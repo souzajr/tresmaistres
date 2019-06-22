@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <!-- Meta Tags -->
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <% if(locals.csrf) { %><meta name="token" content="<%= locals.csrf %>" /><% } %>
+
+        <!-- jquery 3.4.1 -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    </head>
+    <body>
+        <script>
+            $(document).ready(function() {
+                $.ajax({
+                    type: 'POST',
+                    url: '/getToken',   
+                    cache: false,     
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
+                    },
+                    success: function(result) {          
+                        localStorage.setItem('token', result)
+                        $.ajax({
+                            type: 'POST',
+                            url: '/validate',   
+                            cache: false,  
+                            headers: {
+                                'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                                'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
+                            },
+                            success: function(result) {          
+                                window.location.href = result
+                            },
+                            error: function(xhr, status, error) {
+                                window.location.href = '/login'
+                            }
+                        })
+                    },
+                    error: function(xhr, status, error) {
+                        window.location.href = '/login'
+                    }
+                })
+            })
+        </script>
+    </body>
+</html>

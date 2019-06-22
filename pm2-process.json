@@ -1,0 +1,16 @@
+{
+    "script": "bin/www",
+    "watch": [
+        "src",
+        "views"
+    ],
+    "ignore_watch": [
+        "log",
+        "node_modules",
+        "public"
+    ],
+    "watch_options": {
+        "followSymlinks": false
+    },
+    "name": "TresMaisTres"
+}

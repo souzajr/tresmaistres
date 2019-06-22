@@ -1,0 +1,59 @@
+{
+  "name": "tresmaistres",
+  "version": "1.0.0",
+  "description": "Back-end desenvolvido para o portal TresMaisTres",
+  "scripts": {
+    "start": "nodemon index.js",
+    "production": "pm2 start index.js --name TresMaisTres && pm2 start pm2-process.json && pm2 monit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/souzajr/tresmaistres.git"
+  },
+  "keywords": [
+    "tresmaistres",
+    "Node.Js",
+    "Back-end"
+  ],
+  "author": "PurpleTech - https://purpletech.com.br",
+  "license": "Private and Restricted Use",
+  "bugs": {
+    "url": "https://github.com/souzajr/tresmaistres/issues"
+  },
+  "homepage": "https://github.com/souzajr/tresmaistres#readme",
+  "devDependencies": {
+    "morgan": "^1.9.1",
+    "nodemon": "^1.19.1"
+  },
+  "dependencies": {
+    "@fnando/cnpj": "^0.1.1",
+    "@fnando/cpf": "^0.1.1",
+    "bcrypt-nodejs": "^0.0.3",
+    "cep-promise": "^3.0.7",
+    "client-sessions": "^0.8.0",
+    "consign": "^0.1.6",
+    "cors": "^2.8.5",
+    "cron": "^1.7.1",
+    "csurf": "^1.10.0",
+    "dotenv": "^6.2.0",
+    "ejs": "^2.6.2",
+    "email-validator": "^2.0.4",
+    "express": "^4.17.1",
+    "generate-password": "^1.4.2",
+    "helmet": "^3.18.0",
+    "jwt-simple": "^0.5.6",
+    "moment": "^2.24.0",
+    "mongoose": "^5.6.0",
+    "multer": "^1.4.1",
+    "node-cron": "^2.0.3",
+    "nodemailer": "^4.7.0",
+    "pagarme": "^4.4.0",
+    "passport": "^0.4.0",
+    "passport-instagram": "^1.0.0",
+    "passport-jwt": "^4.0.0",
+    "password-validator": "^4.1.1",
+    "pm2": "^3.5.1",
+    "qs": "^6.7.0",
+    "sharp": "^0.22.1"
+  }
+}
