@@ -89,8 +89,9 @@ module.exports = app => {
             .get(csurf(), app.src.api.user.viewFirstAccess)  
             .post(csurf(), app.src.api.user.changeFirstAccess)
 
-        app.get('/minha-conta')
-
+        app.route('/minha-conta')
+            .all(app.src.config.passport.authenticate())
+            .get(app.src.api.user.viewUserProfile)  
     //#endregion
 
     //#region ADMIN 
