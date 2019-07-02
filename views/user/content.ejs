@@ -1,15 +1,19 @@
-<div role="main" class="main">
-    <% if(page === 'Home') { %>
-        <% include pages/home.ejs %>
-    <% } else if(page === 'Login') { %>
-        <% include pages/login.ejs %>
-    <% } else if(page === 'Primeiro acesso') { %>
-        <% include pages/primeiro-acesso.ejs %>
-    <% } else if(page === 'Cadastro') { %>
-        <% include pages/cadastro.ejs %>
-    <% } else if(page === 'Esqueci minha senha') { %>
-        <% include pages/esqueci-minha-senha.ejs %>
-    <% } else if(page === 'Alterar senha') { %>
-        <% include pages/alterar-senha.ejs %>
-    <% } %>
-</div>
+<% if(page === 'Home') { %>
+    <% include pages/home.ejs %>
+<% } else if(page === 'Login') { %>
+    <% include pages/login.ejs %>
+<% } else if(page === 'Primeiro acesso') { %>
+    <% include pages/primeiro-acesso.ejs %>
+<% } else if(page === 'Cadastro') { %>
+    <% include pages/cadastro.ejs %>
+<% } else if(page === 'Esqueci minha senha') { %>
+    <% include pages/esqueci-minha-senha.ejs %>
+<% } else if(page === 'Alterar senha') { %>
+    <% include pages/alterar-senha.ejs %>
+<% } else if(page === 'Termos de uso') { %>
+    <% include pages/termos-de-uso.ejs %>
+<% } else if(page === 'Política de privacidade') { %>
+    <% include pages/politica-de-privacidade.ejs %>
+<% } else if(page === 'Finalizar compra') { %>
+    <% include pages/finalizar-compra.ejs %>
+<% } %>

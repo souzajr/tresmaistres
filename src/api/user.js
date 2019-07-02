@@ -39,8 +39,26 @@ module.exports = app => {
         res.status(200).render('index', {
             user: req.session.user,
             page: 'Home',
+            csrf: req.csrfToken(),
             message: null
         })
+    }
+
+    const sendMessage = (req, res) => {
+        const message = { ...req.body }
+
+        try {
+            existOrError(message.name, 'Digite seu nome')
+            existOrError(message.email, 'Digite seu Email')
+            validEmailOrError(message.email, 'Email inválido')
+            existOrError(message.subject, 'Digite o assunto')
+            existOrError(message.message, 'Digite a mensagem')
+        } catch(msg) {
+            return res.status(400).json(msg)
+        }
+
+        mail.sendMessage(message)
+        res.status(200).json(successMessage)
     }
 
     const viewLogin = (req, res) => {
@@ -522,246 +540,36 @@ module.exports = app => {
         }).catch(_ => res.status(500).json(failMessage))
     }
 
-    const addToCart = (req, res) => {   
-        if(req.query.eventId)
-            Event.findOne({ _id: req.query.eventId }).then(event => {
-                if(!event || event.status !== 'disponivel') return res.status(500).render('500')
-
-                Product.findOne({ _id: event._idProduct }).then(getProduct => {
-                    if(!getProduct.schedule) return res.status(500).render('500')
-
-                    System.find().then(system => {
-                        for(let i = 0; i < system[0].product.length; i++) {
-                            if(system[0].product[i]._id == getProduct._idModel) {
-                                User.findOne({ _id: getProduct._idOwner }).then(clinic => {
-                                    const product = {
-                                        _idProduct: getProduct._id,
-                                        _idEvent: event._id,
-                                        schedule: getProduct.schedule,
-                                        start: event.start,
-                                        value: Number((getProduct.value / (1 - (system[0].product[i].percentage / 100))).toFixed(0)),
-                                        photo: system[0].product[i].photo,
-                                        name: system[0].product[i].name,
-                                        clinicName: clinic.name,
-                                        url: clinic.clinic.url,
-                                    }
-            
-                                    if(!req.session.cart || !req.session.cart.length) {
-                                        req.session.cart = []
-                                        req.session.cart.push(product)
-                                    } else {
-                                        let canAddToCart = true 
-                                        for(let j = 0; j < req.session.cart.length; j++) {
-                                            if(req.session.cart[j]._idEvent == event._id) {
-                                                canAddToCart = false
-                                                break
-                                            }
-                                        }
-                                        
-                                        if(canAddToCart) req.session.cart.push(product)
-                                    } 
-                        
-                                    res.redirect('/finalizar-compra')
-                                })
-                            }
-                        }                
-                    })
-                })
-            }).catch(_ => res.status(500).render('500'))
-        else {
-            Product.findOne({ _id: req.query.productId }).then(getProduct => {
-                if(!getProduct || getProduct.schedule) return res.status(500).render('500')
-
-                System.find().then(system => {
-                    for(let i = 0; i < system[0].product.length; i++) {
-                        if(system[0].product[i]._id == getProduct._idModel) {
-                            User.findOne({ _id: getProduct._idOwner }).then(clinic => {
-                                const product = {
-                                    _idProduct: getProduct._id,
-                                    schedule: getProduct.schedule,
-                                    value: Number((getProduct.value / (1 - (system[0].product[i].percentage / 100))).toFixed(0)),
-                                    photo: system[0].product[i].photo,
-                                    name: system[0].product[i].name,
-                                    clinicName: clinic.name,
-                                    url: clinic.clinic.url,
-                                }
-        
-                                if(!req.session.cart || !req.session.cart.length) {
-                                    req.session.cart = []
-                                    req.session.cart.push(product)
-                                } else {
-                                    req.session.cart.push(product)
-                                } 
-                    
-                                res.redirect('/finalizar-compra')
-                            })
-                        }
-                    }                
-                })
-            }).catch(_ => res.status(500).render('500'))
-        }
-    }
-
     const viewCheckout = async (req, res) => {
-        let getUser = null
+        let getUser = null, discountCoupon = null
 
         if(req.session.user) {
-            await User.findOne({ _id: req.session.user._id }).then(user => {
-                user.password = undefined
-                getUser = user
-            }).catch(_ => res.status(500).render('500'))
+            getUser = await User.findOne({ _id: req.session.user._id })
+            .catch(err => new Error(err))
+            if(getUser instanceof Error) return res.status(500).render('500')
+        }
+
+        if(req.query.cupom) {
+            discountCoupon = await Coupon.findOne({ name: req.query.cupom }).then(coupon => {
+                if(coupon && coupon.validity >= moment().format('L')) return coupon
+            }).catch(err => new Error(err))
+            if(discountCoupon instanceof Error) return res.status(500).render('500')
         }
 
         res.status(200).render('index', {
-            product: req.session.cart !== undefined ? req.session.cart : [],
+            product: req.query.plano ? req.query.plano : null,
             page: 'Finalizar compra',
             user: getUser,
-            moment,
+            coupon: discountCoupon,
             encryptionKey: process.env.PAGARME_ENCRYPTION_KEY,
+            csrf: req.csrfToken(),
             message: null
         })
     }
 
-    const removeProductFromCart = (req, res) => {
-        if(req.session.cart && req.session.cart.length) {
-            for(let i = 0; i < req.session.cart.length; i++) {
-                if(req.session.cart[i]._idProduct == req.params.id) {
-                    req.session.cart.splice(i, 1)
-                }
-            }
-        }
-        
-        res.redirect('/finalizar-compra')
-    }
-
-    const viewShopPage = (req, res) => {
-        User.find({ 'clinic.registerStatus': 'ativo' }).then(clinic => { 
-            if(req.session.location) {
-                for(let i = 0; i < clinic.length; i++) {
-                    if(req.session.location != clinic[i].address.city) {
-                        clinic.splice(i, 1)
-                    }
-                }
-            }
-
-            res.status(200).render('index', {
-                user: req.session.user,
-                location: req.session.location,
-                clinic,
-                page: 'Clínicas',
-                message: null
-            })
-        }).catch(_ => res.status(500).render('500'))
-    }
-
-    const viewClinic = (req, res) => {
-        User.findOne({ 'clinic.url': req.params.name }).then(async clinic => {
-            if(!clinic) return res.status(404).render('404')
-
-            const product = []
-            await Product.find().then(async getProduct => {
-                for(let i = 0; i < getProduct.length; i++) {
-                    if(getProduct[i]._idOwner == clinic._id) {
-                        await System.find().then(async system => {
-                            for(let j = 0; j < system[0].product.length; j++) {
-                                if(getProduct[i]._idModel == system[0].product[j]._id) {
-                                    product.push({
-                                        _idProduct: getProduct[i]._id,
-                                        name: system[0].product[j].name,
-                                        value: getProduct[i].value + (system[0].product[j].percentageAdd * getProduct[i].value / 100),
-                                        photo: system[0].product[j].photo,
-                                        reviews: getProduct[i].reviews
-                                    })
-                                }
-                            }
-                        })
-                    }
-                }
-            })
-
-            res.status(200).render('index', {
-                user: req.session.user,
-                clinic,
-                product,
-                page: 'Clínica',
-                message: null
-            })
-        }).catch(_ => res.status(500).render('500'))
-    }
-
-    const viewProductDetails = (req, res) => {
-        User.findOne({ 'clinic.url': req.params.name }).then(clinic => {
-            System.find().then(async system => {
-                let product = null
-                for(let i = 0; i < system[0].product.length; i++) {
-                    if(system[0].product[i].name == req.params.product) {
-                        await Product.findOne({ _idModel : system[0].product[i]._id, _idOwner: clinic._id }).then(getProduct => {
-                            if(!getProduct) return res.status(404).render('404')
-
-                            product = {
-                                _idProduct: getProduct._id,
-                                address: { ...clinic.address },
-                                schedule: getProduct.schedule,
-                                value: ((getProduct.value / 100) / (1 - (system[0].product[i].percentage / 100))).toFixed(2).replace('.', ','),
-                                photo: system[0].product[i].photo,
-                                name: system[0].product[i].name,
-                                clinicName: clinic.name,
-                                url: clinic.clinic.url,
-                                description: system[0].product[i].description,
-                                reviews: getProduct.reviews
-                            }
-                        })
-                    }
-                }
-
-                if(!product) return res.status(404).render('404')
-
-                Event.find({ _idProduct: product._idProduct, _idOwner: clinic._id, status: 'disponivel' }).then(events => {
-                    res.status(200).render('index', {
-                        user: req.session.user,
-                        product,
-                        events,
-                        page: 'Detalhes do produto',
-                        message: null
-                    })
-                })
-            })
-        }).catch(_ => res.status(500).render('500'))
-    }
-
-    const viewProductPhoto = (req, res) => {
-        res.status(200).sendFile(req.params.fileName, { root: './public/files/product/' })
-    }
-
-    const postReview = (req, res) => {
-        Product.findOne({ _id: req.body.productId}).then(product => {
-            if(!product) return res.status(400).json(failMessage)
-            const newReview = { ...req.body }
-
-            try {
-                existOrError(newReview.name, 'Digite seu nome'),
-                existOrError(newReview.note, 'Diga sua nota'),
-                newReview.note = Number((Number(newReview.note)).toFixed(1))
-                if(newReview.note.toString() === 'NaN') return res.status(400).json(failMessage)
-                if(newReview.note < 0 || newReview.note > 5) return res.status(400).json(failMessage)
-                existOrError(newReview.review, 'Digite a descrição')
-            } catch(msg) {
-                return res.status(400).json(msg)
-            }
-
-            product.reviews.push({
-                name: newReview.name,
-                note: newReview.note,
-                review: newReview.review,
-                createdAt: moment().format('L')
-            })
-
-            product.save().then(_ => res.status(200).json(successMessage))
-        }).catch(_ => res.status(500).json(failMessage))
-    }
-
     return {
         viewIndex,
+        sendMessage,
         viewLogin,
         viewFirstAccess,
         changeFirstAccess,
@@ -780,13 +588,6 @@ module.exports = app => {
         editPassword,
         viewFirstAccess,
         changePassword,
-        addToCart,
-        viewCheckout,
-        removeProductFromCart,
-        viewShopPage,
-        viewClinic,
-        viewProductDetails,
-        viewProductPhoto,
-        postReview
+        viewCheckout
     }
 }

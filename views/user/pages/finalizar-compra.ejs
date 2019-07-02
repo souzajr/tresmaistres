@@ -1,0 +1,485 @@
+<div role="main" class="main shop py-4">
+    <% include ../../template/breadcomb.ejs %>
+
+    <section class="mb-5">
+        <div class="container">
+            <% if(!product) { %>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row text-left pb-4 mb-4">
+                            <div class="col-md-12 mx-md-auto">
+                                <h4>Seu carrinho está vazio</h4>
+                                <a href="/" class="btn btn-default">Voltar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } else { %>
+                <% if(user) { %>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-info alert-dismissible" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                Você está logado como <strong><%= user.name %></strong>.
+                            </div>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-info alert-dismissible" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                Você não está logado em sua conta, <strong><a href="/minha-conta">clique aqui</a></strong> para fazer login. Se você ainda não tiver uma conta, basta preencher o formulário abaixo e uma conta será criada automaticamente para você.
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+
+                <form id="checkout-form">
+                    <input type="hidden" value="<%= product %>" name="producId">
+                    <div class="row">
+                        <div class="col-12">
+							<p>Você tem um cupom de desconto? <a href="#">Clique aqui</a></p>
+                        </div>
+                        <div class="col-12">
+							<p><b style="color:red">*</b> Informações obrigatórias</p>
+                        </div>
+                        <div class="col-12">
+                            <div class="accordion accordion-modern" id="accordion">
+                                <div class="card card-default">
+                                    <div class="card-header">
+                                        <h4 class="card-title m-0">
+                                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                                                Endereço de cobrança
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseOne" class="collapse show">
+                                        <div class="card-body">
+                                            <div class="form-row">
+                                                <div class="form-group col-6">
+                                                    <label class="font-weight-bold text-dark text-2">Nome completo<b style="color:red">*</b></label>
+                                                    <input id="checkuot-form-name" type="text" <% if(user) { %>value="<%= user.name %>"<% } %> class="form-control">
+                                                </div>
+                                                <div class="form-group col-6">
+                                                    <label class="font-weight-bold text-dark text-2">Data de nascimento<b style="color:red">*</b></label>
+                                                    <input id="checkuot-form-birthday" type="date" class="form-control" <% if(user && user.birthday) { %>value="<%= user.birthday %>"<% } %>>
+                                                </div>
+                                                <div class="form-group col-6">
+                                                    <label class="font-weight-bold text-dark text-2">Telefone<b style="color:red">*</b></label>
+                                                    <input id="checkuot-form-phone" type="text" placeholder="Telefone / WhatsApp com DDD" <% if(user && user.phone) { %>value="<%= user.phone %>"<% } %> class="form-control">
+                                                </div>
+                                                <div class="form-group col-6">
+                                                    <label class="font-weight-bold text-dark text-2">Email<b style="color:red">*</b></label>
+                                                    <input id="checkuot-form-email" type="email" <% if(user && user.email) { %>value="<%= user.email %>"<% } %> class="form-control">
+                                                </div>
+                                                <div class="form-group col-6">
+                                                    <label class="font-weight-bold text-dark text-2">Pessoa física ou jurídica?<b style="color:red">*</b></label>
+                                                    <select id="selectDocument" class="form-control">
+                                                        <% if(user && user.documents && user.documents.typeDoc) { %>
+                                                            <option value="<%= user.documents.typeDoc %>" selected>
+                                                                <% if(user.documents.typeDoc === 'pf') { %>
+                                                                    Pessoa física
+                                                                <% } else { %>
+                                                                    Pessoa jurídica
+                                                                <% } %>
+                                                            </option>
+                                                        <% } else { %>
+                                                            <option selected value="pf">Pessoa física</option>
+                                                            <option value="pj">Pessoa jurídica</option>
+                                                        <% } %>
+                                                    </select>
+                                                </div>
+                                                <div id="cpf" class="form-group col-6">
+                                                    <label class="font-weight-bold text-dark text-2">CPF<b style="color:red">*</b></label>
+                                                    <input id="checkuot-form-cpf" type="text" class="form-control" <% if(user && user.documents && user.documents.cpfOrCnpj) { %>value="<%= user.documents.cpfOrCnpj %>"<% } %>>
+                                                </div>
+                                                <div id="cnpj" class="form-group col-6" style="display: none;">
+                                                    <label class="font-weight-bold text-dark text-2">CNPJ<b style="color:red">*</b></label>
+                                                    <input id="checkuot-form-cnpj" type="text" class="form-control" <% if(user && user.documents && user.documents.cpfOrCnpj) { %>value="<%= user.documents.cpfOrCnpj %>"<% } %>>
+                                                </div>
+                                            </div>
+                                            <div class="form-row">
+                                                <div class="form-group col-6">
+                                                    <label class="font-weight-bold text-dark text-2">CEP<b style="color:red">*</b> <span><a href="#!" onclick="pesquisacep(document.getElementById('checkuot-form-zipCode').value);" style="font-size: 10px;">procurar endereço</a></span></label>
+                                                    <input id="checkuot-form-zipCode" type="text" class="form-control" <% if(user && user.address && user.address.zipCode) { %>value="<%= user.address.zipCode %>"<% } %>>
+                                                </div>
+                                                <div class="form-group col-6">
+                                                    <label class="font-weight-bold text-dark text-2">Bairro<b style="color:red">*</b></label>
+                                                    <input id="checkuot-form-neighborhood" type="text" class="form-control" <% if(user && user.address && user.address.neighborhood) { %>value="<%= user.address.neighborhood %>"<% } %>>
+                                                </div>
+                                                <div class="form-group col-6">
+                                                    <label class="font-weight-bold text-dark text-2">Cidade<b style="color:red">*</b></label>
+                                                    <input id="checkuot-form-city" type="text" class="form-control" <% if(user && user.address && user.address.city) { %>value="<%= user.address.city %>"<% } %>>
+                                                </div>
+                                                <div class="form-group col-6">
+                                                    <label class="font-weight-bold text-dark text-2">Estado<b style="color:red">*</b></label>
+                                                    <select id="checkuot-form-state" class="form-control">
+                                                        <option <% if(!user || !user.address || !user.address.state) { %>selected<% } %> disabled>Selecione</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'AC') { %>selected<% } %>>AC</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'AL') { %>selected<% } %>>AL</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'AP') { %>selected<% } %>>AP</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'AM') { %>selected<% } %>>AM</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'BA') { %>selected<% } %>>BA</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'CE') { %>selected<% } %>>CE</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'DF') { %>selected<% } %>>DF</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'ES') { %>selected<% } %>>ES</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'GO') { %>selected<% } %>>GO</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'MA') { %>selected<% } %>>MA</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'MT') { %>selected<% } %>>MT</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'MS') { %>selected<% } %>>MS</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'MG') { %>selected<% } %>>MG</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'PA') { %>selected<% } %>>PA</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'PB') { %>selected<% } %>>PB</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'PR') { %>selected<% } %>>PR</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'PE') { %>selected<% } %>>PE</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'PI') { %>selected<% } %>>PI</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'RJ') { %>selected<% } %>>RJ</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'RN') { %>selected<% } %>>RN</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'RS') { %>selected<% } %>>RS</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'RO') { %>selected<% } %>>RO</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'RR') { %>selected<% } %>>RR</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'SC') { %>selected<% } %>>SC</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'SP') { %>selected<% } %>>SP</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'SE') { %>selected<% } %>>SE</option>
+                                                        <option <% if(user && user.address && user.address.state && user.address.state === 'TO') { %>selected<% } %>>TO</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-8">
+                                                    <label class="font-weight-bold text-dark text-2">Endereço<b style="color:red">*</b></label>
+                                                    <input id="checkuot-form-street" type="text" class="form-control" placeholder="Rua ou avenida" <% if(user && user.address && user.address.street) { %>value="<%= user.address.street %>"<% } %>>
+                                                </div>
+                                                <div class="form-group col-4">
+                                                    <label class="font-weight-bold text-dark text-2">Número<b style="color:red">*</b></label>
+                                                    <input id="checkuot-form-number" type="text" class="form-control" <% if(user && user.address && user.address.number) { %>value="<%= user.address.number %>"<% } %>>
+                                                </div>
+                                                <div class="form-group col-12">
+                                                    <input type="text" class="form-control" id="checkuot-form-complement" <% if(user && user.address && user.address.complement) { %>value="<%= user.address.complement %>"<% } %> placeholder="Complemento (opcional)">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card card-default">
+                                    <div class="card-header">
+                                        <h4 class="card-title m-0">
+                                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+                                                Rever pedido &amp; Pagamento
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseThree" class="collapse">
+                                        <div class="card-body">
+                                            <table class="shop_table cart">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="product-name">
+                                                            Produto
+                                                        </th>
+                                                        <th class="product-price">
+                                                            Preço
+                                                        </th>
+                                                        <th class="product-quantity">
+                                                            Quantidade
+                                                        </th>
+                                                        <th class="product-subtotal">
+                                                            Total
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr class="cart_table_item">
+                                                        <td class="product-name">
+                                                            <a href="#!">Photo Camera</a>
+                                                        </td>
+                                                        <td class="product-price">
+                                                            <span class="amount">$299</span>
+                                                        </td>
+                                                        <td class="product-quantity">
+                                                            1
+                                                        </td>
+                                                        <td class="product-subtotal">
+                                                            <span class="amount">$299</span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                            
+                                            <hr class="solid my-4">
+                            
+                                            <h4 class="text-primary">Revisão</h4>
+                                            <table class="cart-totals">
+                                                <tbody>
+                                                    <tr class="cart-subtotal">
+                                                        <th>
+                                                            <strong class="text-dark">Subtotal</strong>
+                                                        </th>
+                                                        <td>
+                                                            <strong class="text-dark"><span class="amount">$431</span></strong>
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="shipping">
+                                                        <th>
+                                                            Shipping
+                                                        </th>
+                                                        <td>
+                                                            Free Shipping<input type="hidden" value="free_shipping" id="shipping_method" name="shipping_method">
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="total">
+                                                        <th>
+                                                            <strong class="text-dark">Total do pedido</strong>
+                                                        </th>
+                                                        <td>
+                                                            <strong class="text-dark"><span class="amount">$431</span></strong>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                            
+                                            <hr class="solid my-4">
+                            
+                                            <h4 class="text-primary">Pagamento</h4>
+                            
+                                            <div class="radio form-row">
+                                                <div class="form-group col-12">
+                                                    <div class="custom-control custom-radio">
+                                                        <input type="radio" name="optionsRadios" value="option1" class="custom-control-input" id="credit_card" autocomplete="off">
+                                                        <label class="font-weight-bold text-dark text-2 custom-control-label" for="credit_card">Cartão de crédito</label>
+                                                    </div>
+                                                </div>
+                                                <div id="optionCredit_card" class="form-group col-12" style="display: none">
+                                                    <div class="row">
+                                                        <div class="col-12">Você está em um ambiente seguro, seus dados não ficarão salvos em nosso sistema</div>
+                                                        <div class="col-6">
+                                                            <div class=" form-group">
+                                                                <label class="font-weight-bold text-dark text-2" for="card_number">Número do cartão<b style="color:red">*</b></label>
+                                                                <input id="card_number" placeholder="•••• •••• •••• ••••" maxlength="20" type="text" class="form-control" autocomplete="off">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="form-group">
+                                                                <label class="font-weight-bold text-dark text-2" for="card_holder_name">Nome (como escrito no cartão)<b style="color:red">*</b></label>
+                                                                <input id="card_holder_name" type="text" class="form-control" autocomplete="off">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="form-group">
+                                                                <label class="font-weight-bold text-dark text-2" for="card_expiration_month">Mês de expiração<b style="color:red">*</b></label>
+                                                                <input id="card_expiration_month" maxlength="2" minlength="2" placeholder="MM" type="text" class="form-control" autocomplete="off">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="form-group">
+                                                                <label class="font-weight-bold text-dark text-2" for="card_expiration_year">Ano de expiração<b style="color:red">*</b></label>
+                                                                <input id="card_expiration_year" maxlength="2" minlength="2" placeholder="AA" type="text" class="form-control" autocomplete="off">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <div class="form-group">
+                                                                <label class="font-weight-bold text-dark text-2" for="card_cvv">Código de segurança<b style="color:red">*</b></label>
+                                                                <input id="card_cvv" placeholder="CVV" minlength="3" type="text" class="form-control" autocomplete="off">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-12">
+                                                    <div class="custom-control custom-radio">
+                                                        <input type="radio" name="optionsRadios" value="option2" class="custom-control-input" id="boleto" autocomplete="off">
+                                                        <label class="font-weight-bold text-dark text-2 custom-control-label" for="boleto">Boleto bancário</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="custom-control custom-checkbox mt-2">
+                                <input type="checkbox" class="custom-control-input" id="terms_of_use">
+                                <label class="custom-control-label" for="terms_of_use">Li e concordo com o(s) <a target="_blank" href="/termos-de-uso">termos e condições</a> do site<b style="color:red">*</b></label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <button type="submit" class="float-right btn btn-primary btn-modern text-uppercase mt-2 mb-5 mb-lg-0" style="color: #fff">Finalizar compra</button>
+                        </div>
+                    </div>
+                </form>
+
+                <style>
+                    .modal-loading {
+                        display: none;   
+                        position: fixed;
+                        z-index: 1000;
+                        top: 0;
+                        left: 0;
+                        height: 100%;
+                        width: 100%;
+                        background: rgba( 255, 255, 255, .8 ) url('https://i.stack.imgur.com/FhHRx.gif') 50% 50% no-repeat;
+                    }
+                
+                    body.loading .modal-loading { overflow: hidden; }
+                    body.loading .modal-loading { display: block; }
+                </style>
+                <div class="modal-loading"></div>
+                <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.0/jquery.mask.js"></script>
+                <script type="text/javascript" src="/views/assets/js/zip-search.js"></script>
+                <script type="text/javascript" src="https://assets.pagar.me/pagarme-js/3.0/pagarme.min.js"></script>
+                <script type="text/javascript">
+                    $(document).on({
+                        ajaxStart: function() { $('body').addClass('loading') },
+                        ajaxStop: function() { $('body').removeClass('loading') }    
+                    })
+                
+                    $(document).ready(function() { 
+                        function cleanCard() {
+                            document.getElementById('card_holder_name').value = ''
+                            document.getElementById('card_cvv').value = ''
+                            document.getElementById('card_number').value = ''
+                            document.getElementById('card_expiration_month').value = ''
+                            document.getElementById('card_expiration_year').value = ''
+                        }
+                        
+                        $('body').on('change', 'input[type="radio"]', function() {
+                            if($('#credit_card').prop('checked')) {
+                                cleanCard()
+                                document.getElementById('optionCredit_card').style.display = 'block'
+                            } else if($('#boleto').prop('checked')) {
+                                cleanCard()
+                                document.getElementById('optionCredit_card').style.display = 'none'
+                            }
+                        })
+                
+                        $('#checkuot-form-phone').mask('(00) 00000-0000')
+                        $('#checkuot-form-zipCode').mask('00.000-000')
+                        $('#checkuot-form-cpf').mask('000.000.000-00', { reverse: true })
+                        $('#checkuot-form-cnpj').mask('00.000.000/0000-00', { reverse: true })
+                        
+                        $('#selectDocument').on('change', function() {
+                            $('#cpf').hide()
+                            $('#cnpj').hide()
+                
+                            document.getElementById('checkuot-form-cpf').value = ''
+                            document.getElementById('checkuot-form-cnpj').value = ''
+                
+                            if($('#selectDocument option:selected').text() === 'Pessoa física') {
+                                $('#cpf').show()
+                            } else if($('#selectDocument option:selected').text() === 'Pessoa jurídica') {
+                                $('#cnpj').show()
+                            }
+                        })
+
+                        function updateMask(event) {
+                            let $element = $('#checkuot-form-phone')
+                            $(this).off('blur')
+                            $element.unmask()
+                            if(this.value.replace(/\D/g, '').length > 10) {
+                                $element.mask('(00) 0 0000-0000')
+                            } else {
+                                $element.mask('(00) 0000-00009')
+                            }
+                            $(this).on('blur', updateMask)
+                        }
+                        $('#checkuot-form-phone').on('blur', updateMask)
+                
+                        $('#checkout-form').on('submit', async function(e) {
+                            e.preventDefault()
+                            
+                            if($('#terms_of_use').prop('checked')) {
+                                const product = []
+                                $('input[type="hidden"]').each(function() {
+                                    const $product = $(this)
+                                    if($product['0'].id && $product['0'].id !== 'checkuot-form-hasAccount') product.push({ id: $product['0'].id })
+                                })
+                
+                                const data = {
+                                    buyer: {
+                                        name: $('#checkuot-form-name').val(),
+                                        phone: $('#checkuot-form-phone').val(),
+                                        email: $('#checkuot-form-email').val(),
+                                        birthday: $('#checkuot-form-birthday').val(),
+                                        documents: {
+                                            typeDoc: $('#selectDocument option:selected').val(),
+                                            cpfOrCnpj: $('#selectDocument option:selected').val() === 'pf' ? $('#checkuot-form-cpf').val() : $('#checkuot-form-cnpj').val()
+                                        },
+                                        address: {
+                                            street: $('#checkuot-form-street').val(),
+                                            number: $('#checkuot-form-number').val(), 
+                                            complement: $('#checkuot-form-complement').val(),
+                                            city: $('#checkuot-form-city').val(),
+                                            state: $('#checkuot-form-state').val(),
+                                            zipCode: $('#checkuot-form-zipCode').val(),
+                                            neighborhood: $('#checkuot-form-neighborhood').val()
+                                        },
+                                        hasAccount: $('#checkuot-form-hasAccount').val() === 'true' ? true : false,
+                                        password: document.getElementById('checkuot-form-password') ? document.getElementById('checkuot-form-password').value : '',
+                                        confirmPassword: document.getElementById('checkuot-form-confirmPassword') ? document.getElementById('checkuot-form-confirmPassword').value : ''
+                                    },
+                                    product
+                                }
+                                
+                                if($('#credit_card').prop('checked')) {
+                                    const card = {} 
+                                    card.card_holder_name = $('#card_holder_name').val()
+                                    card.card_expiration_date = $('#card_expiration_month').val() + '/' + $('#card_expiration_year').val()
+                                    card.card_number = $('#card_number').val()
+                                    card.card_cvv = $('#card_cvv').val()            
+                                    
+                                    const cardValidations = pagarme.validate({ card })
+                                    if(!cardValidations.card.card_number) {
+                                        return alertify.notify('Número do cartão do crédito inválido', 'error', 5)
+                                    } else if(!cardValidations.card.card_cvv) {
+                                        return alertify.notify('Código de segurança inválido', 'error', 5)
+                                    } else if(!cardValidations.card.card_expiration_month) {
+                                        return alertify.notify('Mês de expiração do cartão inválido', 'error', 5)
+                                    } else if(!cardValidations.card.card_expiration_year) {
+                                        return alertify.notify('Ano de expiração do cartão inválido', 'error', 5)
+                                    } else if(!cardValidations.card.card_expiration_date) {
+                                        return alertify.notify('Data de expiração do cartão inválida', 'error', 5)
+                                    } else if(!cardValidations.card.card_holder_name) {
+                                        return alertify.notify('Nome do titular do cartão inválido', 'error', 5)
+                                    }
+                
+                                    const getHash = await pagarme.client.connect({ encryption_key: '<%= encryptionKey %>' })
+                                    .then(client => client.security.encrypt(card))   
+                                    .then(card_hash => card_hash)
+                                    .catch(err => new Error(err))
+                                    if(getHash instanceof Error) return alertify.notify('Algo deu errado, recarregue a página', 'error', 5)
+
+                                    data.paymentConfig = {
+                                        method: 'credit_card',
+                                        card_hash: getHash
+                                    }
+                                } else if($('#boleto').prop('checked')) {
+                                    data.paymentConfig = {
+                                        method: 'boleto'
+                                    }
+                                } else return alertify.notify('Escolha uma opção de pagamento', 'error', 5)
+                
+                                $.ajax({
+                                    type: 'POST',
+                                    url: '/finalizar-compra',
+                                    dataType: 'json',
+                                    contentType: 'application/json',
+                                    cache: false,
+                                    data: JSON.stringify(data),   
+                                    headers: {
+                                        'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
+                                    },
+                                    success: function(result) {      
+                                        window.location.href = result
+                                    },
+                                    error: function(xhr, status, error) {
+                                        alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                                    }
+                                })
+                            } else return alertify.notify('Você precisa concordar com os Termos de uso', 'error', 5)
+                        })
+                    })
+                </script>
+            <% } %>
+        </div>
+    </section>
+</div>
+<!-- end main-content -->

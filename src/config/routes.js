@@ -42,7 +42,8 @@ passport.use(new InstagramStrategy({
 module.exports = app => {
     //#region MISCELLANEOUS
         /* ============= VIEW INDEX  ============= */
-        app.get('/', app.src.api.user.viewIndex)
+        app.get('/', csurf(), app.src.api.user.viewIndex)
+        app.post('/enviar-mensagem', csurf(), app.src.api.user.sendMessage)
 
         /* ============= VIEW LOGIN  ============= */
         app.get('/login', csurf(), app.src.api.user.viewLogin)
@@ -81,6 +82,13 @@ module.exports = app => {
             req.logout()     
             res.redirect('/')
         })    
+        
+        /* ============= VIEW TERMS OF USE AND PRIVACY ============= */
+        app.get('/termos-de-uso', app.src.api.user.viewTerms)
+        app.get('/politica-de-privacidade', app.src.api.user.viewPrivacy)
+        
+        /* ============= BUY PLAN ============= */
+        app.get('/finalizar-compra', csurf(), app.src.api.user.viewCheckout)
     //#endregion
 
     //#region USER
