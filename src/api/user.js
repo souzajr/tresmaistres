@@ -541,20 +541,27 @@ module.exports = app => {
     }
 
     const viewCheckout = async (req, res) => {
-        let getUser = null, discountCoupon = null
+        console.log(req.query)
+        let getUser = null
+        
+        const discountCoupon = {
+            status: false,
+            coupon: null
+        }
 
         if(req.session.user) {
             getUser = await User.findOne({ _id: req.session.user._id })
             .catch(err => new Error(err))
             if(getUser instanceof Error) return res.status(500).render('500')
         }
-
+        /*
         if(req.query.cupom) {
-            discountCoupon = await Coupon.findOne({ name: req.query.cupom }).then(coupon => {
+            discountCoupon.coupon = await Coupon.findOne({ name: req.query.cupom }).then(coupon => {
                 if(coupon && coupon.validity >= moment().format('L')) return coupon
             }).catch(err => new Error(err))
-            if(discountCoupon instanceof Error) return res.status(500).render('500')
-        }
+            if(discountCoupon.coupon instanceof Error) return res.status(500).render('500')
+            discountCoupon.status = true
+        }*/
 
         res.status(200).render('index', {
             product: req.query.plano ? req.query.plano : null,

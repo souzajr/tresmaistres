@@ -35,12 +35,38 @@
                     </div>
                 <% } %>
 
+                <form id="form-coupon">
+                    <div class="row">
+                        <div class="col-12">
+                            <p>Você tem um cupom de desconto? <a href="javascript:void(0)" onclick="showGetCoupon()">Clique aqui</a></p>
+                        </div>
+                        <div class="col-md-4 col-xs-12" id="coupon-div" style="display: none;">
+                            <div class="input-group mb-3">
+                                <input id="coupon-code" type="text" placeholder="Código do cupom" required class="form-control" aria-describedby="button-addon">
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary" onclick="addCoupon()" style="color:#fff" type="button" id="button-addon">Aplicar cupom</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <script>
+                    function showGetCoupon() {
+                        if(document.getElementById('coupon-div').style.display === 'none')
+                            document.getElementById('coupon-div').style.display = 'block'
+                        else 
+                            document.getElementById('coupon-div').style.display = 'none'
+                    }
+
+                    function addCoupon() {
+                        if($('#coupon-code').val())
+                            window.location.href = window.location.href + '&cupom=' + $('#coupon-code').val()
+                    }
+                </script>
+
                 <form id="checkout-form">
                     <input type="hidden" value="<%= product %>" name="producId">
                     <div class="row">
-                        <div class="col-12">
-							<p>Você tem um cupom de desconto? <a href="#">Clique aqui</a></p>
-                        </div>
                         <div class="col-12">
 							<p><b style="color:red">*</b> Informações obrigatórias</p>
                         </div>
@@ -250,7 +276,7 @@
                                                 </div>
                                                 <div id="optionCredit_card" class="form-group col-12" style="display: none">
                                                     <div class="row">
-                                                        <div class="col-12">Você está em um ambiente seguro, seus dados não ficarão salvos em nosso sistema</div>
+                                                        <div class="col-12">Você está em um ambiente seguro, suas informações de pagamento não ficarão salvas em nosso sistema</div>
                                                         <div class="col-6">
                                                             <div class=" form-group">
                                                                 <label class="font-weight-bold text-dark text-2" for="card_number">Número do cartão<b style="color:red">*</b></label>
