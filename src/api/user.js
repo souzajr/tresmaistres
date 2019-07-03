@@ -5,6 +5,7 @@ const mongoose = require('mongoose')
 const User = mongoose.model('User')
 const Product = mongoose.model('Product')
 const Order = mongoose.model('Order')
+const Coupon = mongoose.model('Coupon')
 const mail = require('../config/mail')
 const crypto = require('crypto')
 const cepValidator = require('cep-promise')
@@ -541,30 +542,30 @@ module.exports = app => {
     }
 
     const viewCheckout = async (req, res) => {
-        console.log(req.query)
-        let getUser = null
-        
-        const discountCoupon = {
-            status: false,
-            coupon: null
-        }
+        let getUser = null, getProduct = null, discountCoupon = null
 
         if(req.session.user) {
             getUser = await User.findOne({ _id: req.session.user._id })
             .catch(err => new Error(err))
             if(getUser instanceof Error) return res.status(500).render('500')
         }
-        /*
+
+        if(req.query.plano) {
+            getProduct = await Product.findOne({ name: req.query.plano.toLowerCase() })
+            .catch(err => new Error(err))
+            if(getProduct instanceof Error) return res.status(500).render('500')
+        }
+
         if(req.query.cupom) {
-            discountCoupon.coupon = await Coupon.findOne({ name: req.query.cupom }).then(coupon => {
+            discountCoupon = await Coupon.findOne({ name: req.query.cupom.toLowerCase() }).then(coupon => {
                 if(coupon && coupon.validity >= moment().format('L')) return coupon
+                return 'Invalid'
             }).catch(err => new Error(err))
-            if(discountCoupon.coupon instanceof Error) return res.status(500).render('500')
-            discountCoupon.status = true
-        }*/
+            if(discountCoupon instanceof Error) return res.status(500).render('500')
+        }
 
         res.status(200).render('index', {
-            product: req.query.plano ? req.query.plano : null,
+            product: getProduct,
             page: 'Finalizar compra',
             user: getUser,
             coupon: discountCoupon,

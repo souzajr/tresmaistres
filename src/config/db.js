@@ -13,5 +13,6 @@ module.exports = {
         require('../model/orderModel')
         require('../model/productModel')
         require('../model/pagarmeReportModel')
+        require('../model/couponModel')
     }
 }

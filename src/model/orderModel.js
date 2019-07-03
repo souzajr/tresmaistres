@@ -1,24 +1,19 @@
 const mongoose = require('mongoose')
 
-const ProductOrderSchema = new mongoose.Schema({
-    _idProduct: { type: String, required: true },
-    _idOwner: { type: String, required: true },
-    _idModel: { type: String, required: true },
-    _idEvent: String,
-    start: String,
-    schedule: { type: Boolean, required: true },
-    name: { type: String, required: true }, 
-    clinicValue: { type: Number, required: true },
-    percentage: { type: Number, required: true },
-    value: { type: Number, required: true }
-})
-
 const OrderSchema = new mongoose.Schema({
     _pagarmeReport: { type: String, required: true },
-    _secondPagarmeReport: String,
     _idTransactionPagarme: { type: Number, required: true },
-    _idUser: { type: String, required: true },
-    product: [ProductOrderSchema],
+    _idUser: String,
+    product: {
+        _id: { type: String, required: true }, 
+        name: { type: String, required: true },
+        value: { type: Number, required: true }
+    },
+    coupon: {
+        _id: String,
+        percentage: Number,
+        name: String
+    },
     total: { type: Number, required: true }, 
     cost: Number,
     paymentConfig: {
@@ -42,26 +37,6 @@ const OrderSchema = new mongoose.Schema({
         documents: {
             typeDoc: { type: String, required: true },
             cpfOrCnpj: { type: String, required: true }
-        }
-    },
-    hasPatient: { type: Boolean, required: true },
-    patient: {
-        name: String,
-        phone: String,
-        email: String,
-        birthday: String,
-        address: {
-            street: String,
-            neighborhood: String,
-            number: String,
-            complement: String,
-            zipCode: String,
-            city: String,
-            state: String
-        },
-        documents: {
-            typeDoc: String,
-            cpfOrCnpj: String
         }
     },
     status: { type: String, required: true },

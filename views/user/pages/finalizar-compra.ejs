@@ -38,6 +38,15 @@
                 <form id="form-coupon">
                     <div class="row">
                         <div class="col-12">
+                            <% let couponId = null %>
+                            <% if(coupon) { %>
+                                <% if(coupon === 'Invalid') { %>
+                                    <strong style="color:red">Cupom inválido!</strong>
+                                <% } else if(coupon !== 'Invalid') { %>
+                                    <% couponId = coupon._id %>
+                                    <strong style="color:green">Cupom <%= coupon.name %> (<%= coupon.percentage %>%) adicionado!</strong>
+                                <% } %>
+                            <% } %>
                             <p>Você tem um cupom de desconto? <a href="javascript:void(0)" onclick="showGetCoupon()">Clique aqui</a></p>
                         </div>
                         <div class="col-md-4 col-xs-12" id="coupon-div" style="display: none;">
@@ -52,6 +61,7 @@
                 </form>
                 <script>
                     function showGetCoupon() {
+                        console.log()
                         if(document.getElementById('coupon-div').style.display === 'none')
                             document.getElementById('coupon-div').style.display = 'block'
                         else 
@@ -59,19 +69,54 @@
                     }
 
                     function addCoupon() {
-                        if($('#coupon-code').val())
-                            window.location.href = window.location.href + '&cupom=' + $('#coupon-code').val()
+                        if($('#coupon-code').val()) {
+                            if(window.location.href.split('&').length <= 1) {
+                                window.location.href = window.location.href + '&cupom=' + $('#coupon-code').val()
+                            } else {
+                                window.location.href = window.location.href.split('&')[0] + '&cupom=' + $('#coupon-code').val()
+                            }
+                        }
                     }
                 </script>
 
                 <form id="checkout-form">
-                    <input type="hidden" value="<%= product %>" name="producId">
                     <div class="row">
                         <div class="col-12">
 							<p><b style="color:red">*</b> Informações obrigatórias</p>
                         </div>
                         <div class="col-12">
                             <div class="accordion accordion-modern" id="accordion">
+                                <% let hasAccount = false %>
+                                <% if(!user) { %>
+                                    <div class="card card-default">
+                                        <div class="card-header">
+                                            <h4 class="card-title m-0">
+                                                <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseAccount">
+                                                    Faça sua conta (opcional)
+                                                </a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapseAccount" class="collapse show">
+                                            <div class="card-body">
+                                                <div class="form-row">
+                                                    <div class="col-12">
+                                                        Ao criar uma conta, você poderá receber novidades, descontos e acompanhar o seu histórico de pedidos
+                                                    </div>
+                                                    <div class="form-group col-6">
+                                                        <label class="font-weight-bold text-dark text-2">Senha</label>
+                                                        <input id="checkuot-form-password" type="password" class="form-control">
+                                                    </div>
+                                                    <div class="form-group col-6">
+                                                        <label class="font-weight-bold text-dark text-2">Confirmar senha</label>
+                                                        <input id="checkuot-form-confirmPassword" type="password" class="form-control">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% } else { %>
+                                    <% hasAccount = true %>
+                                <% } %>
                                 <div class="card card-default">
                                     <div class="card-header">
                                         <h4 class="card-title m-0">
@@ -80,7 +125,7 @@
                                             </a>
                                         </h4>
                                     </div>
-                                    <div id="collapseOne" class="collapse show">
+                                    <div id="collapseOne" class="collapse <% if(user) { %>show<% } %>">
                                         <div class="card-body">
                                             <div class="form-row">
                                                 <div class="form-group col-6">
@@ -189,12 +234,12 @@
                                 <div class="card card-default">
                                     <div class="card-header">
                                         <h4 class="card-title m-0">
-                                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseThree">
+                                            <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseSecond">
                                                 Rever pedido &amp; Pagamento
                                             </a>
                                         </h4>
                                     </div>
-                                    <div id="collapseThree" class="collapse">
+                                    <div id="collapseSecond" class="collapse">
                                         <div class="card-body">
                                             <table class="shop_table cart">
                                                 <thead>
@@ -216,16 +261,16 @@
                                                 <tbody>
                                                     <tr class="cart_table_item">
                                                         <td class="product-name">
-                                                            <a href="#!">Photo Camera</a>
+                                                            <a href="#!" style="text-transform: capitalize"><%= product.name %></a>
                                                         </td>
                                                         <td class="product-price">
-                                                            <span class="amount">$299</span>
+                                                            <span class="amount">R$<%= (product.value / 100).toFixed(2).replace('.', ',') %></span>
                                                         </td>
                                                         <td class="product-quantity">
                                                             1
                                                         </td>
                                                         <td class="product-subtotal">
-                                                            <span class="amount">$299</span>
+                                                            <span class="amount">R$<%= (product.value / 100).toFixed(2).replace('.', ',') %></span>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -241,23 +286,27 @@
                                                             <strong class="text-dark">Subtotal</strong>
                                                         </th>
                                                         <td>
-                                                            <strong class="text-dark"><span class="amount">$431</span></strong>
+                                                            <strong class="text-dark"><span class="amount">R$<%= (product.value / 100).toFixed(2).replace('.', ',') %></span></strong>
                                                         </td>
                                                     </tr>
-                                                    <tr class="shipping">
-                                                        <th>
-                                                            Shipping
-                                                        </th>
-                                                        <td>
-                                                            Free Shipping<input type="hidden" value="free_shipping" id="shipping_method" name="shipping_method">
-                                                        </td>
-                                                    </tr>
+                                                    <% let totalOrder = product.value %>
+                                                    <% if(coupon && coupon !== 'Invalid') { %>
+                                                        <% totalOrder = product.value - (coupon.percentage * product.value / 100) %>
+                                                        <tr class="shipping">
+                                                            <th>
+                                                                Cupom (<%= coupon.name %>)
+                                                            </th>
+                                                            <td>
+                                                                -<%= coupon.percentage %>%
+                                                            </td>
+                                                        </tr>
+                                                    <% } %>
                                                     <tr class="total">
                                                         <th>
                                                             <strong class="text-dark">Total do pedido</strong>
                                                         </th>
                                                         <td>
-                                                            <strong class="text-dark"><span class="amount">$431</span></strong>
+                                                            <strong class="text-dark"><span class="amount">R$<%= (totalOrder / 100).toFixed(2).replace('.', ',') %></span></strong>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -309,12 +358,14 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="form-group col-12">
-                                                    <div class="custom-control custom-radio">
-                                                        <input type="radio" name="optionsRadios" value="option2" class="custom-control-input" id="boleto" autocomplete="off">
-                                                        <label class="font-weight-bold text-dark text-2 custom-control-label" for="boleto">Boleto bancário</label>
+                                                <% if(product.value < 200000) { %>
+                                                    <div class="form-group col-12">
+                                                        <div class="custom-control custom-radio">
+                                                            <input type="radio" name="optionsRadios" value="option2" class="custom-control-input" id="boleto" autocomplete="off">
+                                                            <label class="font-weight-bold text-dark text-2 custom-control-label" for="boleto">Boleto bancário</label>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                <% } %>
                                             </div>
                                         </div>
                                     </div>
@@ -413,12 +464,6 @@
                             e.preventDefault()
                             
                             if($('#terms_of_use').prop('checked')) {
-                                const product = []
-                                $('input[type="hidden"]').each(function() {
-                                    const $product = $(this)
-                                    if($product['0'].id && $product['0'].id !== 'checkuot-form-hasAccount') product.push({ id: $product['0'].id })
-                                })
-                
                                 const data = {
                                     buyer: {
                                         name: $('#checkuot-form-name').val(),
@@ -438,11 +483,12 @@
                                             zipCode: $('#checkuot-form-zipCode').val(),
                                             neighborhood: $('#checkuot-form-neighborhood').val()
                                         },
-                                        hasAccount: $('#checkuot-form-hasAccount').val() === 'true' ? true : false,
+                                        hasAccount: '<%= hasAccount %>' === 'true' ? true : false,
                                         password: document.getElementById('checkuot-form-password') ? document.getElementById('checkuot-form-password').value : '',
                                         confirmPassword: document.getElementById('checkuot-form-confirmPassword') ? document.getElementById('checkuot-form-confirmPassword').value : ''
                                     },
-                                    product
+                                    product: '<%= product._id %>',
+                                    coupon: '<%= couponId %>'
                                 }
                                 
                                 if($('#credit_card').prop('checked')) {
