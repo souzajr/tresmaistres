@@ -11,6 +11,7 @@ const cepValidator = require('cep-promise')
 const cpf = require('@fnando/cpf/dist/node')
 const cnpj = require('@fnando/cnpj/dist/node')
 const bcrypt = require('bcrypt-nodejs')
+const jwt = require('jwt-simple')
 const mail = require('../config/mail')
 const qs = require('qs')
 const moment = require('moment')
@@ -30,11 +31,6 @@ module.exports = app => {
         notSpaceOrError,
         validEmailOrError
     } = app.src.api.validation
-
-    const encryptPassword = password => {
-        const salt = bcrypt.genSaltSync(10)
-        return bcrypt.hashSync(password, salt)
-    }
 
     const checkout = async (req, res) => {
         const order = { ...req.body }
@@ -100,13 +96,20 @@ module.exports = app => {
             if(order.total.toString() === 'NaN') return res.status(500).json(failMessage)
         }
 
-        let user = await User.findOne({ email: order.buyer.email })
-        .catch(err => new Error(err))
-        if(user instanceof Error) return res.status(500).json(failMessage)
-        if(user) {
-            if(!req.session.user) return res.status(400).json('Email já cadastrado, faça login na sua conta para continuar ou digite outro Email')
-            if(req.session.user._id != user._id) return res.status(400).json(failMessage)
+        let user = null
+        if(req.session.user) {
+            user = await User.findOne({ _id: req.session.user._id })
+            .catch(err => new Error(err))
+            if(user instanceof Error) return res.status(500).json(failMessage)
 
+            if(order.buyer.name) user.name = order.buyer.name
+            if(order.buyer.email && order.buyer.email !== user.email) {
+                const checkEmail = await User.findOne({ email: order.buyer.email })
+                .catch(err => new Error(err))
+                if(checkEmail instanceof Error) return res.status(500).json(failMessage)
+                if(checkEmail) return res.status(400).json('Esse Email já está cadastrado, digite outro Email')
+                user.email = order.buyer.email
+            }
             if(order.buyer.phone) user.phone = order.buyer.phone
             if(order.buyer.birthday) user.birthday = order.buyer.birthday
             if(order.buyer.documents.typeDoc) user.documents.typeDoc = order.buyer.documents.typeDoc
@@ -122,8 +125,16 @@ module.exports = app => {
                 user.password = undefined
                 req.session.user = user
             })
-        } else if(!user && !order.buyer.hasAccount && order.buyer.password) {
-            delete order.buyer.confirmPassword
+        } else if(!order.buyer.hasAccount && order.buyer.password) {
+            const checkEmail = await User.findOne({ email: order.buyer.email })
+            .catch(err => new Error(err))
+            if(checkEmail instanceof Error) return res.status(500).json(failMessage)
+            if(checkEmail) return res.status(400).json('Esse Email já está cadastrado, digite outro Email')
+
+            const encryptPassword = password => {
+                const salt = bcrypt.genSaltSync(10)
+                return bcrypt.hashSync(password, salt)
+            }
 
             user = await new User({
                 name: order.buyer.name,
@@ -132,6 +143,7 @@ module.exports = app => {
                 phone: order.buyer.phone,
                 admin: false,
                 createdAt: moment().format('L - LTS'),
+                birthday: order.buyer.birthday,
                 address: {
                     street: order.buyer.address.street,
                     neighborhood: order.buyer.address.neighborhood,
@@ -147,13 +159,26 @@ module.exports = app => {
                 },
                 firstAccess: false
             }).save().then(user => {
-                mail.sendWelcome(user.email, user.name)
                 delete order.buyer.password 
+                delete order.buyer.confirmPassword
+                mail.sendWelcome(user.email, user.name)
+
+                const now = Math.floor(Date.now() / 1000)
+                const payload = {
+                    id: user._id,
+                    iss: process.env.DOMAIN_NAME, 
+                    iat: now,
+                    exp: now + 60 * 60 * 24
+                }
+
+                user.password = undefined
+                if(req.session) req.session.reset()
+                req.session.user = user
+                req.session.token = jwt.encode(payload, process.env.AUTH_SECRET)
+
                 return user
             }).catch(err => new Error(err))
             if(user instanceof Error) return res.status(500).json(failMessage)
-        } else if(!user && !order.buyer.hasAccount && !order.buyer.password) { 
-            user = null
         }
 
         if(order.paymentConfig.method === 'credit_card') {
@@ -212,11 +237,9 @@ module.exports = app => {
                             order._idUser = user ? user._id : null
                             order.createdAt = moment().format('L - LTS')
     
-                            // TODO
                             Order.create(order).then(async order => {   
-                                if(order.coupon) {
-                                    await Coupon.findOne({ _id: order.coupon._idCoupon }).then(async coupon => {
-                                        console.log(coupon.countUse)
+                                if(order.coupon && order.coupon._id) {
+                                    await Coupon.findOne({ _id: order.coupon._id }).then(async coupon => {
                                         if(coupon.countUse) coupon.countUse++
                                         else coupon.countUse = 1
                                         await coupon.save()
@@ -273,7 +296,7 @@ module.exports = app => {
                 'capture': true,
                 'async': false,
                 'customer': {
-                    'external_id': user ? user._id : null,
+                    'external_id': user ? user._id : 'NaN',
                     'name': order.buyer.name,
                     'type': order.buyer.documents.typeDoc === 'pf' ? 'individual' : 'corporation',
                     'country': 'br',
@@ -316,8 +339,8 @@ module.exports = app => {
                         order.createdAt = moment().format('L - LTS')
 
                         Order.create(order).then(async order => {  
-                            if(order.coupon) {
-                                await Coupon.findOne({ _id: order.coupon._idCoupon }).then(async coupon => {
+                            if(order.coupon && order.coupon._id) {
+                                await Coupon.findOne({ _id: order.coupon._id }).then(async coupon => {
                                     if(coupon.countUse) coupon.countUse++
                                     else coupon.countUse = 1
                                     await coupon.save()
@@ -349,12 +372,13 @@ module.exports = app => {
         Order.findOne({ _id: req.params.id }).then(order => {
             if(!order) return res.status(404).render('404')
 
-            Product.findOne({ _id: order.product._idProduct }).then(product => {
+            Product.findOne({ _id: order.product._id }).then(product => {
                 res.status(200).render('index', {
                     page: 'Detalhes do pedido',
                     user: req.session.user,
                     order,
                     product,
+                    moment,
                     message: null
                 })
             })
@@ -362,40 +386,22 @@ module.exports = app => {
     }
 
     const postbackUrl = (req, res) => {
-        if(pagarme.postback.verifySignature(api_key, qs.stringify(req.body), req.headers['x-hub-signature'].replace('sha1=', ''))) {
-            Order.findOne({ _idTransactionPagarme: Number(req.body.transaction.id) }).then(async order => {
+        if(pagarme.postback.verifySignature(process.env.PAGARME_API_KEY, qs.stringify(req.body), req.headers['x-hub-signature'].replace('sha1=', ''))) {
+            Order.findOne({ _idTransactionPagarme: Number(req.body.transaction.id) }).then(order => {
                 if(!order) return res.status(401).end()
 
-                pagarme.client.connect({ api_key })
+                pagarme.client.connect({ api_key: process.env.PAGARME_API_KEY })
                 .then(client => client.transactions.find({ id: order._idTransactionPagarme }))
-                .then(async transaction => {
-                    await PagarmeReport.deleteOne({ _id: order._pagarmeReport }).then(async _ => {
-                        await new PagarmeReport(transaction).save().then(async report => {
+                .then(transaction => {
+                    PagarmeReport.deleteOne({ _id: order._pagarmeReport }).then(_ => {
+                        new PagarmeReport(transaction).save().then(report => {
                             order._pagarmeReport = report._id
                             order.status = transaction.status
                             order.cost = transaction.cost
 
-                            await order.save().then(async _ => {
+                            order.save().then(_ => {
                                 if(transaction.status === 'paid' && transaction.amount === transaction.paid_amount) {
                                     mail.paymentReceived(order)
-
-                                    await Commission.find({ _idOrder: order._id, status: 'pagamento pendente' }).then(async commission => {
-                                        if(commission.length) {
-                                            for(let i = 0; i < commission.length; i++) {
-                                                commission[i].status = 'pendente'
-                                                
-                                                await commission[i].save().then(async _ => {
-                                                    await Event.findOne({ _id: commission[i]._idEvent }).then(async event => {
-                                                        event.status = 'pendente'
-                                                        event.color = '#dc7d35'
-                                                        await event.save()
-                                                    })
-                                                })
-
-                                                
-                                            }
-                                        }
-                                    })
                                 }
 
                                 res.status(200).end()

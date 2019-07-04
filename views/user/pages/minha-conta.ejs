@@ -1,0 +1,154 @@
+<div role="main" class="main">
+    <% include ../../template/breadcomb.ejs %>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 mt-4 mt-lg-0">
+                <aside class="sidebar mt-2" id="sidebar">
+                    <ul class="nav nav-list flex-column mb-5">
+                        <li class="nav-item"><a class="nav-link text-dark active" href="/minha-conta">Meu perfil</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/minha-conta/alterar-senha">Alterar senha</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/minha-conta/pedidos">Meus pedidos</a></li>
+                    </ul>
+                </aside>
+            </div>
+            <div class="col-lg-9">
+
+                <div class="overflow-hidden mb-1">
+                    <h2 class="font-weight-normal text-7 mb-0"><strong class="font-weight-extra-bold">Meu</strong> Perfil</h2>
+                </div>
+                <div class="overflow-hidden mb-4 pb-3">
+                    <p class="mb-0">Altere suas informações</p>
+                </div>
+
+                <form role="form">
+                    <div class="form-group row">
+                        <label
+                            class="col-lg-3 font-weight-bold text-dark col-form-label form-control-label text-2">Nome</label>
+                        <div class="col-lg-9">
+                            <input class="form-control" value="<%= user.name %>" type="text" name="name">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label
+                            class="col-lg-3 font-weight-bold text-dark col-form-label form-control-label text-2">Email</label>
+                        <div class="col-lg-9">
+                            <input class="form-control" name="email" type="email" value="<%= user.email %>">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-lg-3 font-weight-bold text-dark col-form-label form-control-label text-2">Telefone</label>
+                        <div class="col-lg-9">
+                            <input id="phone" class="form-control" name="phone" type="text" value="<%= user.phone %>" placeholder="Telefone / WhatsApp com DDD">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-lg-3 font-weight-bold text-dark col-form-label form-control-label text-2">Data de nascimento</label>
+                        <div class="col-lg-9">
+                            <input class="form-control" name="birthday" type="date" value="<%= user.birthday %>">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-lg-3 font-weight-bold text-dark col-form-label form-control-label text-2">Documento</label>
+                        <div class="col-lg-3">
+                            <select id="selectDocument" class="form-control" name="typeDoc">             
+                                <option <% if(!user.documents || !user.documents.typeDoc) { %>selected<% } %> disabled>Selecione</option>
+                                <option <% if(user.documents && user.documents.typeDoc && user.documents.typeDoc === 'pf') { %>selected<% } %> value="pf">Pessoa física</option>
+                                <option <% if(user.documents && user.documents.typeDoc && user.documents.typeDoc === 'pj') { %>selected<% } %> value="pj">Pessoa jurídica</option>
+                            </select>
+                        </div>
+                        <div id="cpf" class="col-lg-6">
+                            <input id="input-cpf" class="form-control" name="cpfOrCnpj" <% if(user.documents && user.documents.typeDoc && user.documents.typeDoc === 'pf' && user.documents.cpfOrCnpj) { %>value="<%= user.documents.cpfOrCnpj %>"<% } %> type="text" placeholder="Digite seu CPF">
+                        </div>
+                        <div id="cnpj" class="col-lg-6" style="display: none;">
+                            <input id="input-cnpj" class="form-control" name="cpfOrCnpj" <% if(user.documents && user.documents.typeDoc && user.documents.typeDoc === 'pj' && user.documents.cpfOrCnpj) { %>value="<%= user.documents.cpfOrCnpj %>"<% } %> type="text" placeholder="Digite seu CNPJ">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-lg-3 font-weight-bold text-dark col-form-label form-control-label text-2">Endereço</label>
+                        <div class="col-lg-6">
+                            <input class="form-control" type="text" name="street" <% if(user.address && user.address.street) { %>value="<%= user.address.street %>"<% } %> placeholder="Rua ou avenida">
+                        </div>
+                        <div class="col-lg-3">
+                            <input class="form-control" type="text" name="number" <% if(user.address && user.address.number) { %>value="<%= user.address.number %>"<% } %> placeholder="Número">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-lg-3 font-weight-bold text-dark col-form-label form-control-label text-2"></label>
+                        <div class="col-lg-9">
+                            <input class="form-control" type="text" name="complement" <% if(user.address && user.address.complement) { %>value="<%= user.address.complement %>"<% } %> placeholder="Complemento">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-lg-3 font-weight-bold text-dark col-form-label form-control-label text-2"></label>
+                        <div class="col-lg-5">
+                            <input class="form-control" type="text" name="city" <% if(user.address && user.address.city) { %>value="<%= user.address.city %>"<% } %> placeholder="Cidade">
+                        </div>
+                        <div class="col-lg-4">
+                            <select class="form-control" name="state">
+                                <option <% if(!user.address || !user.address.state) { %>selected<% } %> disabled>Selecione</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'AC') { %>selected<% } %>>AC</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'AL') { %>selected<% } %>>AL</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'AP') { %>selected<% } %>>AP</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'AM') { %>selected<% } %>>AM</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'BA') { %>selected<% } %>>BA</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'CE') { %>selected<% } %>>CE</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'DF') { %>selected<% } %>>DF</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'ES') { %>selected<% } %>>ES</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'GO') { %>selected<% } %>>GO</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'MA') { %>selected<% } %>>MA</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'MT') { %>selected<% } %>>MT</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'MS') { %>selected<% } %>>MS</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'MG') { %>selected<% } %>>MG</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'PA') { %>selected<% } %>>PA</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'PB') { %>selected<% } %>>PB</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'PR') { %>selected<% } %>>PR</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'PE') { %>selected<% } %>>PE</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'PI') { %>selected<% } %>>PI</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'RJ') { %>selected<% } %>>RJ</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'RN') { %>selected<% } %>>RN</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'RS') { %>selected<% } %>>RS</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'RO') { %>selected<% } %>>RO</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'RR') { %>selected<% } %>>RR</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'SC') { %>selected<% } %>>SC</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'SP') { %>selected<% } %>>SP</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'SE') { %>selected<% } %>>SE</option>
+                                <option <% if(user.address && user.address.state && user.address.state === 'TO') { %>selected<% } %>>TO</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-lg-3 font-weight-bold text-dark col-form-label form-control-label text-2"></label>
+                        <div class="col-lg-5">
+                            <input class="form-control" type="text" name="neighborhood" <% if(user.address && user.address.neighborhood) { %>value="<%= user.address.neighborhood %>"<% } %> placeholder="Bairro">
+                        </div>
+                        <div class="col-lg-4">
+                            <input id="zipCode" class="form-control" type="text" name="zipCode" <% if(user.address && user.address.zipCode) { %>value="<%= user.address.zipCode %>"<% } %> placeholder="CEP">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.0/jquery.mask.js"></script>
+<script>    
+    $(document).ready(function() {             
+        $('#selectDocument').on('change', function() {
+            $('#cpf').hide()
+            $('#cnpj').hide()
+
+            if($('#selectDocument option:selected').text() === 'Pessoa física') {
+                $('#cpf').show()
+            } else if($('#selectDocument option:selected').text() === 'Pessoa jurídica') {
+                $('#cnpj').show()
+            }
+        })
+
+        $('#phone').mask('(00) 00000-0000')
+        $('#zipCode').mask('00.000-000')
+        $('#input-cpf').mask('000.000.000-00', { reverse: true })
+        $('#input-cnpj').mask('00.000.000/0000-00', { reverse: true })
+    })
+</script>

@@ -1,9 +1,15 @@
 const mongoose = require('mongoose')
 
+const OptionSchema = new mongoose.Schema({
+    description: String,
+    hasCheck: Boolean
+})
+
 const ProductSchema = new mongoose.Schema({
     name: { type: String, required: true, unique: true },
     value: { type: Number, required: true },
-    createdAt: { type: String, required: true }
+    createdAt: { type: String, required: true },
+    options: [OptionSchema]
 })
 
 mongoose.model('Product', ProductSchema)

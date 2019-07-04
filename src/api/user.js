@@ -118,7 +118,22 @@ module.exports = app => {
             getUser.firstAccess = false
             mail.sendWelcome(user.email, getUser.name)
 
-            getUser.save().then(_ => res.status(200).end())
+            getUser.save().then(getUser => {
+                const now = Math.floor(Date.now() / 1000)
+                const payload = {
+                    id: getUser._id,
+                    iss: process.env.DOMAIN_NAME, 
+                    iat: now,
+                    exp: now + 60 * 60 * 24
+                }
+
+                getUser.password = undefined
+                if(req.session) req.session.reset()
+                req.session.user = getUser
+                req.session.token = jwt.encode(payload, process.env.AUTH_SECRET)
+
+                res.status(200).end()
+            })
         }).catch(_ => res.status(500).json(failMessage))
     }
 
@@ -134,15 +149,6 @@ module.exports = app => {
         res.status(200).render('index', {
             user: req.session.user,
             page: 'Política de privacidade',
-            message: null
-        })
-    }
-
-    const viewRegister = (req, res) => {
-        res.status(200).render('index', {
-            user: req.session.user,
-            page: 'Cadastro',
-            csrf: req.csrfToken(),
             message: null
         })
     }
@@ -308,26 +314,12 @@ module.exports = app => {
     }
 
     const viewUserProfile = async (req, res) => {
-        await Order.find({ _idUser: req.session.user._id }).then(order => {
-            res.status(200).render('index', {
-                page: 'Minha conta',
-                user: req.session.user,
-                order,
-                message: null
-            })
+        res.status(200).render('index', {
+            page: 'Minha conta',
+            user: req.session.user, 
+            csrf: req.csrfToken(),
+            message: null
         })
-    }
-
-    const viewEditProfile = async (req, res) => {
-        await User.findOne({ _id: req.session.user._id }).then(user => {
-            user.password = undefined
-
-            res.status(200).render('index', {
-                page: 'Editar conta',
-                user,
-                message: null
-            })
-        }).catch(_ => res.status(500).render('500'))
     }
 
     const changeUserProfile = async (req, res) => {
@@ -548,20 +540,29 @@ module.exports = app => {
             getUser = await User.findOne({ _id: req.session.user._id })
             .catch(err => new Error(err))
             if(getUser instanceof Error) return res.status(500).render('500')
+            if(getUser.firstAccess) return res.redirect('/primeiro-acesso')
         }
 
-        if(req.query.plano) {
+        if(req.query.plano && typeof(req.query.plano) === 'string') {
             getProduct = await Product.findOne({ name: req.query.plano.toLowerCase() })
             .catch(err => new Error(err))
             if(getProduct instanceof Error) return res.status(500).render('500')
         }
 
         if(req.query.cupom) {
-            discountCoupon = await Coupon.findOne({ name: req.query.cupom.toLowerCase() }).then(coupon => {
-                if(coupon && coupon.validity >= moment().format('L')) return coupon
-                return 'Invalid'
-            }).catch(err => new Error(err))
-            if(discountCoupon instanceof Error) return res.status(500).render('500')
+            if(typeof(req.query.cupom) === 'string') {
+                discountCoupon = await Coupon.findOne({ name: req.query.cupom.toLowerCase() }).then(coupon => {
+                    if(coupon && coupon.validity >= moment().format('L')) return coupon
+                    return 'Invalid'
+                }).catch(err => new Error(err))
+                if(discountCoupon instanceof Error) return res.status(500).render('500')
+            } else {
+                discountCoupon = await Coupon.findOne({ name: req.query.cupom[0].toLowerCase() }).then(coupon => {
+                    if(coupon && coupon.validity >= moment().format('L')) return coupon
+                    return 'Invalid'
+                }).catch(err => new Error(err))
+                if(discountCoupon instanceof Error) return res.status(500).render('500')
+            }            
         }
 
         res.status(200).render('index', {
@@ -583,14 +584,12 @@ module.exports = app => {
         changeFirstAccess,
         viewTerms,
         viewPrivacy,
-        viewRegister,
         registerNewUser,
         viewRecoverPassword,
         recoverPassword,
         checkToken,
         resetPassword,
         viewUserProfile,
-        viewEditProfile,
         changeUserProfile,
         viewEditPassword,
         editPassword,

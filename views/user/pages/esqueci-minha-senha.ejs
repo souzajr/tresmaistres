@@ -1,41 +1,60 @@
-<div class="container">
-    <div class="row">
-        <div class="col-md-4 offset-md-4">
-            <form id="form-recuperar-senha">
-                
-                <p>Para recuperar sua senha, digite seu Email abaixo<br>
-                Um código de segurança será enviado para o seu Email e você poderá gerar uma nova senha</p>
-                <div class="form-group">
-                    <label>Endereço de email</label>
-                    <input type="email" name="email" class="form-control" placeholder="Email" required>
+<div role="main" class="main">
+    <% include ../../template/breadcomb.ejs %>
+
+    <section class="mb-5">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div class="featured-boxes">
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3">
+                                <div class="featured-box featured-box-primary text-left mt-5">
+                                    <div class="box-content">
+                                        <h4 class="color-primary font-weight-semibold text-4 text-uppercase mb-3">Para recuperar sua senha, digite seu Email abaixo</h4>
+                                        Um código de segurança será enviado para o seu Email e você poderá gerar uma nova senha
+                                        <form id="form-recuperar-senha">
+                                            <div class="form-row">
+                                                <div class="form-group col-12">
+                                                    <label class="font-weight-bold text-dark text-2">Email</label>
+                                                    <input type="email" name="email" class="form-control" required>
+                                                </div>
+                                                <div class="form-group col-12">
+                                                    <button type="submit" style="color:#fff" class="btn btn-primary btn-modern btn-block">Recuperar senha</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                        <script>
+                                            $(document).ready(function() {
+                                                $('#form-recuperar-senha').on('submit', function(e) {
+                                                    e.preventDefault()
+                                                    
+                                                    $.ajax({
+                                                        type: 'POST',
+                                                        url: '/esqueci-minha-senha',
+                                                        datatype: 'html',
+                                                        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                                                        data: $('#form-recuperar-senha').serialize(),         
+                                                        headers: {
+                                                            'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
+                                                        },
+                                                        success: function(result) {       
+                                                            $("#form-recuperar-senha")[0].reset()
+                                                            alertify.notify(result, 'success', 5)
+                                                        },
+                                                        error: function(xhr, status, error) {
+                                                            alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                                                        }
+                                                    })
+                                                })
+                                            })
+                                        </script>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">Recuperar senha</button>
-            </form>
-            <script>
-                $(document).ready(function() {
-                    $('#form-recuperar-senha').on('submit', function(e) {
-                        e.preventDefault()
-                        
-                        $.ajax({
-                            type: 'POST',
-                            url: '/esqueci-minha-senha',
-                            datatype: 'html',
-                            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-                            data: $('#form-recuperar-senha').serialize(),         
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
-                            },
-                            success: function(result) {       
-                                $("#form-recuperar-senha")[0].reset()
-                                alertify.notify(result, 'success', 5)
-                            },
-                            error: function(xhr, status, error) {
-                                alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
-                            }
-                        })
-                    })
-                })
-            </script>
+            </div>
         </div>
-    </div>
+    </section>
 </div>

@@ -189,10 +189,12 @@
                                             </nav>
 
                                         </div>
+                                        <a href="<% if(!user) { %>/login<% } else if(user && !user.admin) { %>/minha-conta<% } else { %>/admin<% } %>" class="btn btn-primary btn-modern" style="color:#fff">MINHA CONTA</a>
+                                        <!--
                                         <ul class="header-social-icons social-icons d-none d-sm-block">
                                             <li class="social-icons-facebook"><a href="https://www.facebook.com/tresmaistres/" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a></li>
                                             <li class="social-icons-instagram"><a href="https://www.instagram.com/tresmaistres/" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a></li>
-                                        </ul>
+                                        </ul>-->
                                         <button class="btn header-btn-collapse-nav" data-toggle="collapse"
                                             data-target=".header-nav-main nav">
                                             <i class="fas fa-bars"></i>
@@ -229,33 +231,35 @@
                                         <nav class="collapse">
                                                 <ul class="nav nav-pills" id="mainNav">
                                                     <li>
-                                                        <a class="dropdown-item" data-hash data-hash-offset="68"
-                                                            href="https://tresmaistres.com.br/#Home">Home</a>
+                                                        <a class="dropdown-item"
+                                                            href="/#Home">Home</a>
                                                     </li>
                                                     <li>
-                                                        <a class="dropdown-item" data-hash data-hash-offset="68"
-                                                            href="https://tresmaistres.com.br/#QuemSomos">Quem somos</a>
+                                                        <a class="dropdown-item" 
+                                                            href="/#QuemSomos">Quem somos</a>
                                                     </li>
                                                     <li>
-                                                        <a class="dropdown-item" data-hash data-hash-offset="68"
-                                                            href="https://tresmaistres.com.br/#ComoFunciona">Como
+                                                        <a class="dropdown-item" 
+                                                            href="/#ComoFunciona">Como
                                                             funciona</a>
                                                     </li>
                                                     <li>
-                                                        <a class="dropdown-item" data-hash data-hash-offset="68"
-                                                            href="https://tresmaistres.com.br/#Planos">Planos</a>
+                                                        <a class="dropdown-item" 
+                                                            href="/#Planos">Planos</a>
                                                     </li>
                                                     <li>
-                                                        <a class="dropdown-item" data-hash data-hash-offset="68"
-                                                            href="https://tresmaistres.com.br/#Contato">Contato</a>
+                                                        <a class="dropdown-item" 
+                                                            href="/#Contato">Contato</a>
                                                     </li>
                                                 </ul>
                                         </nav>
                                     </div>
+                                    <a href="<% if(!user) { %>/login<% } else if(user && !user.admin) { %>/minha-conta<% } else { %>/admin<% } %>" class="btn btn-primary btn-modern" style="color:#fff">MINHA CONTA</a>
+                                    <!--
                                     <ul class="header-social-icons social-icons d-none d-sm-block">
                                         <li class="social-icons-facebook"><a href="https://www.facebook.com/tresmaistres/" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a></li>
                                         <li class="social-icons-instagram"><a href="https://www.instagram.com/tresmaistres/" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a></li>
-                                    </ul>
+                                    </ul>-->
                                     <button class="btn header-btn-collapse-nav" data-toggle="collapse"
                                         data-target=".header-nav-main nav">
                                         <i class="fas fa-bars"></i>

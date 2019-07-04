@@ -1,0 +1,167 @@
+<div role="main" class="main">
+    <% include ../../template/breadcomb.ejs %>
+
+    <section class="mb-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="row text-left pb-4">
+                        <div class="col-md-12 mx-md-auto">
+                            <% if(order.status === 'paid') { %>
+                                <h4 class="mb-30">
+                                    O seu pagamento foi realizado com sucesso!<br>
+                                    <small>ID: #<%= order._id %></small>
+                                </h4>
+                            <% } else if(order.status === 'waiting_payment') { %>
+                                <h4 class="mb-30">
+                                    Recebemos seu pedido<br>
+                                    <small>ID: #<%= order._id %></small>
+                                </h4>
+                            <% } else { %>
+                                <h4 class="mb-30">
+                                    O seu pagamento foi recusado<br>
+                                    <small>ID: #<%= order._id %></small>
+                                </h4>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+                <% if(order.status === 'waiting_payment') { %>
+                    <div class="col-md-3">
+                        <a target="_blank" class="btn btn-primary btn-lg float-right" style="margin-top: 10px; color: white" href="<%= order.paymentConfig.boleto_url %>"><i class="fa fa-print"></i> Imprimir boleto</a>
+                    </div>
+                <% } %>
+                <% if(user) { %>
+                    <div class="col-md-3">
+                        <a class="btn btn-info btn-lg float-right" style="margin-top: 10px; color: white" href="/minha-conta">Ver meus pedidos</a>
+                    </div>
+                <% } %>
+                
+                <div class="col-md-12">
+                    <h4>Revisão</h4>
+                    <table class="table table-striped table-bordered tbl-shopping-cart">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><a href="#!" style="text-transform: capitalize;"><%= order.product.name %></a></td>
+                                <td><span class="amount">R$<%= (order.product.value / 100).toFixed(2).replace('.', ',') %></span></td>
+                            </tr>
+                            <% if(order.coupon && order.coupon._id) { %>
+                                <tr>
+                                    <td>Cupom de desconto</td>
+                                    <td><%= order.coupon.name %> (<%= order.coupon.percentage %>%)</td>
+                                </tr>
+                            <% } %>
+                            <tr>
+                                <td><b>Total do pedido</b></td>
+                                <td><b>R$<%= (order.total / 100).toFixed(2).replace('.', ',') %></b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-12">
+                    <div class="billing-details">
+                        <h4>Endereço de cobrança</h4>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label>Nome completo</label>
+                                <p><b><%= order.buyer.name %></b></p>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Telefone</label>
+                                <p id="phone"></p>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Email</label>
+                                <p><b><%= order.buyer.email %></b></p>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Pessoa física ou pessoa jurídica?</label>
+                                <% if(order.buyer.documents.typeDoc === 'pf') { %>
+                                    <p><b>Pessoa física</b></p>
+                                <% } else { %>
+                                    <p><b>Pessoa jurídica</b></p>
+                                <% } %>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <% if(order.buyer.documents.typeDoc === 'pf') { %>
+                                    <label>CPF</label>
+                                <% } else { %>
+                                    <label>CNPJ</label>
+                                <% } %>
+                                <p id="cpfOrCnpj"></p>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Data de nascimento</label>
+                                <p><b><%= moment(order.buyer.birthday, 'YYYY-MM-DD').format('L') %></b></p>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Endereço</label>
+                                <p><b><%= order.buyer.address.street %></b></p>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Número</label>
+                                <p><b><%= order.buyer.address.number %></b></p>
+                            </div>
+                            <% if(order.buyer.address.complement) { %>
+                                <div class="col-md-12">
+                                    <label>Complemento</label>
+                                    <p><b><%= order.buyer.address.complement %></b></p>
+                                </div>
+                            <% } %>
+                            <div class="form-group col-md-6">
+                                    <label>Cidade</label>
+                                    <p><b><%= order.buyer.address.city %></b></p>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Estado</label>
+                                <p><b><%= order.buyer.address.state %></b></p>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>CEP</label>
+                                <p id="zipCode"></p>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Bairro</label>
+                                <p><b><%= order.buyer.address.neighborhood %></b></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </div>
+        </div>
+    </section>
+
+    <script type="text/javascript" src="/views/assets/js/string-mask.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() { 
+            const cpfOrCnpj = '<%= order.buyer.documents.cpfOrCnpj %>'
+            const phone = '<%= order.buyer.phone %>'
+            const zipCode = '<%= order.buyer.address.zipCode %>'
+
+            if('<%= order.buyer.documents.typeDoc %>' === 'pf') {
+                const formatterCpf = new StringMask('000.000.000-00', { reverse: true })
+                $('#cpfOrCnpj').html('<b>' + formatterCpf.apply(cpfOrCnpj) + '</b>')
+            } else {
+                const formatterCnpj = new StringMask('00.000.000/0000-00', { reverse: true })
+                $('#cpfOrCnpj').html('<b>' + formatterCnpj.apply(cpfOrCnpj) + '</b>')
+            }
+            
+            const formatterZipCode = new StringMask('00.000-000', { reverse: true })
+            $('#zipCode').html('<b>' + formatterZipCode.apply(zipCode) + '</b>')
+
+            if(phone.length === 10) {
+                const formatterPhone = new StringMask('(00) 0000-0000', { reverse: true })
+                $('#phone').html('<b>' + formatterPhone.apply(phone) + '</b>')
+            } else {
+                const formatterPhone = new StringMask('(00) 0 0000-0000', { reverse: true })
+                $('#phone').html('<b>' + formatterPhone.apply(phone) + '</b>')
+            }            
+        })
+    </script>
+</div>

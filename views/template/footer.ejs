@@ -13,7 +13,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <ul class="list list-icons list-icons-sm">
-                            <li><i class="fas fa-angle-right"></i><a href="/minha-conta" class="link-hover-style-1 ml-1">Minha conta</a></li>
+                            <li><i class="fas fa-angle-right"></i><a href="<% if(!user) { %>/login<% } else { %>/minha-conta<% } %>" class="link-hover-style-1 ml-1">Minha conta</a></li>
                             <li><i class="fas fa-angle-right"></i><a href="/termos-de-uso" class="link-hover-style-1 ml-1">Termos de uso</a></li>
                             <li><i class="fas fa-angle-right"></i><a href="/politica-de-privacidade" class="link-hover-style-1 ml-1">Política de privacidade</a></li>
                         </ul>

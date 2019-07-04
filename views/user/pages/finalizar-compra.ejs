@@ -29,7 +29,7 @@
                         <div class="col-md-12">
                             <div class="alert alert-info alert-dismissible" role="alert">
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                Você não está logado em sua conta, <strong><a href="/minha-conta">clique aqui</a></strong> para fazer login. Se você ainda não tiver uma conta, basta preencher o formulário abaixo e uma conta será criada automaticamente para você.
+                                Você não está logado em sua conta, <strong><a href="/login">clique aqui</a></strong> para fazer login. Se você ainda não tiver uma conta, basta preencher o formulário abaixo e uma conta será criada automaticamente para você.
                             </div>
                         </div>
                     </div>
@@ -146,19 +146,10 @@
                                                 </div>
                                                 <div class="form-group col-6">
                                                     <label class="font-weight-bold text-dark text-2">Pessoa física ou jurídica?<b style="color:red">*</b></label>
-                                                    <select id="selectDocument" class="form-control">
-                                                        <% if(user && user.documents && user.documents.typeDoc) { %>
-                                                            <option value="<%= user.documents.typeDoc %>" selected>
-                                                                <% if(user.documents.typeDoc === 'pf') { %>
-                                                                    Pessoa física
-                                                                <% } else { %>
-                                                                    Pessoa jurídica
-                                                                <% } %>
-                                                            </option>
-                                                        <% } else { %>
-                                                            <option selected value="pf">Pessoa física</option>
-                                                            <option value="pj">Pessoa jurídica</option>
-                                                        <% } %>
+                                                    <select id="selectDocument" class="form-control">             
+                                                        <option <% if(!user || !user.documents || !user.documents.typeDoc) { %>selected<% } %> disabled>Selecione</option>
+                                                        <option <% if(user && user.documents && user.documents.typeDoc && user.documents.typeDoc === 'pf') { %>selected<% } %> value="pf">Pessoa física</option>
+                                                        <option <% if(user && user.documents && user.documents.typeDoc && user.documents.typeDoc === 'pj') { %>selected<% } %> value="pj">Pessoa jurídica</option>
                                                     </select>
                                                 </div>
                                                 <div id="cpf" class="form-group col-6">
@@ -484,8 +475,8 @@
                                             neighborhood: $('#checkuot-form-neighborhood').val()
                                         },
                                         hasAccount: '<%= hasAccount %>' === 'true' ? true : false,
-                                        password: document.getElementById('checkuot-form-password') ? document.getElementById('checkuot-form-password').value : '',
-                                        confirmPassword: document.getElementById('checkuot-form-confirmPassword') ? document.getElementById('checkuot-form-confirmPassword').value : ''
+                                        password: $('#checkuot-form-password').val(),
+                                        confirmPassword: $('#checkuot-form-confirmPassword').val()
                                     },
                                     product: '<%= product._id %>',
                                     coupon: '<%= couponId %>'

@@ -51,9 +51,6 @@ module.exports = app => {
         /* ============= LOCAL LOGIN  ============= */
         app.post('/login', csurf(), app.src.api.auth.login)
 
-        /* ============= VIEW REGISTER  ============= */
-        app.get('/cadastro', csurf(), app.src.api.user.viewRegister)
-
         /* ============= REGISTER NEW USER  ============= */
         app.post('/cadastro', csurf(), app.src.api.user.registerNewUser)
 
@@ -99,7 +96,7 @@ module.exports = app => {
 
         app.route('/minha-conta')
             .all(app.src.config.passport.authenticate())
-            .get(app.src.api.user.viewUserProfile)  
+            .get(csurf(), app.src.api.user.viewUserProfile)  
     //#endregion
 
     //#region ADMIN 
@@ -111,9 +108,7 @@ module.exports = app => {
         app.post('/finalizar-compra', csurf(), app.src.api.pagarme.checkout)
         
         /* ============= END CHECKOUT PROCESS  ============= */
-        app.route('/detalhes-do-pedido')
-            .all(app.src.config.passport.authenticate())
-            .get(app.src.api.pagarme.orderDetails)
+        app.get('/detalhes-do-pedido/:id', app.src.api.pagarme.orderDetails)
 
         /* ============= POSTBACK URL  ============= */
         app.post(process.env.PAGARME_POSTBACK, app.src.api.pagarme.postbackUrl)

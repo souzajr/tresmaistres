@@ -40,7 +40,7 @@ const OrderSchema = new mongoose.Schema({
         }
     },
     status: { type: String, required: true },
-    createdAt: { type: String, required: true },
+    createdAt: { type: String, required: true }
 })
 
 mongoose.model('Order', OrderSchema)
