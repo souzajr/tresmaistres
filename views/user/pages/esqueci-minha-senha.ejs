@@ -38,7 +38,7 @@
                                                             'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
                                                         },
                                                         success: function(result) {       
-                                                            $("#form-recuperar-senha")[0].reset()
+                                                            $('#form-recuperar-senha')[0].reset()
                                                             alertify.notify(result, 'success', 5)
                                                         },
                                                         error: function(xhr, status, error) {

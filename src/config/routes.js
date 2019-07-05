@@ -96,7 +96,17 @@ module.exports = app => {
 
         app.route('/minha-conta')
             .all(app.src.config.passport.authenticate())
-            .get(csurf(), app.src.api.user.viewUserProfile)  
+            .get(csurf(), app.src.api.user.viewUserProfile) 
+            .post(csurf(), app.src.api.user.changeUserProfile) 
+
+        app.route('/minha-conta/alterar-senha')
+            .all(app.src.config.passport.authenticate())
+            .get(csurf(), app.src.api.user.viewEditPassword) 
+            .post(csurf(), app.src.api.user.editPassword)  
+
+        app.route('/minha-conta/pedidos')
+            .all(app.src.config.passport.authenticate())
+            .get(app.src.api.user.viewOrders) 
     //#endregion
 
     //#region ADMIN 

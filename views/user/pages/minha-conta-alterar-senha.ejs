@@ -1,0 +1,85 @@
+<div role="main" class="main">
+    <% include ../../template/breadcomb.ejs %>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 mt-4 mt-lg-0">
+                <aside class="sidebar mt-2" id="sidebar">
+                    <ul class="nav nav-list flex-column mb-5">
+                        <li class="nav-item"><a class="nav-link" href="/minha-conta">Meu perfil</a></li>
+                        <li class="nav-item"><a class="nav-link text-dark active" href="/minha-conta/alterar-senha">Alterar senha</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/minha-conta/pedidos">Meus pedidos</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/sair">Sair</a></li>
+                    </ul>
+                </aside>
+            </div>
+            <div class="col-lg-9">
+
+                <div class="overflow-hidden mb-1">
+                    <h2 class="font-weight-normal text-7 mb-0"><strong class="font-weight-extra-bold">Meu</strong> Perfil</h2>
+                </div>
+                <div class="overflow-hidden mb-4 pb-3">
+                    <p class="mb-0">Alterar senha</p>
+                </div>
+
+                <form id="change-password" role="form">
+                    <div class="form-group row">
+                        <label
+                            class="col-lg-3 font-weight-bold text-dark col-form-label form-control-label text-2">Senha atual</label>
+                        <div class="col-lg-9">
+                            <input class="form-control" type="password" name="currentPassword" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label
+                            class="col-lg-3 font-weight-bold text-dark col-form-label form-control-label text-2">Nova senha</label>
+                        <div class="col-lg-9">
+                            <input class="form-control" type="password" name="newPassword">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label
+                            class="col-lg-3 font-weight-bold text-dark col-form-label form-control-label text-2">Confirmar nova senha</label>
+                        <div class="col-lg-9">
+                            <input class="form-control" type="password" name="confirmNewPassword">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="form-group col-lg-9"></div>
+                        <div class="form-group col-lg-3">
+                            <button type="submit" class="btn btn-primary btn-modern float-right" style="color:#fff">SALVAR</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>    
+    $(document).ready(function() {             
+        $('#change-password').on('submit', function(e) {
+            e.preventDefault()
+                                                    
+            $.ajax({
+                type: 'POST',
+                url: '/minha-conta/alterar-senha',
+                datatype: 'html',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                data: $('#change-password').serialize(),         
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
+                },
+                success: function(result) {   
+                    alertify.notify(result, 'success', 5)
+                    setTimeout(function() { 
+                        window.location.reload()
+                    }, 500)      
+                },
+                error: function(xhr, status, error) {
+                    alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                }
+            })
+        })
+    })
+</script>

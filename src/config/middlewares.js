@@ -56,7 +56,9 @@ module.exports = app => {
         '/validate',
         '/nova-senha',
         '/minha-conta',
-        '/primeiro-acesso'
+        '/primeiro-acesso',
+        '/minha-conta/alterar-senha',
+        '/minha-conta/pedidos'
     ], (req, res, next) => {
         if (!req.session.user) {
             res.status(401).render('index', {

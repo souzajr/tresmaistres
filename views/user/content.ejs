@@ -6,7 +6,7 @@
     <% include pages/primeiro-acesso.ejs %>
 <% } else if(page === 'Esqueci minha senha') { %>
     <% include pages/esqueci-minha-senha.ejs %>
-<% } else if(page === 'Alterar senha') { %>
+<% } else if(page === 'Recuperar senha') { %>
     <% include pages/alterar-senha.ejs %>
 <% } else if(page === 'Termos de uso') { %>
     <% include pages/termos-de-uso.ejs %>
@@ -18,4 +18,8 @@
     <% include pages/detalhes-do-pedido.ejs %>
 <% } else if(page === 'Minha conta') { %>
     <% include pages/minha-conta.ejs %>
+<% } else if(page === 'Alterar senha') { %>
+    <% include pages/minha-conta-alterar-senha.ejs %>
+<% } else if(page === 'Pedidos') { %>
+    <% include pages/minha-conta-pedidos.ejs %>
 <% } %>

@@ -37,12 +37,15 @@ module.exports = app => {
     }
 
     const viewIndex = (req, res) => {
-        res.status(200).render('index', {
-            user: req.session.user,
-            page: 'Home',
-            csrf: req.csrfToken(),
-            message: null
-        })
+        Product.find({ productPublic: true }).then(product => {
+            res.status(200).render('index', {
+                user: req.session.user,
+                page: 'Home',
+                product,
+                csrf: req.csrfToken(),
+                message: null
+            })
+        }).catch(_ => res.status(500).render('500'))
     }
 
     const sendMessage = (req, res) => {
@@ -257,7 +260,7 @@ module.exports = app => {
                 })
             } else {
                 res.status(200).render('index', {
-                    page: 'Alterar senha',
+                    page: 'Recuperar senha',
                     user,
                     csrf: req.csrfToken(),
                     message: null
@@ -297,7 +300,7 @@ module.exports = app => {
             equalsOrError(newPassword.password, newPassword.confirmPassword, 'A senha e confirmação da senha não são iguais')
         } catch (msg) {
             return res.status(400).render('index', {
-                page: 'Alterar senha',
+                page: 'Recuperar senha',
                 user,
                 csrf: req.csrfToken(),
                 message: JSON.stringify(msg)
@@ -436,101 +439,50 @@ module.exports = app => {
                 user.address.state = changeInfoProfile.state
             }
 
-            await user.save().then(_ => res.status(200).json(successMessage))
+            user.save().then(user => {
+                user.password = undefined
+                req.session.user = user
+                res.status(200).json(successMessage)
+            })
         }).catch(_ => res.status(400).json(failMessage))
     }
 
     const viewEditPassword = async (req, res) => {
-        await User.findOne({ _id: req.session.user._id }).then(user => {
-            user.password = undefined
-
-            res.status(200).render('index', {
-                page: 'Editar senha',
-                user,
-                message: null
-            })
-        }).catch(_ => res.status(500).render('500'))
-    }
-
-    const editPassword = async (req, res) => {
-        const changePassword = { ...req.body }
-
-        await User.findOne({ _id: req.session.user._id }).then(async user => {
-            if(!user.facebookId) {
-                if (changePassword.currentPassword || changePassword.newPassword || changePassword.confirmNewPassword) {
-                    try {
-                        existOrError(changePassword.currentPassword, 'Digite sua senha atual')
-                        existOrError(changePassword.newPassword, 'Digite sua nova senha')
-                        existOrError(changePassword.confirmNewPassword, 'Digite a confirmação da sua nova senha')
-                        const checkUser = await User.findOne({ _id: req.session.user._id })
-                        const isMatch = bcrypt.compareSync(changePassword.currentPassword, checkUser.password)
-                        if (!isMatch) return res.status(401).json('Senha atual incorreta')
-                        hasDigitOrError(changePassword.newPassword, 'A senha deve ter pelo menos um número')
-                        //hasLowerOrError(changePassword.newPassword, 'A senha deve ter pelo menos uma letra minúscula')
-                        //hasUpperOrError(changePassword.newPassword, 'A senha deve ter pelo menos uma letra maiúscula')
-                        notSpaceOrError(changePassword.newPassword, 'A senha não deve ter espaços em branco')
-                        //hasSpecialOrError(changePassword.newPassword, 'A senha deve ter pelo menos um caractere especial')
-                        strongOrError(changePassword.newPassword, 'A senha deve conter pelo menos 8 caracteres')
-                        equalsOrError(changePassword.newPassword, changePassword.confirmNewPassword, 'A senha e confirmação da senha não são iguais')
-                    } catch (msg) {
-                        return res.status(400).json(msg)
-                    }
-
-                    user.password = encryptPassword(changePassword.newPassword)
-                    await user.save().then(_ => res.status(200).json(successMessage))
-                } else {
-                    return res.status(400).json(failMessage)
-                }
-            } else {
-                if (changePassword.newPassword || changePassword.confirmNewPassword) {
-                    try {
-                        existOrError(changePassword.newPassword, 'Digite sua nova senha')
-                        existOrError(changePassword.confirmNewPassword, 'Digite a confirmação da sua nova senha')
-                        hasDigitOrError(changePassword.newPassword, 'A senha deve ter pelo menos um número')
-                        //hasLowerOrError(changePassword.newPassword, 'A senha deve ter pelo menos uma letra minúscula')
-                        //hasUpperOrError(changePassword.newPassword, 'A senha deve ter pelo menos uma letra maiúscula')
-                        notSpaceOrError(changePassword.newPassword, 'A senha não deve ter espaços em branco')
-                        //hasSpecialOrError(changePassword.newPassword, 'A senha deve ter pelo menos um caractere especial')
-                        strongOrError(changePassword.newPassword, 'A senha deve conter pelo menos 8 caracteres')
-                        equalsOrError(changePassword.newPassword, changePassword.confirmNewPassword, 'A senha e confirmação da senha não são iguais')
-                    } catch (msg) {
-                        return res.status(400).json(msg)
-                    }
-
-                    user.password = encryptPassword(changePassword.newPassword)
-                    await user.save().then(_ => res.status(200).json(successMessage))
-                } else {
-                    return res.status(400).json(failMessage)
-                }
-            }
+        res.status(200).render('index', {
+            page: 'Alterar senha',
+            user: req.session.user, 
+            csrf: req.csrfToken(),
+            message: null
         })
     }
 
-    const changePassword = async (req, res) => {
-        const newPassword = { ...req.body }
+    const editPassword = (req, res) => {
+        const changePassword = { ...req.body }
 
-        try {
-            const checkUser = await User.findOne({ _id: req.session.user._id })
-            .catch(_ => res.status(500).json(failMessage)) 
-            const isMatch = bcrypt.compareSync(newPassword.password, checkUser.password)
-            if (isMatch) return res.status(400).json('A sua nova senha não pode ser igual a sua senha provisória')
-            hasDigitOrError(newPassword.password, 'A senha deve ter pelo menos um número')
-            //hasLowerOrError(newPassword.password, 'A senha deve ter pelo menos uma letra minúscula')
-            //hasUpperOrError(newPassword.password, 'A senha deve ter pelo menos uma letra maiúscula')
-            notSpaceOrError(newPassword.password, 'A senha não deve ter espaços em branco')
-            //hasSpecialOrError(newPassword.password, 'A senha deve ter pelo menos um caractere especial')
-            strongOrError(newPassword.password, 'A senha deve conter pelo menos 8 caracteres')
-            existOrError(newPassword.confirmPassword, 'Digite a confirmação da senha')
-            equalsOrError(newPassword.password, newPassword.confirmPassword, 'A senha e confirmação da senha não são iguais')
-        } catch (msg) {
-            return res.status(400).json(msg)
-        }
+        User.findOne({ _id: req.session.user._id }).then(async user => {
+            if (changePassword.currentPassword || changePassword.newPassword || changePassword.confirmNewPassword) {
+                try {
+                    existOrError(changePassword.currentPassword, 'Digite sua senha atual')
+                    existOrError(changePassword.newPassword, 'Digite sua nova senha')
+                    existOrError(changePassword.confirmNewPassword, 'Digite a confirmação da sua nova senha')
+                    const checkUser = await User.findOne({ _id: req.session.user._id })
+                    const isMatch = bcrypt.compareSync(changePassword.currentPassword, checkUser.password)
+                    if (!isMatch) return res.status(401).json('Senha atual incorreta')
+                    hasDigitOrError(changePassword.newPassword, 'A senha deve ter pelo menos um número')
+                    //hasLowerOrError(changePassword.newPassword, 'A senha deve ter pelo menos uma letra minúscula')
+                    //hasUpperOrError(changePassword.newPassword, 'A senha deve ter pelo menos uma letra maiúscula')
+                    notSpaceOrError(changePassword.newPassword, 'A senha não deve ter espaços em branco')
+                    //hasSpecialOrError(changePassword.newPassword, 'A senha deve ter pelo menos um caractere especial')
+                    strongOrError(changePassword.newPassword, 'A senha deve conter pelo menos 8 caracteres')
+                    equalsOrError(changePassword.newPassword, changePassword.confirmNewPassword, 'A senha e confirmação da senha não são iguais')
+                } catch (msg) {
+                    return res.status(400).json(msg)
+                }
 
-        await User.findOne({ _id: req.session.user._id }).then(async user => {
-            user.password = encryptPassword(newPassword.password)
-            user.firstAccess = false
-            await user.save().then(_ => res.status(200).json(successMessage))
-        }).catch(_ => res.status(500).json(failMessage))
+                user.password = encryptPassword(changePassword.newPassword)
+                user.save().then(_ => res.status(200).json(successMessage))
+            } else return res.status(400).json(failMessage)
+        })
     }
 
     const viewCheckout = async (req, res) => {
@@ -541,8 +493,9 @@ module.exports = app => {
             .catch(err => new Error(err))
             if(getUser instanceof Error) return res.status(500).render('500')
             if(getUser.firstAccess) return res.redirect('/primeiro-acesso')
+            getUser.password = undefined
         }
-
+        
         if(req.query.plano && typeof(req.query.plano) === 'string') {
             getProduct = await Product.findOne({ name: req.query.plano.toLowerCase() })
             .catch(err => new Error(err))
@@ -576,6 +529,17 @@ module.exports = app => {
         })
     }
 
+    const viewOrders = (req, res) => {
+        Order.find({ _idUser: req.session.user._id }).then(orders => {
+            res.status(200).render('index', {
+                orders,
+                page: 'Pedidos',
+                user: req.session.user,
+                message: null
+            })
+        }).catch(_ => res.status(500).render('500'))
+    }
+
     return {
         viewIndex,
         sendMessage,
@@ -594,7 +558,7 @@ module.exports = app => {
         viewEditPassword,
         editPassword,
         viewFirstAccess,
-        changePassword,
-        viewCheckout
+        viewCheckout,
+        viewOrders
     }
 }

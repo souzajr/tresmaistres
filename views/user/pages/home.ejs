@@ -198,110 +198,29 @@
             </div>
 
             <div class="pricing-table mb-4">
-                <div class="col-md-6 col-lg-3">
-                    <div class="plan">
-                        <div class="plan-header">
-                            <h3>PLANO MENSAL</h3>
-                        </div>
-                        <div class="plan-price">
-                            <span class="price"><span class="price-unit">R$</span>116,90</span>
-                        </div>
-                        <div class="plan-features">
-                            <ul>
-                                <li>Seguidores reais <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Suporte via WhatsApp <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Filtros de segmentação <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Curtidas automáticas</li>
-                                <li>Mensagem de boas-vindas</li>
-                                <li>Comentários automáticos</li>
-                                <li>Visualização de Stories</li>
-                                <li>Curtidas em suas publicações</li>
-                            </ul>
-                        </div>
-                        <div class="plan-footer">
-                            <a href="/finalizar-compra?plano=mensal" style="color:#fff"
-                                class="btn btn-modern btn-primary btn-bottom">COMPRAR</a>
+                <% for(let i = 0; i < product.length; i++) { %>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="plan">
+                            <div class="plan-header">
+                                <h3><%= product[i].name.toUpperCase() %></h3>
+                            </div>
+                            <div class="plan-price">
+                                <span class="price"><span class="price-unit">R$</span><%= (product[i].value / 100).toFixed(2).replace('.', ',') %></span>
+                            </div>
+                            <div class="plan-features">
+                                <ul>
+                                    <% for(let j = 0; j < product[i].options.length; j++) { %>
+                                        <li><%= product[i].options[j].description %> <% if(product[i].options[j].hasCheck) { %><i class="fas fa-check" style="color: #fbb606;"></i><% } %></li>
+                                    <% } %>
+                                </ul>
+                            </div>
+                            <div class="plan-footer">
+                                <a href="/finalizar-compra?plano=<%= product[i].name %>" style="color:#fff"
+                                    class="btn btn-modern btn-primary btn-bottom">COMPRAR</a>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="plan">
-                        <div class="plan-header">
-                            <h3>PLANO BIMESTRAL</h3>
-                        </div>
-                        <div class="plan-price">
-                            <span class="price"><span class="price-unit">R$</span>197,90</span>
-                        </div>
-                        <div class="plan-features">
-                            <ul>
-                                <li>Seguidores reais <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Suporte via WhatsApp <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Filtros de segmentação <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Curtidas automáticas <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Mensagem de boas-vindas</li>
-                                <li>Comentários automáticos</li>
-                                <li>Visualização de Stories</li>
-                                <li>Curtidas em suas publicações</li>
-                            </ul>
-                        </div>
-                        <div class="plan-footer">
-                            <a href="/finalizar-compra?plano=bimestral" style="color:#fff"
-                                class="btn btn-modern btn-primary btn-bottom">COMPRAR</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="plan">
-                        <div class="plan-header">
-                            <h3>PLANO TRIMESTRAL</h3>
-                        </div>
-                        <div class="plan-price">
-                            <span class="price"><span class="price-unit">R$</span>275,90</span>
-                        </div>
-                        <div class="plan-features">
-                            <ul>
-                                <li>Seguidores reais <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Suporte via WhatsApp <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Filtros de segmentação <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Curtidas automáticas <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Mensagem de boas-vindas <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Comentários automáticos <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Visualização de Stories</li>
-                                <li>Curtidas em suas publicações</li>
-                            </ul>
-                        </div>
-                        <div class="plan-footer">
-                            <a href="/finalizar-compra?plano=trimestral" style="color:#fff"
-                                class="btn btn-modern btn-primary btn-bottom">COMPRAR</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="plan">
-                        <div class="plan-header">
-                            <h3>PLANO SEMESTRAL</h3>
-                        </div>
-                        <div class="plan-price">
-                            <span class="price"><span class="price-unit">R$</span>505,90</span>
-                        </div>
-                        <div class="plan-features">
-                            <ul>
-                                <li>Seguidores reais <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Suporte via WhatsApp <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Filtros de segmentação <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Curtidas automáticas <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Mensagem de boas-vindas <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Comentários automáticos <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Visualização de Stories <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                                <li>Curtidas em suas publicações <i class="fas fa-check" style="color: #fbb606;"></i></li>
-                            </ul>
-                        </div>
-                        <div class="plan-footer">
-                            <a href="/finalizar-compra?plano=semestral" style="color:#fff"
-                                class="btn btn-modern btn-primary btn-bottom">COMPRAR</a>
-                        </div>
-                    </div>
-                </div>
+                <% } %>
             </div>
         </div>
     </section>

@@ -221,7 +221,7 @@ module.exports = app => {
                 },
                 'items': [{
                     'id': order.product._id,
-                    'title': 'plano ' + order.product.name,
+                    'title': order.product.name,
                     'unit_price': order.total,
                     'quantity': 1,
                     'tangible': false
@@ -246,7 +246,7 @@ module.exports = app => {
                                     })
                                 }
                                 
-                                mail.paymentReceived(order)
+                                mail.paymentReceived(order.buyer.email, order.buyer.name, order._id)
                                 res.status(200).json('/detalhes-do-pedido/' + order._id)
                             })
                         })
@@ -262,7 +262,7 @@ module.exports = app => {
                                 order.createdAt = moment().format('L - LTS')
         
                                 Order.create(order).then(order => {     
-                                    mail.orderFailed(order)
+                                    mail.orderFailed(order.buyer.email, order.buyer.name, order._id)
                                     res.status(200).json('/detalhes-do-pedido/' + order._id)
                                 })
                             })
@@ -277,12 +277,12 @@ module.exports = app => {
                         order.createdAt = moment().format('L - LTS')
 
                         Order.create(order).then(order => {
-                            mail.orderFailed(order)
-                            res.status(400).json(failMessage)
+                            mail.orderFailed(order.buyer.email, order.buyer.name, order._id)
+                            res.status(200).json('/detalhes-do-pedido/' + order._id)
                         })
                     })
                 }
-            }).catch(err => console.log(err.response.errors))
+            }).catch(_ => res.status(500).json(failMessage))
         } else if(order.paymentConfig.method === 'boleto') {
             if(order.paymentConfig.card_hash || order.product.value >= 200000) return res.status(400).json(failMessage)
 
@@ -323,7 +323,7 @@ module.exports = app => {
                 },
                 'items': [{
                     'id': order.product._id,
-                    'title': 'plano ' + order.product.name,
+                    'title': order.product.name,
                     'unit_price': order.total,
                     'quantity': 1,
                     'tangible': false
@@ -347,7 +347,7 @@ module.exports = app => {
                                 })
                             }
 
-                            mail.orderCreated(order)
+                            mail.orderCreated(order.buyer.email, order.buyer.name, order._id)
                             res.status(200).json('/detalhes-do-pedido/' + order._id)
                         })
                     } else {
@@ -359,7 +359,7 @@ module.exports = app => {
                         order.createdAt = moment().format('L - LTS')
 
                         Order.create(order).then(order => {
-                            mail.orderFailed(order)
+                            mail.orderFailed(order.buyer.email, order.buyer.name, order._id)
                             res.status(400).json(failMessage)
                         })
                     }
@@ -401,7 +401,7 @@ module.exports = app => {
 
                             order.save().then(_ => {
                                 if(transaction.status === 'paid' && transaction.amount === transaction.paid_amount) {
-                                    mail.paymentReceived(order)
+                                    mail.paymentReceived(order.buyer.email, order.buyer.name, order._id)
                                 }
 
                                 res.status(200).end()
