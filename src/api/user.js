@@ -11,6 +11,7 @@ const crypto = require('crypto')
 const cepValidator = require('cep-promise')
 const cpf = require('@fnando/cpf/dist/node')
 const cnpj = require('@fnando/cnpj/dist/node')
+const sm = require('sitemap')
 const jwt = require('jwt-simple')
 const moment = require('moment')
 moment.locale('pt-br')
@@ -540,6 +541,43 @@ module.exports = app => {
         }).catch(_ => res.status(500).render('500'))
     }
 
+    const orderDetails = (req, res) => {
+        Order.findOne({ _id: req.params.id }).then(order => {
+            if(!order) return res.status(404).render('404')
+
+            Product.findOne({ _id: order.product._id }).then(product => {
+                res.status(200).render('index', {
+                    page: 'Detalhes do pedido',
+                    user: req.session.user,
+                    order,
+                    product,
+                    moment,
+                    message: null
+                })
+            })
+        }).catch(_ => res.status(500).render('500'))
+    }
+
+    const viewSiteMap = (req, res) => {
+        const sitemap = sm.createSitemap({
+            hostname: process.env.DOMAIN_NAME,
+            cacheTime: 600000,
+            urls: [
+                { url: '/', img: process.env.DOMAIN_NAME + '/views/assets/img/parallax/parallax-2.jpg' },
+                { url: '/minha-conta' },
+                { url: '/finalizar-compra' },
+                { url: '/politica-de-privacidade' },
+                { url: '/termos-de-uso' }
+            ]
+        })
+
+        sitemap.toXML(function(err, xml) {
+            if(err) return res.status(500).end()
+
+            res.status(200).header('Content-Type', 'application/xml').send(xml)
+        })
+    }
+
     return {
         viewIndex,
         sendMessage,
@@ -559,6 +597,8 @@ module.exports = app => {
         editPassword,
         viewFirstAccess,
         viewCheckout,
-        viewOrders
+        viewOrders,
+        orderDetails,
+        viewSiteMap
     }
 }

@@ -85,7 +85,13 @@ module.exports = app => {
         app.get('/politica-de-privacidade', app.src.api.user.viewPrivacy)
         
         /* ============= BUY PLAN ============= */
-        app.get('/finalizar-compra', csurf(), app.src.api.user.viewCheckout)
+        app.get('/finalizar-compra', csurf(), app.src.api.user.viewCheckout)        
+        
+        /* ============= VIEW ORDERS DETAILS  ============= */
+        app.get('/detalhes-do-pedido/:id', app.src.api.user.orderDetails)     
+        
+        /* ============= VIEW SITEMAP.XML  ============= */
+        app.get('/sitemap.xml', app.src.api.user.viewSiteMap)
     //#endregion
 
     //#region USER
@@ -110,15 +116,14 @@ module.exports = app => {
     //#endregion
 
     //#region ADMIN 
-
+        app.route('/admin')
+            .all(app.src.config.passport.authenticate())
+            .get(admin(app.src.api.admin.viewDashboard))  
     //#endregion
 
     //#region PAGARME
-        /* ============= START CHECKOUT PROCESS  ============= */
+        /* ============= CHECKOUT PROCESS  ============= */
         app.post('/finalizar-compra', csurf(), app.src.api.pagarme.checkout)
-        
-        /* ============= END CHECKOUT PROCESS  ============= */
-        app.get('/detalhes-do-pedido/:id', app.src.api.pagarme.orderDetails)
 
         /* ============= POSTBACK URL  ============= */
         app.post(process.env.PAGARME_POSTBACK, app.src.api.pagarme.postbackUrl)

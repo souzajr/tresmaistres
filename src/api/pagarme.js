@@ -368,23 +368,6 @@ module.exports = app => {
         } else return res.status(400).json(failMessage)
     }
 
-    const orderDetails = (req, res) => {
-        Order.findOne({ _id: req.params.id }).then(order => {
-            if(!order) return res.status(404).render('404')
-
-            Product.findOne({ _id: order.product._id }).then(product => {
-                res.status(200).render('index', {
-                    page: 'Detalhes do pedido',
-                    user: req.session.user,
-                    order,
-                    product,
-                    moment,
-                    message: null
-                })
-            })
-        }).catch(_ => res.status(500).render('500'))
-    }
-
     const postbackUrl = (req, res) => {
         if(pagarme.postback.verifySignature(process.env.PAGARME_API_KEY, qs.stringify(req.body), req.headers['x-hub-signature'].replace('sha1=', ''))) {
             Order.findOne({ _idTransactionPagarme: Number(req.body.transaction.id) }).then(order => {
@@ -417,7 +400,6 @@ module.exports = app => {
 
     return {
         checkout,
-        orderDetails,
         postbackUrl
     }
 }

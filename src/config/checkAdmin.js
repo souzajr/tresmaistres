@@ -24,7 +24,7 @@ module.exports = {
                     firstAccess: false
                 }
 
-                User.create(user).then(_ => console.log('\x1b[41m\x1b[37m', 'USUÁRIO ADMIN CRIADO COM SUCESSO!', '\x1b[0m'))
+                User.create(user).then(console.log('\x1b[41m\x1b[37m', 'USUÁRIO ADMIN CRIADO COM SUCESSO!', '\x1b[0m'))
             }
         })
     }

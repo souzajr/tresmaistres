@@ -54,9 +54,8 @@ module.exports = app => {
     app.use(cors())
     app.use([
         '/validate',
-        '/nova-senha',
-        '/minha-conta',
         '/primeiro-acesso',
+        '/minha-conta',
         '/minha-conta/alterar-senha',
         '/minha-conta/pedidos'
     ], (req, res, next) => {
