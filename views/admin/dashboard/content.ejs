@@ -1,3 +1,9 @@
-<% if(page === 'Home') { %>
-    <% include pages/home.ejs %>
-<% } %>
+<% include ../../template/sidebar.ejs %>
+<div class="content-wrapper">
+    <% include ../../template/dashboardBreadcomb.ejs %>
+    <section class="content">
+        <% if(page === 'Home') { %>
+            <% include pages/home.ejs %>
+        <% } %>
+    </section>
+</div>

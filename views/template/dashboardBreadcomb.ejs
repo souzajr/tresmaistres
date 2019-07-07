@@ -1,0 +1,59 @@
+<section class="content-header">
+    <% if (page === 'Home') { %>
+        <h1>Dashboard <small>visão geral</small></h1> 
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Início</a></li>
+            <li class="active">Dashboard</li>
+        </ol>
+    <% } else if(page === 'perfil') { %>
+        <h1>Perfil</h1> 
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Início</a></li>
+            <li class="active">Perfil</li>
+        </ol>
+    <% } else if(page === 'produtos') { %>
+        <h1>Produtos</h1> 
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Início</a></li>
+            <li class="active">Produtos</li>
+        </ol>
+    <% } else if(page === 'financeiro') { %>
+        <h1>Financeiro</h1> 
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Início</a></li>
+            <li class="active">Financeiro</li>
+        </ol>
+    <% } else if(page === 'detalhes do financeiro') { %>
+        <h1>Detalhes do Financeiro</h1> 
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Início</a></li>
+            <li><a href="/admin/financeiro">Financeiro</a></li>
+            <li class="active">Detalhes do Financeiro</li>
+        </ol>
+    <% } else if(page === 'usuarios') { %>
+        <h1>Usuários</h1> 
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Início</a></li>
+            <li class="active">Usuários</li>
+        </ol>
+    <% } else if(page === 'detalhes do usuario') { %>
+        <h1>Detalhes do Usuário</h1> 
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Início</a></li>
+            <li><a href="/admin/usuarios">Usuários</a></li>
+            <li class="active">Detalhes do Usuário</li>
+        </ol>
+    <% } else if(page === 'clinicas') { %>
+        <h1>Clínicas em espera</h1> 
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Início</a></li>
+            <li class="active">Clínicas em espera</li>
+        </ol>
+    <% } else if(page === 'sistema') { %>
+        <h1>Sistema</h1> 
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i> Início</a></li>
+            <li class="active">Sistema</li>
+        </ol>
+    <% } %>
+</section>
