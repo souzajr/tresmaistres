@@ -79,13 +79,14 @@ module.exports = {
         transporter.sendMail(mailOptions)
     },
 
-    paymentReceived(email, name, order) {
+    paymentReceived(email, name, order, segmentation) {
         const mailOptions = {
             from: 'TRÊS MAIS TRÊS <' + process.env.MAIL_AUTH_USER + '>',
             to: email,
             subject: 'Recebemos seu pagamento - NÃO RESPONDA',
             html: '<b>Olá, ' + name + '. Sucesso, seu pagamento foi aprovado!</b><br/>' +
-            'Para conferir seu pedido, <a target="_blank" href="' + process.env.DOMAIN_NAME + '/detalhes-do-pedido/' + order + '">clique aqui</a>.<br/><br/>' +
+            'Para conferir seu pedido, <a target="_blank" href="' + process.env.DOMAIN_NAME + '/detalhes-do-pedido/' + order + '">clique aqui</a>.<br/>' +
+            'Por favor, preencha sua segmentação para que possamos dar início ao processo de automação, <a href="' + process.env.DOMAIN_NAME + '/briefing?id=' + segmentation + '">clique aqui</a>.<br/><br/>' +
             'Não responda este Email. Em caso de dúvidas, entre em contato através do Email contato@tresmaistres.com.br'
         }
 

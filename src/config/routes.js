@@ -1,7 +1,7 @@
 "use strict";
 
 const admin = require('./admin')
-const csurf = require('csurf')
+const csrf = require('csurf')
 const passport = require('passport')
 const InstagramStrategy = require('passport-instagram').Strategy
 const mongoose = require('mongoose')
@@ -42,23 +42,23 @@ passport.use(new InstagramStrategy({
 module.exports = app => {
     //#region MISCELLANEOUS
         /* ============= VIEW INDEX  ============= */
-        app.get('/', csurf(), app.src.api.user.viewIndex)
-        app.post('/enviar-mensagem', csurf(), app.src.api.user.sendMessage)
+        app.get('/', csrf(), app.src.api.user.viewIndex)
+        app.post('/enviar-mensagem', csrf(), app.src.api.user.sendMessage)
 
         /* ============= VIEW LOGIN  ============= */
-        app.get('/login', csurf(), app.src.api.user.viewLogin)
+        app.get('/login', csrf(), app.src.api.user.viewLogin)
 
         /* ============= LOCAL LOGIN  ============= */
-        app.post('/login', csurf(), app.src.api.auth.login)
+        app.post('/login', csrf(), app.src.api.auth.login)
 
         /* ============= REGISTER NEW USER  ============= */
-        app.post('/cadastro', csurf(), app.src.api.user.registerNewUser)
+        app.post('/cadastro', csrf(), app.src.api.user.registerNewUser)
 
         /* ============= FORGOT PASSWORD ============= */
-        app.get('/esqueci-minha-senha', csurf(), app.src.api.user.viewRecoverPassword)
-        app.post('/esqueci-minha-senha', csurf(), app.src.api.user.recoverPassword)
-        app.get('/alterar-senha/:token', csurf(), app.src.api.user.checkToken)
-        app.post('/alterar-senha/:token', csurf(), app.src.api.user.resetPassword)
+        app.get('/esqueci-minha-senha', csrf(), app.src.api.user.viewRecoverPassword)
+        app.post('/esqueci-minha-senha', csrf(), app.src.api.user.recoverPassword)
+        app.get('/alterar-senha/:token', csrf(), app.src.api.user.checkToken)
+        app.post('/alterar-senha/:token', csrf(), app.src.api.user.resetPassword)
 
         /* ============= SOCIAL LOGIN INSTAGRAM ============= */
         app.get(process.env.INSTAGRAM_CALLBACK_URL + '/login', app.src.api.auth.instagram)
@@ -67,11 +67,6 @@ module.exports = app => {
             successRedirect: process.env.INSTAGRAM_CALLBACK_URL + '/login',
             failureRedirect: process.env.INSTAGRAM_CALLBACK_URL + '/login'
         }))
-
-        /* ============= VALIDATE LOGIN ============= */
-        app.route('/validate')
-            .all(app.src.config.passport.authenticate())
-            .get(app.src.api.auth.validateToken)  
         
         /* ============= LOGOUT ============= */
         app.get('/sair', function(req, res) {
@@ -85,10 +80,17 @@ module.exports = app => {
         app.get('/politica-de-privacidade', app.src.api.user.viewPrivacy)
         
         /* ============= BUY PLAN ============= */
-        app.get('/finalizar-compra', csurf(), app.src.api.user.viewCheckout)        
+        app.get('/finalizar-compra', csrf(), app.src.api.user.viewCheckout)        
         
         /* ============= VIEW ORDERS DETAILS  ============= */
-        app.get('/detalhes-do-pedido/:id', app.src.api.user.orderDetails)     
+        app.get('/detalhes-do-pedido/:id', app.src.api.user.orderDetails)       
+        
+        /* ============= VIEW SEGMENTATION  ============= */
+        app.get('/briefing', csrf(), app.src.api.user.viewSegmentation) 
+        app.post('/briefing', csrf(), app.src.api.user.getSegmentation)   
+
+        /* ============= DOWNLOAD INVOICE  ============= */
+        app.get('/nota-fiscal', app.src.api.user.downloadInvoice)     
         
         /* ============= VIEW SITEMAP.XML  ============= */
         app.get('/sitemap.xml', app.src.api.user.viewSiteMap)
@@ -97,18 +99,18 @@ module.exports = app => {
     //#region USER
         app.route('/primeiro-acesso')
             .all(app.src.config.passport.authenticate())
-            .get(csurf(), app.src.api.user.viewFirstAccess)  
-            .post(csurf(), app.src.api.user.changeFirstAccess)
+            .get(csrf(), app.src.api.user.viewFirstAccess)  
+            .post(csrf(), app.src.api.user.changeFirstAccess)
 
         app.route('/minha-conta')
             .all(app.src.config.passport.authenticate())
-            .get(csurf(), app.src.api.user.viewUserProfile) 
-            .post(csurf(), app.src.api.user.changeUserProfile) 
+            .get(csrf(), app.src.api.user.viewUserProfile) 
+            .post(csrf(), app.src.api.user.changeUserProfile) 
 
         app.route('/minha-conta/alterar-senha')
             .all(app.src.config.passport.authenticate())
-            .get(csurf(), app.src.api.user.viewEditPassword) 
-            .post(csurf(), app.src.api.user.editPassword)  
+            .get(csrf(), app.src.api.user.viewEditPassword) 
+            .post(csrf(), app.src.api.user.editPassword)  
 
         app.route('/minha-conta/pedidos')
             .all(app.src.config.passport.authenticate())
@@ -118,12 +120,26 @@ module.exports = app => {
     //#region ADMIN 
         app.route('/admin')
             .all(app.src.config.passport.authenticate())
-            .get(admin(app.src.api.admin.viewDashboard))  
+            .get(admin(app.src.api.admin.viewHome)) 
+
+        app.route('/admin/perfil')
+            .all(app.src.config.passport.authenticate())
+            .get(csrf(), admin(app.src.api.admin.viewProfile))  
+            .put(csrf(), admin(app.src.api.admin.changeProfile))
+
+        app.route('/admin/detalhes-da-compra')
+            .all(app.src.config.passport.authenticate())
+            .get(csrf(), admin(app.src.api.admin.viewOrderDetails))
+            .post(csrf(), admin(app.src.api.admin.changeOrderDetails))         
+
+        app.route('/admin/briefing')
+            .all(app.src.config.passport.authenticate())
+            .put(csrf(), admin(app.src.api.admin.changeSegmentation))  
     //#endregion
 
     //#region PAGARME
         /* ============= CHECKOUT PROCESS  ============= */
-        app.post('/finalizar-compra', csurf(), app.src.api.pagarme.checkout)
+        app.post('/finalizar-compra', csrf(), app.src.api.pagarme.checkout)
 
         /* ============= POSTBACK URL  ============= */
         app.post(process.env.PAGARME_POSTBACK, app.src.api.pagarme.postbackUrl)

@@ -4,7 +4,12 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>TRÊS MAIS TRÊS</title>
+    <title>TRÊS MAIS TRÊS - <%= page %></title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/views/assets/img/fav-icon.ico" />
+    <link rel="apple-touch-icon" href="/views/assets/img/apple-icon.png" />
+
     <meta name="author" content="Sistema desenvolvido por PurpleTech - Soluções em TI. Acesse https://purpletech.com.br para saber mais.">
     <meta name="keywords" content="TRÊS MAIS TRÊS, Instagram, agência, marketing, publicidade" />
     <meta name="description" content="Com mais de três anos atuando com marketing digital, nosso time é responsável pelo crescimento de milhares de perfis pessoais e profissionais no Instagram." />
@@ -23,16 +28,6 @@
        folder instead of downloading all of them to reduce the load. -->
     <link rel="stylesheet" href="/views/admin/assets/dist/css/skins/_all-skins.min.css">
 
-    <!-- Favicon and Touch Icons -->  
-    <link rel="shortcut icon" href="/views/user/assets/images/favicon.ico" />
-    <link rel="apple-touch-icon" href="/views/user/assets/images/apple-touch-icon.png" />
-  
-
-    <% if(page === 'financeiro') { %>
-        <link rel="stylesheet" href="/views/admin/assets/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
-        <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.5.6/css/buttons.dataTables.min.css">
-    <% } %>
-
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -41,8 +36,7 @@
   <![endif]-->
 
     <!-- Google Font -->
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 
     <!-- CSS Alertify -->
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/css/alertify.min.css" />

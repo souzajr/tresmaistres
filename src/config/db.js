@@ -14,5 +14,6 @@ module.exports = {
         require('../model/productModel')
         require('../model/pagarmeReportModel')
         require('../model/couponModel')
+        require('../model/segmentationModel')
     }
 }

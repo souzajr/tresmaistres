@@ -11,12 +11,11 @@ module.exports = (app) => {
     const getToken = function(req) {
         let token = null
 
-        try {
-            if(req.session && req.session.token) token = req.session.token
-            return token
-        } catch(err) {
-            return err
+        if(req.session && req.session.token && new Date((jwt.decode(req.session.token, process.env.AUTH_SECRET)).exp * 1000) > new Date()) {
+            token = req.session.token
         }
+        
+        return token
     }
 
     const params = {
@@ -24,9 +23,8 @@ module.exports = (app) => {
         jwtFromRequest: getToken
     }
     
-    const strategy = new Strategy(params, async (payload, done) => {
-        await User.findOne({ _id: payload.id })
-        .then(user => done(null, user ? { ...payload } : false))
+    const strategy = new Strategy(params, (payload, done) => {
+        User.findOne({ _id: payload.id }).then(user => done(null, user ? true : false))
         .catch(err => done(err, false))
     })
     

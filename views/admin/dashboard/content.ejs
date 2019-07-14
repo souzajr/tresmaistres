@@ -1,9 +1,14 @@
 <% include ../../template/sidebar.ejs %>
 <div class="content-wrapper">
     <% include ../../template/dashboardBreadcomb.ejs %>
-    <section class="content">
+    <section <% if(page === 'Detalhes da compra') { %>class="invoice"<% } else { %>class="content"<% } %>>
         <% if(page === 'Home') { %>
             <% include pages/home.ejs %>
+        <% } else if(page === 'Perfil') { %>
+            <% include pages/perfil.ejs %>
+        <% } else if(page === 'Detalhes da compra') { %>
+            <% include pages/detalhes-da-compra.ejs %>
         <% } %>
     </section>
+    <div class="clearfix"></div>
 </div>

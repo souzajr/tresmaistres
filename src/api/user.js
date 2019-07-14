@@ -6,6 +6,7 @@ const User = mongoose.model('User')
 const Product = mongoose.model('Product')
 const Order = mongoose.model('Order')
 const Coupon = mongoose.model('Coupon')
+const Segmentation = mongoose.model('Segmentation')
 const mail = require('../config/mail')
 const crypto = require('crypto')
 const cepValidator = require('cep-promise')
@@ -192,7 +193,7 @@ module.exports = app => {
         user.createdAt = moment().format('L - LTS')
         user.admin = false
 
-        await User.create(user).then(user => {
+        User.create(user).then(user => {
             mail.sendWelcome(user.email, user.name)
             
             const now = Math.floor(Date.now() / 1000)
@@ -207,8 +208,10 @@ module.exports = app => {
             user.password = undefined
             req.session.user = user
             req.session.token = jwt.encode(payload, process.env.AUTH_SECRET)
-            
-            res.status(200).end()
+
+            if(user.firstAccess) return res.redirect('/primeiro-acesso')
+            if(user.admin) return res.redirect('/admin')
+            res.redirect('/minha-conta')    
         }).catch(err => console.log(err))
     }
 
@@ -542,20 +545,91 @@ module.exports = app => {
     }
 
     const orderDetails = (req, res) => {
-        Order.findOne({ _id: req.params.id }).then(order => {
+        Order.findOne({ _id: req.params.id }).then(async order => {
             if(!order) return res.status(404).render('404')
+
+            let segmentation = null
+            if(order.options && order.options._idSegmentation) {
+                segmentation = await Segmentation.findOne({ _id: order.options._idSegmentation })
+                .catch(err => new Error(err))
+                if(segmentation instanceof Error) return res.status(500).render('500')
+            }
 
             Product.findOne({ _id: order.product._id }).then(product => {
                 res.status(200).render('index', {
                     page: 'Detalhes do pedido',
                     user: req.session.user,
                     order,
+                    segmentation,
                     product,
                     moment,
                     message: null
                 })
             })
         }).catch(_ => res.status(500).render('500'))
+    }
+
+    const viewSegmentation = (req, res) => {
+        if(!req.query.id) return res.status(404).render('404')
+
+        Segmentation.findOne({ _id: req.query.id }).then(async segmentation => {
+            if(segmentation.status !== 'pendente') return res.status(404).render('404')
+
+            let getUser = null
+            if(segmentation._idUser) {
+                if(req.session.user && !req.session.user.admin && segmentation._idUser != req.session.user._id)
+                    return res.status(404).render('404')
+
+                getUser = await User.findOne({ _id: segmentation._idUser })
+                .catch(err => new Error(err))
+                if(getUser instanceof Error) return res.status(500).render('500')
+            }
+
+            res.status(200).render('index', {
+                page: 'Segmentação',
+                user: req.session.user,
+                segmentation,
+                getUser,
+                csrf: req.csrfToken(),
+                message: null
+            })
+        }).catch(_ => res.status(500).render('500'))
+    }
+
+    const getSegmentation = (req, res) => {
+        const segmentation = { ...req.body }
+
+        try {
+            existOrError(segmentation.segmentationId, failMessage)
+            existOrError(segmentation.instagramProfile, 'Digite o login do seu perfil no Instagram')
+            existOrError(segmentation.instagramPassword, 'Digite a senha do seu perfil no Instagram')
+            existOrError(segmentation.profiles, 'Digite os perfis de interesse')
+            existOrError(segmentation.subjects, 'Digite os assuntos de interesse')
+            existOrError(segmentation.locations, 'Digite as cidades de interesse')
+            existOrError(segmentation.genre, 'Escolha o gênero do seu público')
+        } catch (msg) {
+            return res.status(400).json(msg)
+        }
+
+        Segmentation.findOne({ _id: segmentation.segmentationId }).then(getSegmentation => {
+            if(getSegmentation.status !== 'pendente') return res.status(400).json(failMessage)
+            
+            getSegmentation.status = 'enviado'
+            getSegmentation.instagramProfile = segmentation.instagramProfile
+            getSegmentation.instagramPassword = segmentation.instagramPassword
+            getSegmentation.interest = {
+                profiles: segmentation.profiles,
+                subjects: segmentation.subjects,
+                locations: segmentation.locations,
+                genre: segmentation.genre
+            }
+
+            getSegmentation.save().then(res.status(200).end())
+        }).catch(_ => res.status(500).json(failMessage))
+    }
+
+    const downloadInvoice = (req, res) => {
+        res.status(200).download('./public/' + req.query.invoice)
     }
 
     const viewSiteMap = (req, res) => {
@@ -599,6 +673,9 @@ module.exports = app => {
         viewCheckout,
         viewOrders,
         orderDetails,
+        viewSegmentation,
+        getSegmentation,
+        downloadInvoice,
         viewSiteMap
     }
 }

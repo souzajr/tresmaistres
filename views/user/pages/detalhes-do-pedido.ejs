@@ -36,6 +36,16 @@
                         <a class="btn btn-info btn-lg float-right" style="margin-top: 10px; color: white" href="/minha-conta/pedidos">Ver meus pedidos</a>
                     </div>
                 <% } %>
+                <% if(segmentation && segmentation.status === 'pendente') { %>
+                    <div class="col-md-3">
+                        <a class="btn btn-warning btn-lg float-right" style="margin-top: 10px; color: white" href="/briefing?id=<%= segmentation._id %>">Preencher segmentação</a>
+                    </div>
+                <% } %>
+                <% if(order.options && order.options.invoice) { %>
+                    <div class="col-md-3">
+                        <a class="btn btn-warning btn-lg float-right" style="margin-top: 10px; color: white" href="/nota-fiscal?invoice=<%= order.options.invoice %>">Nota fiscal</a>
+                    </div>
+                <% } %>
                 
                 <div class="col-md-12">
                     <h4>Revisão</h4>
@@ -145,21 +155,21 @@
             const zipCode = '<%= order.buyer.address.zipCode %>'
 
             if('<%= order.buyer.documents.typeDoc %>' === 'pf') {
-                const formatterCpf = new StringMask('000.000.000-00', { reverse: true })
+                const formatterCpf = new StringMask('000.000.000-00')
                 $('#cpfOrCnpj').html('<b>' + formatterCpf.apply(cpfOrCnpj) + '</b>')
             } else {
-                const formatterCnpj = new StringMask('00.000.000/0000-00', { reverse: true })
+                const formatterCnpj = new StringMask('00.000.000/0000-00')
                 $('#cpfOrCnpj').html('<b>' + formatterCnpj.apply(cpfOrCnpj) + '</b>')
             }
             
-            const formatterZipCode = new StringMask('00.000-000', { reverse: true })
+            const formatterZipCode = new StringMask('00.000-000')
             $('#zipCode').html('<b>' + formatterZipCode.apply(zipCode) + '</b>')
 
             if(phone.length === 10) {
-                const formatterPhone = new StringMask('(00) 0000-0000', { reverse: true })
+                const formatterPhone = new StringMask('(00) 0000-0000')
                 $('#phone').html('<b>' + formatterPhone.apply(phone) + '</b>')
             } else {
-                const formatterPhone = new StringMask('(00) 0 0000-0000', { reverse: true })
+                const formatterPhone = new StringMask('(00) 0 0000-0000')
                 $('#phone').html('<b>' + formatterPhone.apply(phone) + '</b>')
             }            
         })

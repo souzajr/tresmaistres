@@ -7,6 +7,7 @@ const Product = mongoose.model('Product')
 const PagarmeReport = mongoose.model('PagarmeReport')
 const User = mongoose.model('User')
 const Coupon = mongoose.model('Coupon')
+const Segmentation = mongoose.model('Segmentation')
 const cepValidator = require('cep-promise')
 const cpf = require('@fnando/cpf/dist/node')
 const cnpj = require('@fnando/cnpj/dist/node')
@@ -64,6 +65,9 @@ module.exports = app => {
             const validateZipCode = await cepValidator(order.buyer.address.zipCode).catch(err => err)
             notExistOrError(validateZipCode.errors, 'CEP inválido') 
             existOrError(order.buyer.address.neighborhood, 'Digite o bairro do endereço de cobrança')   
+            if(order.origin) {
+                if(order.origin === 'Selecione') order.origin = 'Outro'
+            } else order.origin = 'Outro'
             if(!order.buyer.hasAccount) {
                 if(order.buyer.password) {
                     hasDigitOrError(order.buyer.password, 'A senha deve ter pelo menos um número')
@@ -233,11 +237,20 @@ module.exports = app => {
                             order._pagarmeReport = report._id
                             order._idTransactionPagarme = transaction.id
                             order.status = transaction.status
-                            order.cost = transaction.cost
                             order._idUser = user ? user._id : null
                             order.createdAt = moment().format('L - LTS')
     
                             Order.create(order).then(async order => {   
+                                await new Segmentation({
+                                    _idUser: user ? user._id : null,
+                                    _idOrder: order._id,
+                                    status: 'pendente',
+                                    createdAt: order.createdAt
+                                }).save().then(async segmentation => {
+                                    order.options = { _idSegmentation: segmentation._id }
+                                    await order.save()
+                                })
+
                                 if(order.coupon && order.coupon._id) {
                                     await Coupon.findOne({ _id: order.coupon._id }).then(async coupon => {
                                         if(coupon.countUse) coupon.countUse++
@@ -246,7 +259,7 @@ module.exports = app => {
                                     })
                                 }
                                 
-                                mail.paymentReceived(order.buyer.email, order.buyer.name, order._id)
+                                mail.paymentReceived(order.buyer.email, order.buyer.name, order._id, order.options._idSegmentation)
                                 res.status(200).json('/detalhes-do-pedido/' + order._id)
                             })
                         })
@@ -377,25 +390,35 @@ module.exports = app => {
                 .then(client => client.transactions.find({ id: order._idTransactionPagarme }))
                 .then(transaction => {
                     PagarmeReport.deleteOne({ _id: order._pagarmeReport }).then(_ => {
-                        new PagarmeReport(transaction).save().then(report => {
+                        new PagarmeReport(transaction).save().then(async report => {
                             order._pagarmeReport = report._id
                             order.status = transaction.status
-                            order.cost = transaction.cost
 
-                            order.save().then(_ => {
-                                if(transaction.status === 'paid' && transaction.amount === transaction.paid_amount) {
-                                    mail.paymentReceived(order.buyer.email, order.buyer.name, order._id)
+                            if(transaction.status === 'paid' && transaction.amount === transaction.paid_amount) {                                
+                                if(!order.options || !order.options._idSegmentation) { 
+                                    await new Segmentation({
+                                        _idUser: order._idUser ? order._idUser : null,
+                                        _idOrder: order._id,
+                                        status: 'pendente',
+                                        createdAt: moment().format('L - LTS')
+                                    }).save().then(segmentation => {
+                                        if(!order.options) {
+                                            order.options = { _idSegmentation: segmentation._id }
+                                        } else {
+                                            order.options._idSegmentation = segmentation._id
+                                        }
+                                    }).catch(_ => res.status(500).end())
                                 }
+                                                                
+                                mail.paymentReceived(order.buyer.email, order.buyer.name, order._id, order.options._idSegmentation)
+                            }
 
-                                res.status(200).end()
-                            })
+                            order.save().then(res.status(200).end())
                         })
                     })
                 })    
             }).catch(_ => res.status(500).end())
-        } else {
-            res.status(401).end()
-        }
+        } else res.status(401).end()
     }
 
     return {

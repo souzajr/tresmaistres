@@ -4,6 +4,9 @@ const OrderSchema = new mongoose.Schema({
     _pagarmeReport: { type: String, required: true },
     _idTransactionPagarme: { type: Number, required: true },
     _idUser: String,
+    status: { type: String, required: true },
+    total: { type: Number, required: true }, 
+    origin: { type: String, required: true },
     product: {
         _id: { type: String, required: true }, 
         name: { type: String, required: true },
@@ -14,8 +17,6 @@ const OrderSchema = new mongoose.Schema({
         percentage: Number,
         name: String
     },
-    total: { type: Number, required: true }, 
-    cost: Number,
     paymentConfig: {
         method: { type: String, require: true },
         boleto_url: String
@@ -39,7 +40,19 @@ const OrderSchema = new mongoose.Schema({
             cpfOrCnpj: { type: String, required: true }
         }
     },
-    status: { type: String, required: true },
+    options: {
+        _idSeller: String,
+        _idSegmentation: String,
+        invoice: String,
+        interacion: {
+            comment: String,
+            createdAt: String
+        },
+        automation: {
+            _idResponsible: String,
+            createdAt: String
+        }
+    },
     createdAt: { type: String, required: true }
 })
 

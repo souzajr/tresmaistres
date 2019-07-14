@@ -44,7 +44,10 @@ module.exports = app => {
         if(req.session) req.session.reset()
         req.session.user = user
         req.session.token = jwt.encode(payload, process.env.AUTH_SECRET)
-        return res.status(200).end()
+
+        if(user.firstAccess) return res.status(200).json('/primeiro-acesso')
+        if(user.admin) return res.status(200).json('/admin')
+        res.status(200).json('/minha-conta')        
     }
 
     const instagram = async (req, res) => {
@@ -68,7 +71,9 @@ module.exports = app => {
                 req.session.user = user
                 req.session.token = jwt.encode(payload, process.env.AUTH_SECRET)
 
-                return res.redirect('/validate')                    
+                if(user.firstAccess) return res.redirect('/primeiro-acesso')
+                if(user.admin) return res.redirect('/admin')
+                res.redirect('/minha-conta')    
             }).catch(_ => res.status(500).render('500'))
         } else {
             return res.status(401).render('index', {
@@ -77,52 +82,10 @@ module.exports = app => {
                 message: JSON.stringify('Algo deu errado')
             })
         }
-    }
-
-    const validateToken = (req, res) => {
-        if(req.session.user && req.session.token) {
-            const userToken = req.session.token
-
-            try {
-                if (userToken) {
-                    const token = jwt.decode(userToken, process.env.AUTH_SECRET)
-                    if (new Date(token.exp * 1000) > new Date()) {
-                        if(req.session.user.firstAccess) {
-                            return res.redirect('/primeiro-acesso')
-                        } else {
-                            if(req.session.user.admin) {
-                                return res.redirect('/admin')
-                            } else {
-                                return res.redirect('/minha-conta')
-                            }
-                        }
-                    } else {
-                        res.status(401).render('index', {
-                            user: req.session.user,
-                            page: 'Login',
-                            message: JSON.stringify('Por favor, faça login para continuar')
-                        })
-                    }
-                }
-            } catch (err) {
-                res.status(401).render('index', {
-                    user: req.session.user,
-                    page: 'Login',
-                    message: JSON.stringify('Por favor, faça login para continuar')
-                })
-            }
-        } else {
-            res.status(401).render('index', {
-                user: req.session.user,
-                page: 'Login',
-                message: JSON.stringify('Por favor, faça login para continuar')
-            })
-        }
-    }     
+    } 
 
     return {
         login,
-        instagram,
-        validateToken
+        instagram
     }
 }

@@ -1,0 +1,294 @@
+<div class="row">
+    <div class="col-xs-12">
+        <h2 class="page-header">
+            <i class="fa fa-globe"></i> TRÊS MAIS TRÊS
+            <small class="pull-right">Data da compra: <%= order.createdAt %></small>
+        </h2>
+    </div>
+</div>
+<div class="row invoice-info">
+    <div class="col-sm-4 invoice-col">
+        <strong>Comprador</strong><br>
+        <%= order.buyer.name %><br>
+        Data de nascimento: <%= moment(order.buyer.birthday, 'YYYY-MM-DD').format('DD/MM/YYYY') %><br>
+        <% if(order.buyer.documents.typeDoc === 'pf') { %>CPF:<% } else { %>CNPJ:<% } %> <span id="cpfOrCnpj"></span><br>
+        Telefone: <span id="phone"></span><br>
+        Email: <%= order.buyer.email %><br>
+    </div>
+    <div class="col-sm-4 invoice-col">
+        <strong>Endereço de cobrança</strong><br>
+        <%= order.buyer.address.street %>, <%= order.buyer.address.number %><br>
+        <% if(order.buyer.address.complement) { %><%= order.buyer.address.complement %><br><% } %>
+        <%= order.buyer.address.neighborhood %>. CEP: <span id="zipCode"></span><br>
+        <%= order.buyer.address.city %>/<%= order.buyer.address.state %><br>
+    </div>
+    <div class="col-sm-4 invoice-col">
+        <strong>Informações</strong><br>
+        ID do pedido: #<%= order._id %><br>
+        Forma de pagamento: <% if(order.paymentConfig.method === 'credit_card') { %>Cartão de crédito<% } else { %>Boleto<% } %><br>
+        Renovação: <% if(order.origin === 'Renovação') { %>Sim<% } else { %>Não<% } %><br>
+        Status: 
+            <% if(order.status === 'paid') { %>
+                <span class="label label-success">PAGO</span>
+            <% } else if(order.status === 'waiting_payment') { %>
+                <span class="label label-warning">AGUARDANDO</span>
+            <% } else { %>
+                <span class="label label-danger">CANCELADO</span>
+            <% } %><br>
+        Automação:   
+            <% if(order.options && order.options.automation && order.options.automation._idResponsible) { %>
+                <span class="label label-success">INICIADA</span>
+            <% } else { %>
+                <span class="label label-danger">NÃO INICIADA</span>
+            <% } %>
+        <% if(order.options && order.options._idSegmentation) { %>
+            <% if(segmentation && segmentation.status !== 'pendente') { %>
+                <br>Briefing: <a href="#" data-toggle="modal" data-target="#modal-briefing">Ver mais</a>
+            <% } else { %>
+                <br>Briefing: <a target="_blank" href="/briefing?id=<%= order.options._idSegmentation %>">URL do cliente</a>
+            <% } %>
+        <% } %>
+            
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12 table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Qtd</th>
+                    <th>Produto</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>#<%= order.product._id %></td>
+                    <td>1</td>
+                    <td style="text-transform: uppercase"><%= order.product.name %></td>
+                    <td>R$<%= (order.product.value / 100).toFixed(2).replace('.', ',') %></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-6">
+        <div class="table-responsive">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th style="width:50%">Subtotal:</th>
+                        <td>R$<%= (order.product.value / 100).toFixed(2).replace('.', ',') %></td>
+                    </tr>
+                    <% if(order.coupon && order.coupon.percentage) { %>
+                        <tr>
+                            <th>Cupom (<%= order.coupon.name %>)</th>
+                            <td style="color:red">- R$<%= ((order.product.value - order.total) / 100).toFixed(2).replace('.', ',') %> (<%= order.coupon.percentage %>%)</td>
+                        </tr>
+                    <% } %>
+                    <tr>
+                        <th>Total:</th>
+                        <td>R$<%= (order.total / 100).toFixed(2).replace('.', ',') %></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<form id="form-action">
+    <input type="hidden" name="orderId" value="<%= order._id %>">
+    <div class="row">
+        <div class="col-md-12">
+            <hr>
+            <strong>Ações</strong>
+        </div>
+        <div class="col-md-6">
+            Quem foi o vendedor?
+            <div class="form-group">
+                <select name="seller" class="form-control">
+                    <option <% if(!order.options || !order.options._idSeller) { %>selected<% } %>>Selecione</option>
+                    <% for(let i = 0; i < users.length; i++) { %>
+                        <option <% if(order.options && order.options._idSeller && order.options._idSeller == users[i]._id) { %>selected<% } %> value="<%= users[i]._id %>"><%= users[i].name %></option>
+                    <% } %>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-6">
+            Quem foi o automador? <% if(order.options && order.options.automation && order.options.automation.createdAt) { %><%= order.options.automation.createdAt %><% } %> 
+            <div class="form-group">
+                <select name="automation" class="form-control">
+                    <option <% if(!order.options || !order.options.automation || !order.options.automation._idResponsible) { %>selected<% } %>>Selecione</option>
+                    <% for(let i = 0; i < users.length; i++) { %>
+                        <option <% if(order.options && order.options.automation && order.options.automation._idResponsible && order.options.automation._idResponsible == users[i]._id) { %>selected<% } %> value="<%= users[i]._id %>"><%= users[i].name %></option>
+                    <% } %>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-12">
+            Observações<% if(order.options && order.options.interacion && order.options.interacion.createdAt) { %> (<%= order.options.interacion.createdAt %>)<% } %>:
+            <div class="form-group">
+                <textarea name="comment" class="form-control" rows="3"><% if(order.options && order.options.interacion && order.options.interacion.comment) { %><%= order.options.interacion.comment %><% } %></textarea>
+            </div>        
+        </div>
+        <div class="col-md-6">
+            Anexar nota fiscal <% if(order.options && order.options.invoice) { %><a href="/nota-fiscal?invoice=<%= order.options.invoice %>">(ver nota fiscal atual)</a><% } %>
+            <div class="form-group">
+                <input name="file" type="file" class="form-control" accept=".pdf, .csv, .doc, .docx">
+                <small>Tamanho máximo: 15MB. Tipos aceitos: PDF, CSV, DOC e DOCX.</small>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <button type="submit" class="btn btn-primary">Salvar informações</button>
+        </div>
+    </div>
+</form>
+
+<% if(segmentation) { %>
+    <div class="modal fade" id="modal-briefing">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Briefing</h4>
+                </div>
+                <form id="form-briefing">
+                    <input type="hidden" name="segmentationId" value="<%= segmentation._id %>">
+                    <div class="modal-body">          
+                        <div class="row">
+                            <div class="col-md-6">              
+                                <strong>Login Instagram</strong><br/>
+                                <%= segmentation.instagramProfile %>
+                            </div>
+                            <div class="col-md-6">              
+                                <strong>Senha Instagram</strong><br/>
+                                <%= segmentation.instagramPassword %>
+                            </div>
+                            <div class="col-md-12">              
+                                <strong>Perfis de interesse</strong><br/>
+                                <%= segmentation.interest.profiles %>
+                            </div>
+                            <div class="col-md-12">              
+                                <strong>Assuntos de interesse</strong><br/>
+                                <%= segmentation.interest.subjects %>
+                            </div>
+                            <div class="col-md-12">              
+                                <strong>Locais de interesse</strong><br/>
+                                <%= segmentation.interest.locations %>
+                            </div>
+                            <div class="col-md-12">              
+                                <strong>Gênero de interesse</strong><br/>
+                                <%= segmentation.interest.genre %>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select name="status" class="form-control">
+                                        <option value="enviado" <% if(segmentation.status === 'enviado') { %>selected<% } %>>Enviado</option>
+                                        <option value="pendente" <% if(segmentation.status === 'pendente') { %>selected<% } %>>Pendente (URL voltará a ser visível pelo cliente)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Fechar</button>
+                        <button type="submit" class="btn btn-primary">Alterar</button>
+                    </div>
+                </form>
+                <script>
+                    $(document).ready(function() {
+                        $('#form-briefing').on('submit', function(e) {                        
+                            $(document).ajaxStart(function() { Pace.restart() })
+                            e.preventDefault()
+                            
+                            $.ajax({
+                                type: 'PUT',
+                                url: '/admin/briefing',
+                                datatype: 'html',
+                                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                                data: $('#form-briefing').serialize(),    
+                                headers: {
+                                    'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
+                                },
+                                success: function(result) {          
+                                    alertify.notify(result, 'success', 5)
+                                    setTimeout(function() { 
+                                        window.location.reload()
+                                    }, 500)
+                                },
+                                error: function(xhr, status, error) {
+                                    if(error === 'Forbidden') return window.location.href = '/'
+                                    alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                                }
+                            })
+                        })
+                    })
+                </script>
+            </div>
+        </div>
+    </div>
+<% } %>
+
+<script type="text/javascript" src="/views/assets/js/string-mask.js"></script>
+<script>
+    $(document).ready(function() { 
+        const cpfOrCnpj = '<%= order.buyer.documents.cpfOrCnpj %>'
+        const phone = '<%= order.buyer.phone %>'
+        const zipCode = '<%= order.buyer.address.zipCode %>'
+
+        if('<%= order.buyer.documents.typeDoc %>' === 'pf') {
+            const formatterCpf = new StringMask('000.000.000-00')
+            $('#cpfOrCnpj').html(formatterCpf.apply(cpfOrCnpj))
+        } else {
+            const formatterCnpj = new StringMask('00.000.000/0000-00')
+            $('#cpfOrCnpj').html(formatterCnpj.apply(cpfOrCnpj))
+        }
+            
+        const formatterZipCode = new StringMask('00.000-000')
+        $('#zipCode').html(formatterZipCode.apply(zipCode))
+
+        if(phone.length === 10) {
+            const formatterPhone = new StringMask('(00) 0000-0000')
+            $('#phone').html(formatterPhone.apply(phone))
+        } else {
+            const formatterPhone = new StringMask('(00) 0 0000-0000')
+            $('#phone').html(formatterPhone.apply(phone))
+        } 
+
+        $('#form-action').on('submit', function(e) {                        
+            $(document).ajaxStart(function() { Pace.restart() })
+            e.preventDefault()
+                                                            
+            $.ajax({
+                type: 'POST',
+                url: '/admin/detalhes-da-compra?id=<%= order._id %>',
+                enctype: 'multipart/form-data',
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: new FormData($('#form-action')[0]),  
+                headers: {
+                    'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
+                },
+                success: function(result) {          
+                    alertify.notify(result, 'success', 5)
+                    setTimeout(function() { 
+                        window.location.reload()
+                    }, 500)
+                },
+                error: function(xhr, status, error) {
+                    if(error === 'Forbidden') return window.location.href = '/'
+                    alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                }
+            })
+        })
+    })
+</script>

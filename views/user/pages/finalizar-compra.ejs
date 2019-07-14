@@ -219,6 +219,22 @@
                                                     <input type="text" class="form-control" id="checkuot-form-complement" <% if(user && user.address && user.address.complement) { %>value="<%= user.address.complement %>"<% } %> placeholder="Complemento (opcional)">
                                                 </div>
                                             </div>
+                                            <div class="form-row">
+                                                <div class="form-group col-6">
+                                                    <label class="font-weight-bold text-dark text-2">Onde nos achou?</label>
+                                                    <select id="checkuot-form-origin" class="form-control">
+                                                        <option selected disabled>Selecione</option>
+                                                        <option>Renovação</option>
+                                                        <option>Facebook</option>
+                                                        <option>Google</option>
+                                                        <option>YouTube</option>
+                                                        <option>Instagram</option>
+                                                        <option>Google</option>
+                                                        <option>Email</option>
+                                                        <option>Outro</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -478,6 +494,7 @@
                                         password: $('#checkuot-form-password').val(),
                                         confirmPassword: $('#checkuot-form-confirmPassword').val()
                                     },
+                                    origin: $('#checkuot-form-origin option:selected').val(),
                                     product: '<%= product._id %>',
                                     coupon: '<%= couponId %>'
                                 }
@@ -528,12 +545,13 @@
                                     cache: false,
                                     data: JSON.stringify(data),   
                                     headers: {
-                                        'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
+                                        'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
                                     },
                                     success: function(result) {      
                                         window.location.href = result
                                     },
                                     error: function(xhr, status, error) {
+                                        if(error === 'Forbidden') return window.location.href = '/'
                                         alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
                                     }
                                 })

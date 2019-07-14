@@ -66,9 +66,9 @@
                 url: '/minha-conta/alterar-senha',
                 datatype: 'html',
                 contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-                data: $('#change-password').serialize(),         
+                data: $('#change-password').serialize(),      
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
+                    'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
                 },
                 success: function(result) {   
                     alertify.notify(result, 'success', 5)
@@ -77,6 +77,7 @@
                     }, 500)      
                 },
                 error: function(xhr, status, error) {
+                    if(error === 'Forbidden') return window.location.href = '/'
                     alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
                 }
             })

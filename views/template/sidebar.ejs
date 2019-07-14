@@ -4,7 +4,37 @@
             <li class="header">MENU</li>
             <li class="<% if(page === 'Home') { %>active<% } %>">
                 <a href="/admin">
-                    <i class="fa fa-dashboard"></i> <span>Dashboard</span>
+                    <i class="fa fa-home"></i> <span>Home</span>
+                </a>
+            </li>
+            <li class="<% if(page === 'Cupons') { %>active<% } %>">
+                <a href="/admin/cupons">
+                    <i class="fa fa-tag"></i> <span>Cupons</span>
+                </a>
+            </li>
+            <li class="<% if(page === 'Planos') { %>active<% } %>">
+                <a href="/admin/planos">
+                    <i class="fa fa-shopping-bag"></i> <span>Planos</span>
+                </a>
+            </li>
+            <li class="<% if(page === 'Origem') { %>active<% } %>">
+                <a href="/admin/origem">
+                    <i class="fa fa-map-marker"></i> <span>Origem</span>
+                </a>
+            </li>
+            <li class="<% if(page === 'Automações') { %>active<% } %>">
+                <a href="/admin/automacoes">
+                    <i class="fa fa-dashboard"></i> <span>Automações</span>
+                </a>
+            </li>
+            <li class="<% if(page === 'Relatórios') { %>active<% } %>">
+                <a href="/admin/relatorios">
+                    <i class="fa fa-folder-open"></i> <span>Relatórios</span>
+                </a>
+            </li>
+            <li class="<% if(page === 'Pós venda') { %>active<% } %>">
+                <a href="/admin/pos-venda">
+                    <i class="fa fa-history"></i> <span>Pós venda</span>
                 </a>
             </li>
         </ul>
