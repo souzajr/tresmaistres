@@ -426,6 +426,128 @@ module.exports = app => {
         }).catch(_ => res.status(500).render('500'))
     }
 
+    const addPlan = async (req, res) => {
+        const product = { ...req.body }
+
+        try {
+            existOrError(product.name, 'Digite o nome do plano')
+            product.name = product.name.toLowerCase()
+            const checkName = await Product.findOne({ name: product.name })
+            .catch(err => new Error(err))
+            if(checkName instanceof Error)
+                return res.status(500).json(failMessage)
+            notExistOrError(checkName, 'Esse nome já está sendo utilizado, escolha outro')
+            existOrError(product.value, 'Digite o preço do plano')
+            product.value = Number((Number(Number(product.value).toFixed(2)) * 100).toFixed(0))
+            if(product.value.toString() === 'NaN')
+                return res.status(400).json(failMessage)
+            if(product.value < 1000)
+                return res.status(400).json('O valor do plano deve ser maior ou igual a 10 reais')
+            existOrError(product.productPublic, 'Escolha se o produto ficará ou não visível na Home')
+        } catch(msg) {
+            return res.status(400).json(msg)
+        }
+
+        const options = []
+        if(product.description) {
+            if(typeof(product.description) === 'string') {
+                options.push({
+                    description: product.description,
+                    hasCheck: product.hasCheck === 'true' ? true : false
+                })
+            } else {
+                if(product.description.length !== product.hasCheck.length)
+                    return res.status(400).json(failMessage)
+
+                for(let i = 0; i < product.description.length; i++) {
+                    if(product.description[i] !== '') {
+                        options.push({
+                            description: product.description[i],
+                            hasCheck: product.hasCheck[i] === 'true' ? true : false
+                        })
+                    }
+                }
+            }
+        }
+
+        new Product({
+            name: product.name,
+            value: product.value,
+            productPublic: product.productPublic === 'true' ? true : false,
+            options,
+            createdAt: moment().format('L - LTS')
+        }).save()
+        .then(res.status(200).json(successMessage))
+        .catch(_ => res.status(500).json(failMessage))
+    }
+
+    const editPlan = async (req, res) => {
+        const product = { ...req.body }
+        return console.log(product)
+
+        try {
+            existOrError(product.productId, failMessage)
+            existOrError(product.name, 'Digite o nome do plano')
+            product.name = product.name.toLowerCase()
+            const checkName = await Product.findOne({ name: product.name })
+            .catch(err => new Error(err))
+            if(checkName instanceof Error)
+                return res.status(500).json(failMessage)
+            if(checkName && checkName._id != product.productId)
+                notExistOrError(checkName, 'Esse nome já está sendo utilizado, escolha outro')
+            existOrError(product.value, 'Digite o preço do plano')
+            product.value = Number((Number(Number(product.value).toFixed(2)) * 100).toFixed(0))
+            if(product.value.toString() === 'NaN')
+                return res.status(400).json(failMessage)
+            if(product.value < 1000)
+                return res.status(400).json('O valor do plano deve ser maior ou igual a 10 reais')
+            existOrError(product.productPublic, 'Escolha se o produto ficará ou não visível na Home')
+        } catch(msg) {
+            return res.status(400).json(msg)
+        }
+
+        const options = []
+        if(product.description) {
+            if(typeof(product.description) === 'string') {
+                options.push({
+                    description: product.description,
+                    hasCheck: product.hasCheck === 'true' ? true : false
+                })
+            } else {
+                if(product.description.length !== product.hasCheck.length)
+                    return res.status(400).json(failMessage)
+
+                for(let i = 0; i < product.description.length; i++) {
+                    if(product.description[i] !== '') {
+                        options.push({
+                            description: product.description[i],
+                            hasCheck: product.hasCheck[i] === 'true' ? true : false
+                        })
+                    }
+                }
+            }
+        }
+
+        Product.findOne({ _id: product.productId }).then(getProduct => {
+            if(!getProduct) return res.status(400).json(failMessage)
+
+            getProduct.name = product.name
+            getProduct.value = product.value
+            getProduct.productPublic = product.productPublic === 'true' ? true : false
+            getProduct.options = options
+
+            getProduct.save().then(res.status(200).json(successMessage))
+        }).catch(_ => res.status(500).json(failMessage))
+    }
+
+    const removePlan = (req, res) => {
+        if(!req.body.productId) return res.status(400).json(failMessage)
+
+        Product.deleteOne({ _id: req.body.productId })
+        .then(res.status(200).json(successMessage))
+        .catch(_ => res.status(500).json(failMessage))
+    }
+
     return {
         viewHome,
         viewProfile,
@@ -437,6 +559,9 @@ module.exports = app => {
         addCoupon,
         editCoupon,
         removeCoupon,
-        viewPlans
+        viewPlans,
+        addPlan,
+        editPlan,
+        removePlan
     }
 }
