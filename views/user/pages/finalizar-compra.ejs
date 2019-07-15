@@ -44,7 +44,7 @@
                                     <strong style="color:red">Cupom inválido!</strong>
                                 <% } else if(coupon !== 'Invalid') { %>
                                     <% couponId = coupon._id %>
-                                    <strong style="color:green">Cupom <%= coupon.name %> (<%= coupon.percentage %>%) adicionado!</strong>
+                                    <strong style="color:green">Cupom <%= coupon.name.toUpperCase() %> (<%= coupon.percentage %>%) adicionado!</strong>
                                 <% } %>
                             <% } %>
                             <p>Você tem um cupom de desconto? <a href="javascript:void(0)" onclick="showGetCoupon()">Clique aqui</a></p>
@@ -301,7 +301,7 @@
                                                         <% totalOrder = product.value - (coupon.percentage * product.value / 100) %>
                                                         <tr class="shipping">
                                                             <th>
-                                                                Cupom (<%= coupon.name %>)
+                                                                Cupom (<%= coupon.name.toUpperCase() %>)
                                                             </th>
                                                             <td>
                                                                 -<%= coupon.percentage %>%

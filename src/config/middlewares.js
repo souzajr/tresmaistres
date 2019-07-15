@@ -62,7 +62,7 @@ module.exports = app => {
         '/admin/perfil',
         '/admin/detalhes-da-compra',
         '/admin/briefing',
-        '/nota-fiscal'
+        '/admin/cupons'
     ], (req, res, next) => {
         if (!req.session.user) {
             res.status(401).render('index', {

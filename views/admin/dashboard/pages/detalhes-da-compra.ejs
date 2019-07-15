@@ -86,7 +86,7 @@
                     </tr>
                     <% if(order.coupon && order.coupon.percentage) { %>
                         <tr>
-                            <th>Cupom (<%= order.coupon.name %>)</th>
+                            <th>Cupom (<%= order.coupon.name.toUpperCase() %>)</th>
                             <td style="color:red">- R$<%= ((order.product.value - order.total) / 100).toFixed(2).replace('.', ',') %> (<%= order.coupon.percentage %>%)</td>
                         </tr>
                     <% } %>

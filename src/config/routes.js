@@ -135,6 +135,13 @@ module.exports = app => {
         app.route('/admin/briefing')
             .all(app.src.config.passport.authenticate())
             .put(csrf(), admin(app.src.api.admin.changeSegmentation))  
+
+        app.route('/admin/cupons')
+            .all(app.src.config.passport.authenticate())
+            .get(csrf(), admin(app.src.api.admin.viewCoupons))
+            .post(csrf(), admin(app.src.api.admin.addCoupon)) 
+            .put(csrf(), admin(app.src.api.admin.editCoupon))  
+            .delete(csrf(), admin(app.src.api.admin.removeCoupon))           
     //#endregion
 
     //#region PAGARME

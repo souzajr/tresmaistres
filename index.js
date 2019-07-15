@@ -5,7 +5,6 @@ const app = express()
 const consign = require('consign')
 const db = require('./src/config/db')
 const createFolder = require('./src/config/createFolder')
-
 require('dotenv').config()
 
 app.use(express.static(__dirname))
@@ -20,9 +19,6 @@ consign()
     .then('./src/api')
     .then('./src/config/routes.js')  
     .into(app)
-
-const cronJob = require('./src/config/cronJob')
-cronJob.startCronJobServer()
 
 const checkAdmin = require('./src/config/checkAdmin')
 checkAdmin.createAdmin()

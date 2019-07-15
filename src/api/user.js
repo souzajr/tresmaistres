@@ -629,6 +629,7 @@ module.exports = app => {
     }
 
     const downloadInvoice = (req, res) => {
+        if(!req.query.invoice) return res.status(404).render('404')
         res.status(200).download('./public/' + req.query.invoice)
     }
 

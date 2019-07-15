@@ -104,5 +104,18 @@ module.exports = {
         }
 
         transporter.sendMail(mailOptions)
+    },
+
+    sendInvoice(email, name, order) {
+        const mailOptions = {
+            from: 'TRÊS MAIS TRÊS <' + process.env.MAIL_AUTH_USER + '>',
+            to: email,
+            subject: 'Sua nota fiscal está pronta - NÃO RESPONDA',
+            html: '<b>Olá, ' + name + '. Acabamos de anexar sua nota fiscal ao pedido.</b><br/>' +
+            'Para conferir seu pedido, <a target="_blank" href="' + process.env.DOMAIN_NAME + '/detalhes-do-pedido/' + order + '">clique aqui</a>.<br/><br/>' +
+            'Não responda este Email. Em caso de dúvidas, entre em contato através do Email contato@tresmaistres.com.br'
+        }
+
+        transporter.sendMail(mailOptions)
     }
 }

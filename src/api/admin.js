@@ -6,6 +6,7 @@ const User = mongoose.model('User')
 const Order = mongoose.model('Order')
 const Product = mongoose.model('Product')
 const Segmentation = mongoose.model('Segmentation')
+const Coupon = mongoose.model('Coupon')
 const mail = require('../config/mail')
 const multer = require('multer')
 const crypto = require('crypto')
@@ -291,7 +292,10 @@ module.exports = app => {
                     }
                 }
 
-                order.save().then(res.status(200).json(successMessage))
+                order.save().then(_ => {
+                    mail.sendInvoice(order.buyer.email, order.buyer.name, order._id)
+                    res.status(200).json(successMessage)
+                })
             }).catch(_ => res.status(500).json(failMessage))
         })
     }
@@ -314,12 +318,112 @@ module.exports = app => {
         }).catch(_ => res.status(500).json(failMessage))
     }
 
+    const viewCoupons = (req, res) => {
+        Coupon.find().then(coupons => {
+            res.status(200).render('./admin/index', {
+                user: req.session.user,
+                page: 'Cupons',
+                coupons,
+                moment,
+                csrf: req.csrfToken(),
+                message: null
+            })
+        }).catch(_ => res.status(500).render('500'))
+    }
+
+    const addCoupon = async (req, res) => {
+        const coupon = { ...req.body }
+
+        try {
+            existOrError(coupon.name, 'Digite o nome do cupom')
+            coupon.name = coupon.name.toLowerCase()
+            const checkName = await Coupon.findOne({ name: coupon.name })
+            .catch(err => new Error(err))
+            if(checkName instanceof Error)
+                return res.status(500).json(failMessage)
+            notExistOrError(checkName, 'Esse nome já está sendo utilizado por outro cupom, escolha outro nome')
+            existOrError(coupon.percentage, 'Digite a porcentagem do cupom')
+            coupon.percentage = Number(Number(coupon.percentage).toFixed(2))
+            if(coupon.percentage.toString() === 'NaN')
+                return res.status(400).json(failMessage)
+            if(coupon.percentage < 1 || coupon.percentage > 99)
+                return res.status(400).json('O valor do cupom deve ser maior que 1 e menor que 99')
+            existOrError(coupon.validity, 'Escolha a data de validade do cupom')
+            coupon.validity = moment(coupon.validity, 'YYYY-MM-DD').format('DD/MM/YYYY')
+            if(coupon.validity === 'Invalid date')
+                return res.status(400).json(failMessage)
+            if(coupon.validity < moment().format('L'))
+                return res.status(400).json('A validade do cupom precisa ser maior ou igual do que a data atual')
+        } catch(msg) {
+            return res.status(400).json(msg)
+        }
+
+        coupon.createdAt = moment().format('L - LTS')
+        Coupon.create(coupon).then(res.status(200).json(successMessage))
+        .catch(_ => res.status(500).json(failMessage))
+    }
+
+    const editCoupon = async (req, res) => {
+        const coupon = { ...req.body }
+
+        try {
+            existOrError(coupon.couponId, failMessage)
+            existOrError(coupon.name, 'Digite o nome do cupom')
+            coupon.name = coupon.name.toLowerCase()
+            const checkName = await Coupon.findOne({ name: coupon.name })
+            .catch(err => new Error(err))
+            if(checkName instanceof Error)
+                return res.status(500).json(failMessage)
+            if(checkName && checkName._id != coupon.couponId)
+                notExistOrError(checkName, 'Esse nome já está sendo utilizado por outro cupom, escolha outro nome')
+            existOrError(coupon.percentage, 'Digite a porcentagem do cupom')
+            coupon.percentage = Number(Number(coupon.percentage).toFixed(2))
+            if(coupon.percentage.toString() === 'NaN')
+                return res.status(400).json(failMessage)
+            if(coupon.percentage < 1 || coupon.percentage > 99)
+                return res.status(400).json('O valor do cupom deve ser maior que 1 e menor que 99')
+            existOrError(coupon.validity, 'Escolha a data de validade do cupom')
+            coupon.validity = moment(coupon.validity, 'YYYY-MM-DD').format('DD/MM/YYYY')
+            if(coupon.validity === 'Invalid date')
+                return res.status(400).json(failMessage)
+            if(coupon.validity < moment().format('L'))
+                return res.status(400).json('A validade do cupom precisa ser maior ou igual do que a data atual')
+        } catch(msg) {
+            return res.status(400).json(msg)
+        }
+
+        Coupon.findOne({ _id: coupon.couponId }).then(getCoupon => {
+            if(coupon.name !== getCoupon.name)
+                getCoupon.name = coupon.name
+            
+            if(coupon.percentage !== getCoupon.percentage)
+                getCoupon.percentage = coupon.percentage
+
+            if(coupon.validity !== getCoupon.validity)
+                getCoupon.validity = coupon.validity
+
+            getCoupon.save().then(res.status(200).json(successMessage))
+        }).catch(_ => res.status(500).json(failMessage))
+    }
+
+    const removeCoupon = (req, res) => {
+        if(!req.body.couponId) return res.status(400).json(failMessage)
+
+        Coupon.deleteOne({ _id: req.body.couponId })
+        .then(res.status(200).json(successMessage))
+        .catch(_ => res.status(500).json(failMessage))
+    }
+
     return {
         viewHome,
         viewProfile,
         changeProfile,
         viewOrderDetails,
         changeOrderDetails,
-        changeSegmentation
+        changeSegmentation,
+        viewCoupons,
+        addCoupon,
+        editCoupon,
+        removeCoupon
     }
 }

@@ -28,27 +28,25 @@
                 </div>
                 <% if(order.status === 'waiting_payment') { %>
                     <div class="col-md-3">
-                        <a target="_blank" class="btn btn-primary btn-lg float-right" style="margin-top: 10px; color: white" href="<%= order.paymentConfig.boleto_url %>"><i class="fa fa-print"></i> Imprimir boleto</a>
+                        <a target="_blank" class="btn btn-primary btn-lg float-right" style="margin-top: 10px; color: #fff" href="<%= order.paymentConfig.boleto_url %>"><i class="fa fa-print"></i> Imprimir boleto</a>
                     </div>
                 <% } %>
                 <% if(user) { %>
                     <div class="col-md-3">
-                        <a class="btn btn-info btn-lg float-right" style="margin-top: 10px; color: white" href="/minha-conta/pedidos">Ver meus pedidos</a>
+                        <a class="btn btn-info btn-lg float-right" style="margin-top: 10px; color: #fff" href="/minha-conta/pedidos">Ver meus pedidos</a>
                     </div>
                 <% } %>
                 <% if(segmentation && segmentation.status === 'pendente') { %>
                     <div class="col-md-3">
-                        <a class="btn btn-warning btn-lg float-right" style="margin-top: 10px; color: white" href="/briefing?id=<%= segmentation._id %>">Preencher segmentação</a>
-                    </div>
-                <% } %>
-                <% if(order.options && order.options.invoice) { %>
-                    <div class="col-md-3">
-                        <a class="btn btn-warning btn-lg float-right" style="margin-top: 10px; color: white" href="/nota-fiscal?invoice=<%= order.options.invoice %>">Nota fiscal</a>
+                        <a class="btn btn-warning btn-lg float-right" style="margin-top: 10px; color: #fff" href="/briefing?id=<%= segmentation._id %>">Preencher segmentação</a>
                     </div>
                 <% } %>
                 
                 <div class="col-md-12">
-                    <h4>Revisão</h4>
+                    <% if(order.options && order.options.invoice) { %>
+                        <a class="btn btn-warning btn-lg float-right" style="color: #fff" href="/nota-fiscal?invoice=<%= order.options.invoice %>">Nota fiscal</a>
+                    <% } %>
+                    <h4>Revisão</h4>                    
                     <table class="table table-striped table-bordered tbl-shopping-cart">
                         <thead>
                             <tr>
@@ -64,7 +62,7 @@
                             <% if(order.coupon && order.coupon._id) { %>
                                 <tr>
                                     <td>Cupom de desconto</td>
-                                    <td><%= order.coupon.name %> (<%= order.coupon.percentage %>%)</td>
+                                    <td><%= order.coupon.name.toUpperCase() %> (<%= order.coupon.percentage %>%)</td>
                                 </tr>
                             <% } %>
                             <tr>
