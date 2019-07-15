@@ -1,0 +1,282 @@
+<link rel="stylesheet" href="/views/admin/assets/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-header">
+                <button data-toggle="modal" data-target="#modal-add-product" class="btn btn-info">Adicionar produto</button>
+            </div>
+            <div class="box-body">
+                <table id="table-info" class="table table-bordered table-hover">
+                    <style>
+                        .no-sort::after {
+                            display: none !important;
+                        }
+
+                        .no-sort {
+                            pointer-events: none !important;
+                            cursor: default !important;
+                        }
+                    </style>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Valor</th>
+                            <th>Público</th>
+                            <th>Registro</th>
+                            <th class="no-sort">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(let i = 0; i < products.length; i++) { %>
+                            <tr>         
+                                <td><%= products[i].name.toUpperCase() %></td>              
+                                <td>R$<%= (products[i].value / 100).toFixed(2).replace('.', ',') %></td>
+                                <td><% if(products[i].productPublic) { %>Sim<% } else { %>Não<% } %></td>
+                                <td><%= products[i].createdAt %></td>
+                                <td>  
+                                    <form id="form-remove-coupon-<%= i %>">
+                                        <input type="hidden" name="couponId" value="<%= products[i]._id %>">
+                                        <a href="#" data-toggle="modal" data-target="#modal-edit-coupon-<%= i %>">
+                                            <span class="btn badge bg-light-blue">Editar</span>
+                                        </a>
+                                        <button type="submit" class="btn badge bg-red">Remover</button>
+                                    </form> 
+                                    <script>
+                                        $(document).ready(function() {
+                                            $('#form-remove-coupon-<%= i %>').on('submit', function(e) {                        
+                                                $(document).ajaxStart(function() { Pace.restart() })
+                                                e.preventDefault()
+                                                
+                                                $.ajax({
+                                                    type: 'DELETE',
+                                                    url: '/admin/cupons',
+                                                    datatype: 'html',
+                                                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                                                    data: $('#form-remove-coupon-<%= i %>').serialize(),    
+                                                    headers: {
+                                                        'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
+                                                    },
+                                                    success: function(result) {          
+                                                        alertify.notify(result, 'success', 5)
+                                                        setTimeout(function() { 
+                                                            window.location.reload()
+                                                        }, 500)
+                                                    },
+                                                    error: function(xhr, status, error) {
+                                                        if(error === 'Forbidden') return window.location.href = '/'
+                                                        alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                                                    }
+                                                })
+                                            })
+                                        })
+                                    </script>
+                                </td>
+                            </tr>
+                            
+                            <div class="modal fade" id="modal-edit-coupon-<%= i %>">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span></button>
+                                            <h4 class="modal-title">Editar cupom</h4>
+                                        </div>
+                                        <form id="form-edit-coupon-<%= i %>">
+                                            <input type="hidden" name="couponId" value="<%= products[i]._id %>">
+                                            <div class="modal-body">          
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Nome</label>
+                                                            <input type="text" name="name" class="form-control">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Fechar</button>
+                                                <button type="submit" class="btn btn-primary">Alterar</button>
+                                            </div>
+                                        </form>
+                                        <script>
+                                            $(document).ready(function() {
+                                                $('#form-edit-coupon-<%= i %>').on('submit', function(e) {                        
+                                                    $(document).ajaxStart(function() { Pace.restart() })
+                                                    e.preventDefault()
+                                                    
+                                                    $.ajax({
+                                                        type: 'PUT',
+                                                        url: '/admin/cupons',
+                                                        datatype: 'html',
+                                                        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                                                        data: $('#form-edit-coupon-<%= i %>').serialize(),    
+                                                        headers: {
+                                                            'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
+                                                        },
+                                                        success: function(result) {          
+                                                            alertify.notify(result, 'success', 5)
+                                                            setTimeout(function() { 
+                                                                window.location.reload()
+                                                            }, 500)
+                                                        },
+                                                        error: function(xhr, status, error) {
+                                                            if(error === 'Forbidden') return window.location.href = '/'
+                                                            alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                                                        }
+                                                    })
+                                                })
+                                            })
+                                        </script>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Valor</th>
+                            <th>Público</th>
+                            <th>Registro</th>
+                            <th>Ações</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-add-product">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Adicionar produto</h4>
+            </div>
+            <form id="form-add-product">
+                <div class="modal-body">          
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Nome</label>
+                                <input type="text" name="name" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Valor <span id="value"></span></label>
+                                <input type="number" name="value" min="10" step=".01" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>O produto ficará visível na Home?</label>
+                                <select name="productPublic" class="form-control">
+                                    <option selected disabled>Selecione</option>
+                                    <option value="true">Sim</option>
+                                    <option value="false">Não</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>  
+                    Descrições do produto      
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>Descrição</label>
+                                <input type="text" name="description" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Check?</label>
+                                <select name="productPublic" class="form-control">
+                                    <option selected value="true">Sim</option>
+                                    <option value="false">Não</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            Add Desc
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </div>
+            </form>
+            <script>
+                $(document).ready(function() {
+                    $('#form-add-product').on('submit', function(e) {                        
+                        $(document).ajaxStart(function() { Pace.restart() })
+                        e.preventDefault()
+                        
+                        $.ajax({
+                            type: 'POST',
+                            url: '/admin/planos',
+                            datatype: 'html',
+                            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                            data: $('#form-add-product').serialize(),    
+                            headers: {
+                                'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
+                            },
+                            success: function(result) {          
+                                alertify.notify(result, 'success', 5)
+                                setTimeout(function() { 
+                                    window.location.reload()
+                                }, 500)
+                            },
+                            error: function(xhr, status, error) {
+                                if(error === 'Forbidden') return window.location.href = '/'
+                                alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                            }
+                        })
+                    })
+                })
+            </script>
+        </div>
+    </div>
+</div>
+
+<script src="/views/admin/assets/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="/views/admin/assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#table-info').DataTable({
+            'paging': true,
+            'lengthChange': true,
+            'searching': true,
+            'ordering': true,
+            'info': true,
+            'autoWidth': false,
+            'language': {
+                "sEmptyTable": "Nenhum registro encontrado",
+                "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+                "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+                "sInfoFiltered": "(Filtrados de _MAX_ registros)",
+                "sInfoPostFix": "",
+                "sInfoThousands": ".",
+                "sLengthMenu": "_MENU_ resultados por página",
+                "sLoadingRecords": "Carregando...",
+                "sProcessing": "Processando...",
+                "sZeroRecords": "Nenhum registro encontrado",
+                "sSearch": "Pesquisar",
+                "oPaginate": {
+                    "sNext": "Próximo",
+                    "sPrevious": "Anterior",
+                    "sFirst": "Primeiro",
+                    "sLast": "Último"
+                },
+                "oAria": {
+                    "sSortAscending": ": Ordenar colunas de forma ascendente",
+                    "sSortDescending": ": Ordenar colunas de forma descendente"
+                }
+            }
+        })
+    })
+</script>

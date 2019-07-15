@@ -414,6 +414,18 @@ module.exports = app => {
         .catch(_ => res.status(500).json(failMessage))
     }
 
+    const viewPlans = (req, res) => {
+        Product.find().then(products => {
+            res.status(200).render('./admin/index', {
+                user: req.session.user,
+                page: 'Planos',
+                products,
+                csrf: req.csrfToken(),
+                message: null
+            })
+        }).catch(_ => res.status(500).render('500'))
+    }
+
     return {
         viewHome,
         viewProfile,
@@ -424,6 +436,7 @@ module.exports = app => {
         viewCoupons,
         addCoupon,
         editCoupon,
-        removeCoupon
+        removeCoupon,
+        viewPlans
     }
 }

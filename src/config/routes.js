@@ -141,7 +141,14 @@ module.exports = app => {
             .get(csrf(), admin(app.src.api.admin.viewCoupons))
             .post(csrf(), admin(app.src.api.admin.addCoupon)) 
             .put(csrf(), admin(app.src.api.admin.editCoupon))  
-            .delete(csrf(), admin(app.src.api.admin.removeCoupon))           
+            .delete(csrf(), admin(app.src.api.admin.removeCoupon))   
+
+        app.route('/admin/planos')
+            .all(app.src.config.passport.authenticate())
+            .get(csrf(), admin(app.src.api.admin.viewPlans))
+            .post(csrf(), admin(app.src.api.admin.addCoupon)) 
+            .put(csrf(), admin(app.src.api.admin.editCoupon))  
+            .delete(csrf(), admin(app.src.api.admin.removeCoupon))          
     //#endregion
 
     //#region PAGARME
