@@ -93,7 +93,12 @@ module.exports = app => {
         app.get('/nota-fiscal', app.src.api.user.downloadInvoice)     
         
         /* ============= VIEW SITEMAP.XML  ============= */
-        app.get('/sitemap.xml', app.src.api.user.viewSiteMap)
+        app.get('/sitemap.xml', app.src.api.user.viewSiteMap)  
+        
+        /* ============= VIEW ROBOTS.TXT  ============= */
+        app.get('/robots.txt', function (req, res) {
+            res.status(200).type('text/plain').send('User-agent: *\nDisallow: /admin/')
+        })
     //#endregion
 
     //#region USER
@@ -156,7 +161,15 @@ module.exports = app => {
 
         app.route('/admin/automacoes')
             .all(app.src.config.passport.authenticate())
-            .get(admin(app.src.api.admin.viewAutomation))          
+            .get(admin(app.src.api.admin.viewAutomation)) 
+
+        app.route('/admin/relatorios')
+            .all(app.src.config.passport.authenticate())
+            .get(admin(app.src.api.admin.viewReport))
+
+        app.route('/admin/pos-venda')
+            .all(app.src.config.passport.authenticate())
+            .get(admin(app.src.api.admin.viewAfterSales))            
     //#endregion
 
     //#region PAGARME

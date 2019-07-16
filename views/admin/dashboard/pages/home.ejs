@@ -81,7 +81,8 @@
                                     <% } %>
                                     <i <% if(orders[i].options && orders[i].options.automation && orders[i].options.automation._idResponsible) { %>style="color: #4297b9"<% } %> class="fa fa-check-circle" data-toggle="tooltip" data-placement="top" title="Automação"></i>
                                     <i <% if(orders[i].origin === 'Renovação') { %>style="color: #4297b9"<% } %> class="fa fa-repeat" data-toggle="tooltip" data-placement="top" title="Renovação"></i>
-                                    <i <% if(orders[i].options && orders[i].options.invoice) { %>style="color: #4297b9"<% } %> class="fa fa-file" data-toggle="tooltip" data-placement="top" title="Nota fiscal"></i></td>
+                                    <i <% if(orders[i].options && orders[i].options.invoice) { %>style="color: #4297b9"<% } %> class="fa fa-file" data-toggle="tooltip" data-placement="top" title="Nota fiscal"></i>
+                                </td>
                                 <td><a href="/admin/detalhes-da-compra?id=<%= orders[i]._id %>" style="color: black; font-size: 17px;"><i class="fa fa-eye" data-toggle="tooltip" data-placement="top" title="Ver mais detalhes"></i></a></td>
                             </tr>
                         <% } %>

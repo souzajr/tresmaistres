@@ -579,6 +579,30 @@ module.exports = app => {
         }).catch(_ => res.status(500).json(failMessage))
     }
 
+    const viewReport = (req, res) => {
+        Order.find().sort({ 'createdAt' : -1 }).then(orders => {
+            res.status(200).render('./admin/index', {
+                user: req.session.user,
+                page: 'Relatórios',
+                orders,
+                moment,
+                message: null
+            })
+        }).catch(_ => res.status(500).json(failMessage))
+    }
+    
+    const viewAfterSales = (req, res) => {
+        Order.find().sort({ 'createdAt' : -1 }).then(orders => {
+            res.status(200).render('./admin/index', {
+                user: req.session.user,
+                page: 'Pós venda',
+                orders,
+                moment,
+                message: null
+            })
+        }).catch(_ => res.status(500).json(failMessage))
+    }
+
     return {
         viewHome,
         viewProfile,
@@ -595,6 +619,8 @@ module.exports = app => {
         editPlan,
         removePlan,
         viewOrigin,
-        viewAutomation
+        viewAutomation,
+        viewReport,
+        viewAfterSales
     }
 }

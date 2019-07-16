@@ -10,7 +10,8 @@ const OrderSchema = new mongoose.Schema({
     product: {
         _id: { type: String, required: true }, 
         name: { type: String, required: true },
-        value: { type: Number, required: true }
+        value: { type: Number, required: true },
+        validity: String
     },
     coupon: {
         _id: String,

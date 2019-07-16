@@ -1,0 +1,437 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+<link rel="stylesheet" href="/views/admin/assets/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+<script type="text/javascript" src="/views/assets/js/string-mask.js"></script>
+
+<%
+    let totalOrder = 0, ticketMedium = 0
+    let janOrder = 0, fevOrder = 0, marOrder = 0, abrOrder = 0, maiOrder = 0, junOrder = 0, julOrder = 0, agoOrder = 0, setOrder = 0, outOrder = 0, novOrder = 0, dezOrder = 0
+    const labels = [], data = []    
+    for(let i = 0; i < orders.length; i++) {
+        if(orders[i].status === 'paid') {
+            totalOrder += orders[i].total
+
+            if(!labels.length) {
+                labels.push(orders[i].product.name.toUpperCase())
+                data.push(orders[i].product.value)
+            } else {
+                let count = 0
+                for(let j = 0; j < labels.length; j++) {
+                    if(labels[j] === orders[i].product.name.toUpperCase()) {
+                        data[j] += orders[i].product.value
+                        count++
+                        break
+                    }
+                }
+
+                if(count === 0) {
+                    labels.push(orders[i].product.name.toUpperCase())
+                    data.push(orders[i].product.value)
+                }
+            }
+
+            if(moment(orders[i].createdAt, 'DD/MM/YYYY').format('YYYY') === moment().format('YYYY')) {
+                if(moment(orders[i].createdAt, 'YYYY/MM/DD').format('M') === '1') {
+                    janOrder += orders[i].total
+                } else if(moment(orders[i].createdAt, 'YYYY/MM/DD').format('M') === '2') {
+                    fevOrder += orders[i].total
+                } else if(moment(orders[i].createdAt, 'YYYY/MM/DD').format('M') === '3') {
+                    marOrder += orders[i].total
+                } else if(moment(orders[i].createdAt, 'YYYY/MM/DD').format('M') === '4') {
+                    abrOrder += orders[i].total
+                } else if(moment(orders[i].createdAt, 'YYYY/MM/DD').format('M') === '5') {
+                    maiOrder += orders[i].total
+                } else if(moment(orders[i].createdAt, 'YYYY/MM/DD').format('M') === '6') {
+                    junOrder += orders[i].total
+                } else if(moment(orders[i].createdAt, 'YYYY/MM/DD').format('M') === '7') {
+                    julOrder += orders[i].total
+                } else if(moment(orders[i].createdAt, 'YYYY/MM/DD').format('M') === '8') {
+                    agoOrder += orders[i].total
+                } else if(moment(orders[i].createdAt, 'YYYY/MM/DD').format('M') === '9') {
+                    setOrder += orders[i].total
+                } else if(moment(orders[i].createdAt, 'YYYY/MM/DD').format('M') === '10') {
+                    outOrder += orders[i].total
+                } else if(moment(orders[i].createdAt, 'YYYY/MM/DD').format('M') === '11') {
+                    novOrder += orders[i].total
+                } else {
+                    dezOrder += orders[i].total
+                }
+            }
+        }
+    }
+    
+    for(let i = 0; i < data.length; i++) data[i] = (data[i] / 100).toFixed(2)
+    ticketMedium = Number((totalOrder / 30).toFixed(0))    
+%>
+
+<div class="row">
+    <div class="col-lg-3 col-xs-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-aqua"><i class="ion ion-bag"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Vendas</span>
+                <span class="info-box-number"><%= orders.length %></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-xs-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-green"><i class="fa fa-dollar"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Total em vendas</span>
+                <span class="info-box-number">R$<%= (totalOrder / 100).toFixed(2).replace('.', ',') %></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-xs-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-yellow"><i class="fa fa-cart-plus"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Ticket Médio Mensal</span>
+                <span class="info-box-number">R$<%= (ticketMedium / 100).toFixed(2).replace('.', ',') %></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-xs-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-red"><i class="ion ion-clock"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Última venda</span>
+                <span class="info-box-number"><% if(orders.length) { %><%= (orders[0].createdAt).replace('-', '') %><% } %></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Balanço <%= moment().format('YYYY') %></h3>
+            </div>
+            <div class="box-body">
+                <div class="chart">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Produtos vendidos</h3>
+            </div>
+            <div class="box-body">
+                <div class="chart">
+                    <canvas id="chart-area"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Transações / assinaturas</h3><br/>
+            </div>
+            <div class="box-body">
+                <table id="table-info" class="table table-bordered table-hover">
+                    <style>
+                        .no-sort::after {
+                            display: none !important;
+                        }
+
+                        .no-sort {
+                            pointer-events: none !important;
+                            cursor: default !important;
+                        }
+                    </style>
+                    <thead>
+                        <tr>
+                            <th style="display: none;"></th>
+                            <th>#ID</th>
+                            <th>Nome</th>
+                            <th>Data</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th class="no-sort">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(let i = 0; i < orders.length; i++) { %>
+                            <tr>       
+                                <td style="display: none;"><%= i + 1 %></td>   
+                                <td><%= orders[i]._id %></td>              
+                                <td><%= orders[i].buyer.name %></td>
+                                <td><%= orders[i].createdAt %></td>
+                                <td>R$<%= (orders[i].total / 100).toFixed(2).replace('.', ',') %></td>
+                                <td>
+                                    <%
+                                        let getIcon = null
+                                        if(orders[i].origin === 'Facebook')
+                                            getIcon = 'fa fa-facebook-official'
+                                        else if(orders[i].origin === 'Google')
+                                            getIcon = 'fa fa-google'
+                                        else if(orders[i].origin === 'Email')
+                                            getIcon = 'fa fa-envelope'
+                                        else if(orders[i].origin === 'YouTube')
+                                            getIcon = 'fa fa-youtube'
+                                        else if(orders[i].origin === 'Instagram')
+                                            getIcon = 'fa fa-instagram'
+                                        else if(orders[i].origin === 'Renovação')
+                                            getIcon = 'fa fa-repeat'
+                                        else
+                                            getIcon = 'fa fa-mail-forward'
+                                    %>
+                                    <% if(orders[i].status === 'paid') { %>
+                                        <button style="letter-spacing: 2px;" class="btn btn-success btn-sm"><i class="<%= getIcon %>"></i>&nbsp;<% if(orders[i].paymentConfig.method === 'boleto') { %><i class="fa fa-barcode"></i><% } else { %><i class="fa fa-credit-card"></i><% } %>&nbsp;PAGO</button>
+                                    <% } else if(orders[i].status === 'waiting_payment') { %>
+                                        <button style="letter-spacing: 2px;" class="btn btn-default btn-sm"><i class="<%= getIcon %>"></i>&nbsp;<% if(orders[i].paymentConfig.method === 'boleto') { %><i class="fa fa-barcode"></i><% } else { %><i class="fa fa-credit-card"></i><% } %>&nbsp;AGUARDANDO</button>
+                                    <% } else { %>
+                                        <button style="letter-spacing: 2px;" class="btn btn-danger btn-sm"><i class="<%= getIcon %>"></i>&nbsp;<% if(orders[i].paymentConfig.method === 'boleto') { %><i class="fa fa-barcode"></i><% } else { %><i class="fa fa-credit-card"></i><% } %>&nbsp;CANCELADO</button>
+                                    <% } %>                                    
+                                </td>
+                                <td><a href="/admin/detalhes-da-compra?id=<%= orders[i]._id %>" style="color: black; font-size: 17px;"><i class="fa fa-eye" data-toggle="tooltip" data-placement="top" title="Ver mais detalhes"></i></a></td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th style="display: none;"></th>
+                            <th>#ID</th>
+                            <th>Nome</th>
+                            <th>Data</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Transações não finalizadas</h3><br/>
+            </div>
+            <div class="box-body">
+                <table id="table-info-2" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th style="display: none;"></th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Telefone</th>
+                            <th>Cidade / UF</th>
+                            <th>Registro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(let i = 0; i < orders.length; i++) { %>
+                            <% if(orders[i].status !== 'paid' && orders[i].status !== 'waiting_payment') { %>
+                                <tr>       
+                                    <td style="display: none;"><%= i + 1 %></td>                 
+                                    <td><%= orders[i].buyer.name %></td>              
+                                    <td><%= orders[i].buyer.email %></td>              
+                                    <td><span id="phone-<%= i %>"></span></td>              
+                                    <td><%= orders[i].buyer.address.city %> / <%= orders[i].buyer.address.state %></td>
+                                    <td><%= orders[i].createdAt %></td>                                    
+                                </tr>
+                                <script>
+                                    $(document).ready(function() {
+                                        const phone = '<%= orders[i].buyer.phone %>'
+
+                                        if(phone.length === 10) {
+                                            const formatterPhone = new StringMask('(00) 0000-0000')
+                                            $('#phone-<%= i %>').html(formatterPhone.apply(phone))
+                                        } else {
+                                            const formatterPhone = new StringMask('(00) 0 0000-0000')
+                                            $('#phone-<%= i %>').html(formatterPhone.apply(phone))
+                                        } 
+                                    })
+                                </script>
+                            <% } %>
+                        <% } %>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th style="display: none;"></th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Telefone</th>
+                            <th>Cidade / UF</th>
+                            <th>Registro</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/views/admin/assets/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="/views/admin/assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script>
+    const barChartData = {
+        labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro',
+            'Novembro', 'Dezembro'
+        ],
+        datasets: [{
+            label: 'Pedidos',
+            backgroundColor: '#3c8dbc',
+            borderWidth: 1,
+            data: [
+                '<%= janOrder / 100 %>',
+                '<%= fevOrder / 100 %>',
+                '<%= marOrder / 100 %>',
+                '<%= abrOrder / 100 %>',
+                '<%= maiOrder / 100 %>',
+                '<%= junOrder / 100 %>',
+                '<%= julOrder / 100 %>',
+                '<%= agoOrder / 100 %>',
+                '<%= setOrder / 100 %>',
+                '<%= outOrder / 100 %>',
+                '<%= novOrder / 100 %>',
+                '<%= dezOrder / 100 %>'
+            ]
+        }]
+    }
+
+    const labels = '<%= labels %>'
+    const data = '<%= data %>'
+    function getRandomColor() {
+        let letters = '0123456789ABCDEF'
+        let color = '#'
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)]
+        }
+        return color
+    }
+    const backgroundColor = []
+    for(let i = 0; i < labels.split(',').length; i++) backgroundColor.push(getRandomColor())
+
+    const pieChartData = {
+        labels: labels.split(','),
+        datasets: [{
+            backgroundColor,
+            data: data.split(',')
+        }]
+    }
+
+    window.onload = function() {
+        const ctx = document.getElementById('barChart').getContext('2d')
+        window.myBar = new Chart(ctx, {
+            type: 'bar',
+            data: barChartData,
+            options: {
+                responsive: true,
+                legend: {
+                    position: 'top'
+                },                
+                tooltips: {
+                    callbacks: {
+                        label: (item) => `R$${ (item.yLabel).toFixed(2).replace('.', ',') }`
+                    }
+                }
+            }
+        })
+
+        const ctx2 = document.getElementById('chart-area').getContext('2d')
+        window.myPie = new Chart(ctx2, {
+            type: 'pie',
+            data: pieChartData,
+            options: {
+                responsive: true,
+                legend: {
+                    position: 'top'
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(tooltipItem, data) {
+                            let dataset = data.datasets[tooltipItem.datasetIndex];
+                            let meta = dataset._meta[Object.keys(dataset._meta)[0]];
+                            let total = meta.total;
+                            let currentValue = dataset.data[tooltipItem.index];
+                            let percentage = parseFloat((currentValue/total*100).toFixed(1));
+                            return 'R$' + currentValue.replace('.', ',') + ' (' + percentage + '%)';
+                        },
+                        title: function(tooltipItem, data) {
+                            return data.labels[tooltipItem[0].index];
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    $(document).ready(function() {
+        $('#table-info').DataTable({
+            'paging': true,
+            'lengthChange': true,
+            'searching': true,
+            'ordering': true,
+            'info': true,
+            'autoWidth': false,
+            'language': {
+                "sEmptyTable": "Nenhum registro encontrado",
+                "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+                "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+                "sInfoFiltered": "(Filtrados de _MAX_ registros)",
+                "sInfoPostFix": "",
+                "sInfoThousands": ".",
+                "sLengthMenu": "_MENU_ resultados por página",
+                "sLoadingRecords": "Carregando...",
+                "sProcessing": "Processando...",
+                "sZeroRecords": "Nenhum registro encontrado",
+                "sSearch": "Pesquisar",
+                "oPaginate": {
+                    "sNext": "Próximo",
+                    "sPrevious": "Anterior",
+                    "sFirst": "Primeiro",
+                    "sLast": "Último"
+                },
+                "oAria": {
+                    "sSortAscending": ": Ordenar colunas de forma ascendente",
+                    "sSortDescending": ": Ordenar colunas de forma descendente"
+                }
+            }
+        })
+
+        $('#table-info-2').DataTable({
+            'paging': true,
+            'lengthChange': true,
+            'searching': true,
+            'ordering': true,
+            'info': true,
+            'autoWidth': false,
+            'language': {
+                "sEmptyTable": "Nenhum registro encontrado",
+                "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+                "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+                "sInfoFiltered": "(Filtrados de _MAX_ registros)",
+                "sInfoPostFix": "",
+                "sInfoThousands": ".",
+                "sLengthMenu": "_MENU_ resultados por página",
+                "sLoadingRecords": "Carregando...",
+                "sProcessing": "Processando...",
+                "sZeroRecords": "Nenhum registro encontrado",
+                "sSearch": "Pesquisar",
+                "oPaginate": {
+                    "sNext": "Próximo",
+                    "sPrevious": "Anterior",
+                    "sFirst": "Primeiro",
+                    "sLast": "Último"
+                },
+                "oAria": {
+                    "sSortAscending": ": Ordenar colunas de forma ascendente",
+                    "sSortDescending": ": Ordenar colunas de forma descendente"
+                }
+            }
+        })
+    })
+</script>

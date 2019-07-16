@@ -640,6 +640,11 @@ module.exports = app => {
             urls: [
                 { url: '/', img: process.env.DOMAIN_NAME + '/views/assets/img/parallax/parallax-2.jpg' },
                 { url: '/minha-conta' },
+                { url: '/minha-conta/alterar-senha' },
+                { url: '/minha-conta/pedidos' },
+                { url: '/briefing' },
+                { url: '/nota-fiscal' },
+                { url: '/sair' },                
                 { url: '/finalizar-compra' },
                 { url: '/politica-de-privacidade' },
                 { url: '/termos-de-uso' }
