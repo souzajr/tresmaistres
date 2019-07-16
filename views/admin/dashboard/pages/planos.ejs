@@ -74,195 +74,6 @@
                                     </script>
                                 </td>
                             </tr>
-                            
-                            <div class="modal fade" id="modal-edit-product-<%= i %>">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span></button>
-                                            <h4 class="modal-title">Editar plano</h4>
-                                        </div>
-                                        <form id="form-edit-product-<%= i %>">
-                                            <input type="hidden" name="productId" value="<%= products[i]._id %>">
-                                            <div class="modal-body">          
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label>Nome</label>
-                                                            <input type="text" name="name" value="<%= products[i].name %>" class="form-control">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <label>Valor <span id="getValue-<%= i %>">(R$<%= (products[i].value / 100).toFixed(2).replace('.', ',') %>)</span></label>
-                                                            <input id="value-<%= i %>" type="number" name="value" value="<%= (products[i].value / 100).toFixed(2) %>" min="10" step=".01" class="form-control">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-12">
-                                                        <div class="form-group">
-                                                            <label>O produto ficará visível na Home?</label>
-                                                            <select id="productPublic-<%= i %>" name="productPublic" class="form-control">
-                                                                <option <% if(products[i].productPublic) { %>selected<% } %> value="true">Sim</option>
-                                                                <option <% if(!products[i].productPublic) { %>selected<% } %> value="false">Não</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <% if(products[i].options.length) { %>
-                                                    <input type="hidden" name="hasDesc" value="true">
-                                                    <div id="prodDesc-<%= i %>">
-                                                        <hr>  
-                                                        Descrições do produto      
-                                                        <div class="row">
-                                                            <% for(let j = 0; j < products[i].options.length; j++) { %>
-                                                                <div class="col-md-7">
-                                                                    <div class="form-group">
-                                                                        <label>Descrição</label>
-                                                                        <input type="text" name="description" value="<%= products[i].options[j].description %>" class="form-control">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-3">
-                                                                    <div class="form-group">
-                                                                        <label>Check?</label>
-                                                                        <select name="hasCheck" class="form-control">
-                                                                            <option <% if(products[i].options[j].hasCheck) { %>selected<% } %> value="true">Sim</option>
-                                                                            <option <% if(!products[i].options[j].hasCheck) { %>selected<% } %> value="false">Não</option>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-2" style="margin-top: 30px; font-size: 20px;">
-                                                                    <a onclick="addAnotherDesc_<%= i %>()" style="color: #de3535;" href="javascript:void(0)"><i class="fa fa-plus-square"></i></a>
-                                                                </div>
-                                                            <% } %>
-                                                            <div id="duplicater-<%= i %>">
-                                                                <div id="dub">
-                                                                    <div class="col-md-7">
-                                                                        <div class="form-group">
-                                                                            <label>Descrição</label>
-                                                                            <input type="text" name="description" class="form-control">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-3">
-                                                                        <div class="form-group">
-                                                                            <label>Check?</label>
-                                                                            <select name="hasCheck" class="form-control">
-                                                                                <option selected value="true">Sim</option>
-                                                                                <option value="false">Não</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-2" style="margin-top: 30px; font-size: 20px;">
-                                                                        <a onclick="addAnotherDesc_<%= i %>()" style="color: #de3535;" href="javascript:void(0)"><i class="fa fa-plus-square"></i></a>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div id="receiver-<%= i %>"></div>
-                                                        </div>
-                                                    </div>
-                                                <% } else { %>
-                                                    <input type="hidden" name="hasDesc" value="false">
-                                                    <div id="prodDesc-<%= i %>" style="display: none;">
-                                                        <hr>  
-                                                        Descrições do produto      
-                                                        <div class="row">
-                                                            <div id="duplicater-<%= i %>">
-                                                                <div class="col-md-7">
-                                                                    <div class="form-group">
-                                                                        <label>Descrição</label>
-                                                                        <input id="descOne-<%= i %>" type="text" name="description" class="form-control">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-3">
-                                                                    <div class="form-group">
-                                                                        <label>Check?</label>
-                                                                        <select name="hasCheck" class="form-control">
-                                                                            <option selected value="true">Sim</option>
-                                                                            <option value="false">Não</option>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-2" style="margin-top: 30px; font-size: 20px;">
-                                                                    <a onclick="addAnotherDesc_<%= i %>()" style="color: #de3535;" href="javascript:void(0)"><i class="fa fa-plus-square"></i></a>
-                                                                </div>
-                                                            </div>
-                                                            <div id="receiver-<%= i %>"></div>
-                                                        </div>
-                                                    </div>
-                                                <% } %>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Fechar</button>
-                                                <button type="submit" class="btn btn-primary">Alterar</button>
-                                            </div>
-                                        </form>
-                                        <script>
-                                            <% if(products[i].options.length) { %>
-                                                function addAnotherDesc_<%= i %>() {
-                                                    $('#duplicater-<%= i %>').children().clone().appendTo('#receiver-<%= i %>')
-                                                }
-                                            <% } else { %>
-                                                function addAnotherDesc_<%= i %>() {
-                                                    const duplicater = document.getElementById('duplicater-<%= i %>')
-                                                    const holder = $('#descOne-<%= i %>').val()
-                                                    $('#descOne-<%= i %>').val('')
-                                                    const clone = duplicater.cloneNode(true)
-                                                    const receiver = document.getElementById('receiver-<%= i %>')
-                                                    receiver.appendChild(clone)
-                                                    $('#descOne-<%= i %>').val(holder)
-                                                }
-                                            <% } %>
-                            
-                                            $(document).ready(function() {
-                                                $("#value-<%= i %>").keyup(function() {
-                                                    const value = Number(this.value)
-                                                    if(value.toString() === 'NaN') return alert('Valor inválido')
-                                                    if(value < 10) {
-                                                        $("#getValue-<%= i %>").html('')
-                                                        return
-                                                    }
-                                                    
-                                                    $("#getValue-<%= i %>").html('(R$' + value.toFixed(2).replace('.', ',') + ')')
-                                                })
-                            
-                                                $('#productPublic-<%= i %>').on('change', function() {
-                                                    $('#prodDesc-<%= i %>').hide()
-                                                    
-                                                    if($('#productPublic-<%= i %> option:selected').text() === 'Sim') {
-                                                        $('#prodDesc-<%= i %>').show()
-                                                    }
-                                                })
-
-                                                $('#form-edit-product-<%= i %>').on('submit', function(e) {                        
-                                                    $(document).ajaxStart(function() { Pace.restart() })
-                                                    e.preventDefault()
-
-                                                    $.ajax({
-                                                        type: 'PUT',
-                                                        url: '/admin/planos',
-                                                        datatype: 'html',
-                                                        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-                                                        data: $('#form-edit-product-<%= i %>').serialize(),    
-                                                        headers: {
-                                                            'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
-                                                        },
-                                                        success: function(result) {          
-                                                            alertify.notify(result, 'success', 5)
-                                                            setTimeout(function() { 
-                                                                window.location.reload()
-                                                            }, 500)
-                                                        },
-                                                        error: function(xhr, status, error) {
-                                                            if(error === 'Forbidden') return window.location.href = '/'
-                                                            alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
-                                                        }
-                                                    })
-                                                })
-                                            })
-                                        </script>
-                                    </div>
-                                </div>
-                            </div>
                         <% } %>
                     </tbody>
                     <tfoot>
@@ -279,6 +90,197 @@
         </div>
     </div>
 </div>
+
+<% for(let i = 0; i < products.length; i++) { %>
+    <div class="modal fade" id="modal-edit-product-<%= i %>">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Editar plano</h4>
+                </div>
+                <form id="form-edit-product-<%= i %>">
+                    <input type="hidden" name="productId" value="<%= products[i]._id %>">
+                    <div class="modal-body">          
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nome</label>
+                                    <input type="text" name="name" value="<%= products[i].name %>" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Valor <span id="getValue-<%= i %>">(R$<%= (products[i].value / 100).toFixed(2).replace('.', ',') %>)</span></label>
+                                    <input id="value-<%= i %>" type="number" name="value" value="<%= (products[i].value / 100).toFixed(2) %>" min="10" step=".01" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>O produto ficará visível na Home?</label>
+                                    <select id="productPublic-<%= i %>" name="productPublic" class="form-control">
+                                        <option <% if(products[i].productPublic) { %>selected<% } %> value="true">Sim</option>
+                                        <option <% if(!products[i].productPublic) { %>selected<% } %> value="false">Não</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <% if(products[i].options.length) { %>
+                            <input type="hidden" name="hasDesc" value="true">
+                            <div id="prodDesc-<%= i %>">
+                                <hr>  
+                                Descrições do produto      
+                                <div class="row">
+                                    <% for(let j = 0; j < products[i].options.length; j++) { %>
+                                        <div class="col-md-7">
+                                            <div class="form-group">
+                                                <label>Descrição</label>
+                                                <input type="text" name="description" value="<%= products[i].options[j].description %>" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Check?</label>
+                                                <select name="hasCheck" class="form-control">
+                                                    <option <% if(products[i].options[j].hasCheck) { %>selected<% } %> value="true">Sim</option>
+                                                    <option <% if(!products[i].options[j].hasCheck) { %>selected<% } %> value="false">Não</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" style="margin-top: 30px; font-size: 20px;">
+                                            <a onclick="addAnotherDesc_<%= i %>()" style="color: #de3535;" href="javascript:void(0)"><i class="fa fa-plus-square"></i></a>
+                                        </div>
+                                    <% } %>
+                                    <div id="duplicater-<%= i %>" style="display: none;">
+                                        <div class="col-md-7">
+                                            <div class="form-group">
+                                                <label>Descrição</label>
+                                                <input type="text" name="description" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Check?</label>
+                                                <select name="hasCheck" class="form-control">
+                                                    <option selected value="true">Sim</option>
+                                                    <option value="false">Não</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" style="margin-top: 30px; font-size: 20px;">
+                                            <a onclick="addAnotherDesc_<%= i %>()" style="color: #de3535;" href="javascript:void(0)"><i class="fa fa-plus-square"></i></a>
+                                        </div>
+                                    </div>
+                                    <div id="receiver-<%= i %>"></div>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <input type="hidden" name="hasDesc" value="false">
+                            <div id="prodDesc-<%= i %>" style="display: none;">
+                                <hr>  
+                                Descrições do produto      
+                                <div class="row">
+                                    <div id="duplicater-<%= i %>">
+                                        <div class="col-md-7">
+                                            <div class="form-group">
+                                                <label>Descrição</label>
+                                                <input id="descOne-<%= i %>" type="text" name="description" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Check?</label>
+                                                <select name="hasCheck" class="form-control">
+                                                    <option selected value="true">Sim</option>
+                                                    <option value="false">Não</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" style="margin-top: 30px; font-size: 20px;">
+                                            <a onclick="addAnotherDesc_<%= i %>()" style="color: #de3535;" href="javascript:void(0)"><i class="fa fa-plus-square"></i></a>
+                                        </div>
+                                    </div>
+                                    <div id="receiver-<%= i %>"></div>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Fechar</button>
+                        <button type="submit" class="btn btn-primary">Alterar</button>
+                    </div>
+                </form>
+                <script>
+                    <% if(products[i].options.length) { %>
+                        function addAnotherDesc_<%= i %>() {
+                            $('#duplicater-<%= i %>').show()
+                            $('#duplicater-<%= i %>').children().clone().appendTo('#receiver-<%= i %>')
+                            $('#duplicater-<%= i %>').hide()
+                        }
+                    <% } else { %>
+                        function addAnotherDesc_<%= i %>() {
+                            const duplicater = document.getElementById('duplicater-<%= i %>')
+                            const holder = $('#descOne-<%= i %>').val()
+                            $('#descOne-<%= i %>').val('')
+                            const clone = duplicater.cloneNode(true)
+                            const receiver = document.getElementById('receiver-<%= i %>')
+                            receiver.appendChild(clone)
+                            $('#descOne-<%= i %>').val(holder)
+                        }
+                    <% } %>
+
+                    $(document).ready(function() {
+                        $("#value-<%= i %>").keyup(function() {
+                            const value = Number(this.value)
+                            if(value.toString() === 'NaN') return alert('Valor inválido')
+                            if(value < 10) {
+                                $("#getValue-<%= i %>").html('')
+                                return
+                            }
+                            
+                            $("#getValue-<%= i %>").html('(R$' + value.toFixed(2).replace('.', ',') + ')')
+                        })
+
+                        $('#productPublic-<%= i %>').on('change', function() {
+                            $('#prodDesc-<%= i %>').hide()
+                            
+                            if($('#productPublic-<%= i %> option:selected').text() === 'Sim') {
+                                $('#prodDesc-<%= i %>').show()
+                            }
+                        })
+
+                        $('#form-edit-product-<%= i %>').on('submit', function(e) {                        
+                            $(document).ajaxStart(function() { Pace.restart() })
+                            e.preventDefault()
+
+                            $.ajax({
+                                type: 'PUT',
+                                url: '/admin/planos',
+                                datatype: 'html',
+                                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                                data: $('#form-edit-product-<%= i %>').serialize(),    
+                                headers: {
+                                    'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
+                                },
+                                success: function(result) {          
+                                    alertify.notify(result, 'success', 5)
+                                    setTimeout(function() { 
+                                        window.location.reload()
+                                    }, 500)
+                                },
+                                error: function(xhr, status, error) {
+                                    if(error === 'Forbidden') return window.location.href = '/'
+                                    alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                                }
+                            })
+                        })
+                    })
+                </script>
+            </div>
+        </div>
+    </div>
+<% } %>
 
 <div class="modal fade" id="modal-add-product">
     <div class="modal-dialog">

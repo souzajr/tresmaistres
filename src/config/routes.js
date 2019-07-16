@@ -148,7 +148,15 @@ module.exports = app => {
             .get(csrf(), admin(app.src.api.admin.viewPlans))
             .post(csrf(), admin(app.src.api.admin.addPlan)) 
             .put(csrf(), admin(app.src.api.admin.editPlan))  
-            .delete(csrf(), admin(app.src.api.admin.removePlan))          
+            .delete(csrf(), admin(app.src.api.admin.removePlan))    
+
+        app.route('/admin/origem')
+            .all(app.src.config.passport.authenticate())
+            .get(admin(app.src.api.admin.viewOrigin))       
+
+        app.route('/admin/automacoes')
+            .all(app.src.config.passport.authenticate())
+            .get(admin(app.src.api.admin.viewAutomation))          
     //#endregion
 
     //#region PAGARME

@@ -483,7 +483,6 @@ module.exports = app => {
 
     const editPlan = async (req, res) => {
         const product = { ...req.body }
-        return console.log(product)
 
         try {
             existOrError(product.productId, failMessage)
@@ -529,8 +528,6 @@ module.exports = app => {
         }
 
         Product.findOne({ _id: product.productId }).then(getProduct => {
-            if(!getProduct) return res.status(400).json(failMessage)
-
             getProduct.name = product.name
             getProduct.value = product.value
             getProduct.productPublic = product.productPublic === 'true' ? true : false
@@ -548,6 +545,40 @@ module.exports = app => {
         .catch(_ => res.status(500).json(failMessage))
     }
 
+    const viewOrigin = (req, res) => {
+        Order.find().then(orders => {
+            res.status(200).render('./admin/index', {
+                user: req.session.user,
+                page: 'Origem',
+                orders,
+                message: null
+            })
+        }).catch(_ => res.status(500).json(failMessage))
+    }
+
+    const viewAutomation = (req, res) => {
+        Order.find().sort({ 'createdAt' : -1 }).then(getOrders => {
+            Segmentation.find({ status: 'enviado' }).then(segmentations => {
+                const orders = []
+                for(let i = 0; i < getOrders.length; i++) {
+                    for(let j = 0; j < segmentations.length; j++) {
+                        if(getOrders[i]._id == segmentations[j]._idOrder) {
+                            orders.push(getOrders[i])
+                        }
+                    }
+                }
+
+                res.status(200).render('./admin/index', {
+                    user: req.session.user,
+                    page: 'Automações',
+                    orders,
+                    segmentations,
+                    message: null
+                })
+            })
+        }).catch(_ => res.status(500).json(failMessage))
+    }
+
     return {
         viewHome,
         viewProfile,
@@ -562,6 +593,8 @@ module.exports = app => {
         viewPlans,
         addPlan,
         editPlan,
-        removePlan
+        removePlan,
+        viewOrigin,
+        viewAutomation
     }
 }

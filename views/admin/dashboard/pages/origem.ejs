@@ -1,0 +1,123 @@
+<%
+    let fbClient = 0, ggClient = 0, mailClient = 0, ytClient = 0, igClient = 0, rnClient = 0, otClient = 0
+    for(let i = 0; i < orders.length; i++) {
+        if(orders[i].origin === 'Facebook') {
+            fbClient++
+        } else if(orders[i].origin === 'Google') {
+            ggClient++
+        } else if(orders[i].origin === 'Email') {           
+            mailClient++
+        } else if(orders[i].origin === 'YouTube') {      
+            ytClient++
+        } else if(orders[i].origin === 'Instagram') {   
+            igClient++
+        } else if(orders[i].origin === 'Renovação') {
+            rnClient++
+        } else {
+            otClient++
+        }
+    }
+%>
+
+<link rel="stylesheet" href="/views/admin/assets/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-body">
+                <table id="table-info" class="table table-bordered table-hover">
+                    <style>
+                        .no-sort::after {
+                            display: none !important;
+                        }
+
+                        .no-sort {
+                            pointer-events: none !important;
+                            cursor: default !important;
+                        }
+                    </style>
+                    <thead>
+                        <tr>
+                            <th>Origem</th>
+                            <th>Clientes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Email <i class="fa fa-envelope"></i></td>
+                            <td><%= mailClient %></td>
+                        </tr>
+                        <tr>
+                            <td>Renovação <i class="fa fa-repeat"></i></td>
+                            <td><%= rnClient %></td>
+                        </tr>
+                        <tr>
+                            <td>Facebook <i class="fa fa-facebook-official"></i></td>
+                            <td><%= fbClient %></td>
+                        </tr>
+                        <tr>
+                            <td>Outro <i class="fa fa-mail-forward"></i></td>
+                            <td><%= otClient %></td>
+                        </tr>
+                        <tr>
+                            <td>YouTube <i class="fa fa-youtube"></i></td>
+                            <td><%= ytClient %></td>
+                        </tr>
+                        <tr>
+                            <td>Instagram <i class="fa fa-instagram"></i></td>
+                            <td><%= igClient %></td>
+                        </tr>
+                        <tr>
+                            <td>Google <i class="fa fa-google"></i></td>
+                            <td><%= ggClient %></td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Origem</th>
+                            <th>Clientes</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/views/admin/assets/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="/views/admin/assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#table-info').DataTable({
+            'paging': false,
+            'lengthChange': true,
+            'searching': true,
+            'ordering': true,
+            'info': false,
+            'autoWidth': false,
+            'language': {
+                "sEmptyTable": "Nenhum registro encontrado",
+                "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+                "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+                "sInfoFiltered": "(Filtrados de _MAX_ registros)",
+                "sInfoPostFix": "",
+                "sInfoThousands": ".",
+                "sLengthMenu": "_MENU_ resultados por página",
+                "sLoadingRecords": "Carregando...",
+                "sProcessing": "Processando...",
+                "sZeroRecords": "Nenhum registro encontrado",
+                "sSearch": "Pesquisar",
+                "oPaginate": {
+                    "sNext": "Próximo",
+                    "sPrevious": "Anterior",
+                    "sFirst": "Primeiro",
+                    "sLast": "Último"
+                },
+                "oAria": {
+                    "sSortAscending": ": Ordenar colunas de forma ascendente",
+                    "sSortDescending": ": Ordenar colunas de forma descendente"
+                }
+            }
+        })
+    })
+</script>
