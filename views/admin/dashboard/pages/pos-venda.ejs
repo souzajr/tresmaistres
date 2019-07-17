@@ -4,7 +4,7 @@
     <div class="col-md-12">
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Transações faltando 5 dias para o vencimento</h3><br/>
+                <h3 class="box-title">Transações vencidas ou próximas do vencimento</h3><br/>
             </div>
             <div class="box-body">
                 <table id="table-info" class="table table-bordered table-hover">
@@ -30,13 +30,13 @@
                     </thead>
                     <tbody>
                         <% for(let i = 0; i < orders.length; i++) { %>
-                            <% if(orders[i].product.validity) { %>
+                            <% if(orders[i].product.dateValidity && moment(orders[i].product.dateValidity, 'DD/MM/YYYY').diff(moment(moment().format('L'), 'DD/MM/YYYY'), 'days') <= 5) { %>                     
                                 <tr>       
                                     <td style="display: none;"><%= i + 1 %></td>   
                                     <td><%= orders[i]._id %></td>              
                                     <td><%= orders[i].buyer.name %></td>
                                     <td><%= orders[i].createdAt %></td>
-                                    <td><%= orders[i].product.validity %></td>
+                                    <td><%= orders[i].product.dateValidity %></td>
                                     <td><a href="/admin/detalhes-da-compra?id=<%= orders[i]._id %>" style="color: black; font-size: 17px;"><i class="fa fa-eye" data-toggle="tooltip" data-placement="top" title="Ver mais detalhes"></i></a></td>
                                 </tr>
                             <% } %>

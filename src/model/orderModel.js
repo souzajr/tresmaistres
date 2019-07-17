@@ -11,7 +11,7 @@ const OrderSchema = new mongoose.Schema({
         _id: { type: String, required: true }, 
         name: { type: String, required: true },
         value: { type: Number, required: true },
-        validity: String
+        dateValidity: String
     },
     coupon: {
         _id: String,

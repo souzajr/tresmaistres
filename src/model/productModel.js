@@ -10,7 +10,7 @@ const ProductSchema = new mongoose.Schema({
     value: { type: Number, required: true },
     createdAt: { type: String, required: true },
     productPublic: { type: Boolean, required: true },
-    validity: String,
+    validity: Number,
     options: [OptionSchema]
 })
 

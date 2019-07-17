@@ -79,11 +79,8 @@ module.exports = app => {
                     existOrError(order.buyer.confirmPassword, 'Digite a confirmação da senha')
                     equalsOrError(order.buyer.password, order.buyer.confirmPassword, 'A senha e confirmação da senha não são iguais')
                 }
-            }   
-            existOrError(order.product, failMessage)
-            order.product = await Product.findOne({ _id: order.product })   
-            .catch(err => new Error(err))
-            if(!order.product || order.product instanceof Error) return res.status(500).json(failMessage)
+            }  
+            existOrError(order.product, failMessage) 
             if(order.coupon) {
                 order.coupon = await Coupon.findOne({ _id: order.coupon })
                 .catch(err => new Error(err))
@@ -94,12 +91,29 @@ module.exports = app => {
             return res.status(400).json(msg)
         }
 
+        const getProduct = await Product.findOne({ _id: order.product })   
+        .catch(err => new Error(err))
+        if(!getProduct || getProduct instanceof Error) return res.status(500).json(failMessage)
+
+        order.product = {
+            _id: getProduct._id,
+            name: getProduct.name,
+            value: getProduct.value,
+            validity: getProduct.validity
+        }
+
+        if(order.product.validity) {
+            order.product.dateValidity = moment(moment().format('L'), 'DD/MM/YYYY').add(order.product.validity, 'days').format('L')
+            if(order.product.dateValidity === 'Invalid date')
+                return res.status(400).json(failMessage)
+        }
+
         order.total = order.product.value
         if(order.coupon) {
             order.total = Number((order.product.value - (order.coupon.percentage * order.product.value / 100)).toFixed(0))
-            if(order.total.toString() === 'NaN') return res.status(500).json(failMessage)
+            if(order.total.toString() === 'NaN') return res.status(400).json(failMessage)
         }
-
+        
         let user = null
         if(req.session.user) {
             user = await User.findOne({ _id: req.session.user._id })
@@ -186,7 +200,8 @@ module.exports = app => {
         }
 
         if(order.paymentConfig.method === 'credit_card') {
-            if(!order.paymentConfig.card_hash) return res.status(400).json(failMessage)
+            if(!order.paymentConfig.card_hash)
+                return res.status(400).json(failMessage)
 
             pagarme.client.connect({ api_key: process.env.PAGARME_API_KEY })
             .then(client => client.transactions.create({
@@ -297,6 +312,7 @@ module.exports = app => {
                 }
             }).catch(_ => res.status(500).json(failMessage))
         } else if(order.paymentConfig.method === 'boleto') {
+            
             if(order.paymentConfig.card_hash || order.product.value >= 200000) return res.status(400).json(failMessage)
 
             pagarme.client.connect({ api_key: process.env.PAGARME_API_KEY })
@@ -342,7 +358,7 @@ module.exports = app => {
                     'tangible': false
                 }]
             })).then(transaction => {
-                new PagarmeReport(transaction).save().then(report => {    
+                new PagarmeReport(transaction).save().then(report => { 
                     if(transaction.status === 'waiting_payment') {
                         order._pagarmeReport = report._id
                         order._idTransactionPagarme = transaction.id

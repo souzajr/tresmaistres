@@ -443,6 +443,11 @@ module.exports = app => {
                 return res.status(400).json(failMessage)
             if(product.value < 1000)
                 return res.status(400).json('O valor do plano deve ser maior ou igual a 10 reais')
+            if(product.validity && product.validity !== 'Selecione') {
+                product.validity = Number(Number(product.validity).toFixed(0))
+                if(product.validity.toString() === 'NaN')
+                    return res.status(400).json(failMessage)
+            } else product.validity = null
             existOrError(product.productPublic, 'Escolha se o produto ficará ou não visível na Home')
         } catch(msg) {
             return res.status(400).json(msg)
@@ -474,6 +479,7 @@ module.exports = app => {
             name: product.name,
             value: product.value,
             productPublic: product.productPublic === 'true' ? true : false,
+            validity: product.validity,
             options,
             createdAt: moment().format('L - LTS')
         }).save()
@@ -500,6 +506,11 @@ module.exports = app => {
                 return res.status(400).json(failMessage)
             if(product.value < 1000)
                 return res.status(400).json('O valor do plano deve ser maior ou igual a 10 reais')
+            if(product.validity && product.validity !== 'Selecione') {
+                product.validity = Number(Number(product.validity).toFixed(0))
+                if(product.validity.toString() === 'NaN')
+                    return res.status(400).json(failMessage)
+            } else product.validity = null
             existOrError(product.productPublic, 'Escolha se o produto ficará ou não visível na Home')
         } catch(msg) {
             return res.status(400).json(msg)
@@ -531,6 +542,7 @@ module.exports = app => {
             getProduct.name = product.name
             getProduct.value = product.value
             getProduct.productPublic = product.productPublic === 'true' ? true : false
+            getProduct.validity = product.validity,
             getProduct.options = options
 
             getProduct.save().then(res.status(200).json(successMessage))
@@ -592,7 +604,7 @@ module.exports = app => {
     }
     
     const viewAfterSales = (req, res) => {
-        Order.find().sort({ 'createdAt' : -1 }).then(orders => {
+        Order.find({ status: 'paid' }).sort({ 'createdAt' : -1 }).then(orders => {
             res.status(200).render('./admin/index', {
                 user: req.session.user,
                 page: 'Pós venda',
