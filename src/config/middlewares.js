@@ -27,7 +27,7 @@ module.exports = app => {
             cookie: {
                 path: '/',
                 httpOnly: true,
-                secure: true,
+                secureProxy: true,
                 ephemeral: false
             }
         })) 
