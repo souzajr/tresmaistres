@@ -43,8 +43,6 @@ module.exports = app => {
                 ephemeral: true
             }
         })) 
-        
-        app.use(morgan('dev'))
     }
     app.use(passport.initialize())
     app.use(passport.session())  
@@ -52,6 +50,7 @@ module.exports = app => {
     app.use(express.urlencoded({ extended: true }))    
     app.use(express.json()) 
     app.use(cors())
+    app.use(morgan('dev'))
     app.use([
         '/validate',
         '/primeiro-acesso',
