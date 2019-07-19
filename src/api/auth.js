@@ -54,7 +54,7 @@ module.exports = app => {
     const instagram = async (req, res) => {
         if(req.user) {
             User.findOne({ _id: req.user._id }).then(async user => {
-                if(newUserByAdmin) return res.status(200).json('/trocar-senha')
+                if(user.deletedAt) return res.redirect('/login')
 
                 const now = Math.floor(Date.now() / 1000)
                 const payload = {
@@ -74,7 +74,7 @@ module.exports = app => {
                 req.session.user = user
                 req.session.token = jwt.encode(payload, process.env.AUTH_SECRET)
 
-                if(user.newUserByAdmin) return res.status(200).json('/trocar-senha')
+                if(user.newUserByAdmin) return res.redirect('/trocar-senha')
                 if(user.firstAccess) return res.redirect('/primeiro-acesso')
                 if(user.admin) return res.redirect('/admin')
                 res.redirect('/minha-conta')    
