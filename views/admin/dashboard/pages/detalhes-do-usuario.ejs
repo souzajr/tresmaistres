@@ -15,12 +15,14 @@
                     <li class="list-group-item">
                         <b>Email</b> <a class="pull-right"><%= getUser.email %></a>
                     </li>
-                    <li class="list-group-item">
-                        <b>Telefone</b> <a class="pull-right"><%= getUser.phone %></a>
-                    </li>
-                    <% if(getUser.documents) { %>
+                    <% if(getUser.phone) { %>
                         <li class="list-group-item">
-                            <b><% if(getUser.documents.typeDoc === 'pf') { %>CPF<% } else { %>CNPJ<% } %></b> <a class="pull-right"><%= getUser.documents.cpfOrCnpj%></a>
+                            <b>Telefone</b> <a class="pull-right" id="phone"></a>
+                        </li>
+                    <% } %>
+                    <% if(getUser.documents && getUser.documents.typeDoc) { %>
+                        <li class="list-group-item">
+                            <b><% if(getUser.documents.typeDoc === 'pf') { %>CPF<% } else { %>CNPJ<% } %></b> <a class="pull-right" id="document"></a>
                         </li>
                     <% } %>
                     <% if(getUser.birthday) { %>
@@ -52,7 +54,7 @@
                             </li>
                         <% } %>
                         <li class="list-group-item">
-                            <b>CEP</b> <a class="pull-right"><%= getUser.address.zipCode %></a>
+                            <b>CEP</b> <a class="pull-right" id="zipCode"></a>
                         </li>
                         <li class="list-group-item">
                             <b>Cidade/estado</b> <a class="pull-right"><%= getUser.address.city %>/<%= getUser.address.state %></a>
@@ -282,6 +284,31 @@
     </div>
 </div>
 
+<script type="text/javascript" src="/views/assets/js/string-mask.js"></script>
 <script>
+    $(document).ready(function() { 
+        const cpfOrCnpj = '<%= getUser.documents.cpfOrCnpj %>'
+        const phone = '<%= getUser.phone %>'
+        const zipCode = '<%= getUser.address.zipCode %>'
 
+        
+        if('<%= getUser.documents.typeDoc %>' === 'pf') {
+            const formatterCpf = new StringMask('000.000.000-00')
+            $('#document').html(formatterCpf.apply(cpfOrCnpj))
+        } else {
+            const formatterCnpj = new StringMask('00.000.000/0000-00')
+            $('#document').html(formatterCnpj.apply(cpfOrCnpj))
+        }
+            
+        const formatterZipCode = new StringMask('00.000-000')
+        $('#zipCode').html(formatterZipCode.apply(zipCode))
+
+        if(phone.length === 10) {
+            const formatterPhone = new StringMask('(00) 0000-0000')
+            $('#phone').html(formatterPhone.apply(phone))
+        } else {
+            const formatterPhone = new StringMask('(00) 0 0000-0000')
+            $('#phone').html(formatterPhone.apply(phone))
+        } 
+    })
 </script>
