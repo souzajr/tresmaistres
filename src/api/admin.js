@@ -8,6 +8,7 @@ const Product = mongoose.model('Product')
 const Segmentation = mongoose.model('Segmentation')
 const Coupon = mongoose.model('Coupon')
 const mail = require('../config/mail')
+const generator = require('generate-password')
 const multer = require('multer')
 const crypto = require('crypto')
 const path = require('path')
@@ -130,6 +131,10 @@ module.exports = app => {
     }
 
     const viewOrderDetails = (req, res) => {
+        if(!req.session.user.permissions.orderDetail) {
+            return res.status(401).render('500')
+        }
+
         if(!req.query.id) return res.redirect('/admin')  
         
         Order.findOne({ _id: req.query.id }).then(async order => { 
@@ -157,6 +162,10 @@ module.exports = app => {
     }
 
     const changeOrderDetails = (req, res) => {
+        if(!req.session.user.permissions.orderDetail) {
+            return res.status(401).json(failMessage)
+        }
+
         const storage = multer.diskStorage({
             destination: (req, file, cb) => {
                 cb(null, './public')
@@ -301,6 +310,10 @@ module.exports = app => {
     }
 
     const changeSegmentation = (req, res) => {
+        if(!req.session.user.permissions.orderDetail) {
+            return res.status(401).json(failMessage)
+        }
+
         const segmentation = { ...req.body }
 
         try {
@@ -318,7 +331,11 @@ module.exports = app => {
         }).catch(_ => res.status(500).json(failMessage))
     }
 
-    const viewCoupons = (req, res) => {
+    const viewCoupons = (req, res) => { 
+        if(!req.session.user.permissions.coupons) {
+            return res.status(401).render('500')
+        }
+
         Coupon.find().then(coupons => {
             res.status(200).render('./admin/index', {
                 user: req.session.user,
@@ -331,7 +348,11 @@ module.exports = app => {
         }).catch(_ => res.status(500).render('500'))
     }
 
-    const addCoupon = async (req, res) => {
+    const addCoupon = async (req, res) => {        
+        if(!req.session.user.permissions.coupons) {
+            return res.status(401).json(failMessage)
+        }
+        
         const coupon = { ...req.body }
 
         try {
@@ -364,6 +385,10 @@ module.exports = app => {
     }
 
     const editCoupon = async (req, res) => {
+        if(!req.session.user.permissions.coupons) {
+            return res.status(401).json(failMessage)
+        }
+
         const coupon = { ...req.body }
 
         try {
@@ -407,6 +432,10 @@ module.exports = app => {
     }
 
     const removeCoupon = (req, res) => {
+        if(!req.session.user.permissions.coupons) {
+            return res.status(401).json(failMessage)
+        }
+
         if(!req.body.couponId) return res.status(400).json(failMessage)
 
         Coupon.deleteOne({ _id: req.body.couponId })
@@ -415,6 +444,10 @@ module.exports = app => {
     }
 
     const viewPlans = (req, res) => {
+        if(!req.session.user.permissions.product) {
+            return res.status(401).render('500')
+        }
+
         Product.find().then(products => {
             res.status(200).render('./admin/index', {
                 user: req.session.user,
@@ -427,6 +460,10 @@ module.exports = app => {
     }
 
     const addPlan = async (req, res) => {
+        if(!req.session.user.permissions.product) {
+            return res.status(401).json(failMessage)
+        }
+
         const product = { ...req.body }
 
         try {
@@ -488,6 +525,10 @@ module.exports = app => {
     }
 
     const editPlan = async (req, res) => {
+        if(!req.session.user.permissions.product) {
+            return res.status(401).json(failMessage)
+        }
+
         const product = { ...req.body }
 
         try {
@@ -550,6 +591,10 @@ module.exports = app => {
     }
 
     const removePlan = (req, res) => {
+        if(!req.session.user.permissions.product) {
+            return res.status(401).json(failMessage)
+        }
+
         if(!req.body.productId) return res.status(400).json(failMessage)
 
         Product.deleteOne({ _id: req.body.productId })
@@ -558,6 +603,10 @@ module.exports = app => {
     }
 
     const viewOrigin = (req, res) => {
+        if(!req.session.user.permissions.origin) {
+            return res.status(401).render('500')
+        }
+
         Order.find().then(orders => {
             res.status(200).render('./admin/index', {
                 user: req.session.user,
@@ -565,10 +614,14 @@ module.exports = app => {
                 orders,
                 message: null
             })
-        }).catch(_ => res.status(500).json(failMessage))
+        }).catch(_ => res.status(500).render('500'))
     }
 
     const viewAutomation = (req, res) => {
+        if(!req.session.user.permissions.automation) {
+            return res.status(401).render('500')
+        }
+
         Order.find().sort({ 'createdAt' : -1 }).then(getOrders => {
             Segmentation.find({ status: 'enviado' }).then(segmentations => {
                 const orders = []
@@ -588,10 +641,14 @@ module.exports = app => {
                     message: null
                 })
             })
-        }).catch(_ => res.status(500).json(failMessage))
+        }).catch(_ => res.status(500).render('500'))
     }
 
     const viewReport = (req, res) => {
+        if(!req.session.user.permissions.report) {
+            return res.status(401).render('500')
+        }
+
         Order.find().sort({ 'createdAt' : -1 }).then(orders => {
             res.status(200).render('./admin/index', {
                 user: req.session.user,
@@ -600,10 +657,14 @@ module.exports = app => {
                 moment,
                 message: null
             })
-        }).catch(_ => res.status(500).json(failMessage))
+        }).catch(_ => res.status(500).render('500'))
     }
     
     const viewAfterSales = (req, res) => {
+        if(!req.session.user.permissions.afterSales) {
+            return res.status(401).render('500')
+        }
+
         Order.find({ status: 'paid' }).sort({ 'createdAt' : -1 }).then(orders => {
             res.status(200).render('./admin/index', {
                 user: req.session.user,
@@ -612,6 +673,171 @@ module.exports = app => {
                 moment,
                 message: null
             })
+        }).catch(_ => res.status(500).render('500'))
+    }
+
+    const viewUsers = (req, res) => {
+        if(!req.session.user.permissions.users) {
+            return res.status(401).render('500')
+        }
+
+        User.find().then(users => {
+            res.status(200).render('./admin/index', {
+                user: req.session.user,
+                page: 'Usuários',
+                users,
+                csrf: req.csrfToken(),
+                message: null
+            })
+        }).catch(_ => res.status(500).render('500'))
+    }
+
+    const addNewUser = async (req, res) => {
+        if(!req.session.user.permissions.users) {
+            return res.status(401).json('Você não tem autorização')
+        }
+        
+        const user = { ...req.body }
+
+        try {
+            existOrError(user.name, 'Digite o nome')
+            tooSmall(user.name, 'Nome muito curto, digite um nome maior')
+            tooBig(user.name, 'Nome muito longo, digite um nome menor')
+            existOrError(user.email, 'Digite o Email')
+            tooBigEmail(user.email, 'Email é muito longo')
+            validEmailOrError(user.email, 'Email inválido')
+            const userFromDB = await User.findOne({ email: user.email })
+            .catch(err => new Error(err))
+            if(userFromDB instanceof Error) return res.status(500).json(failMessage)
+            notExistOrError(userFromDB, 'Esse Email já está registrado')
+            if(user.admin) {
+                if(user.admin === 'Sim' && req.session.user.admin) user.admin = true
+                else user.admin = false
+            } else user.admin = false
+        } catch (msg) {
+            return res.status(400).json(msg)
+        }
+        
+        const password = generator.generate({ uppercase: false, excludeSimilarCharacters: true }) 
+        user.password = encryptPassword(password)
+        user.firstAccess = false
+        user.newUserByAdmin = true 
+        user.createdAt = moment().format('L - LTS')  
+
+        User.create(user).then(_ => {
+            mail.newAccountByAdmin(user.email, user.name, password)
+            res.status(200).json(successMessage)
+        }).catch(_ => res.status(500).json(failMessage))
+    }
+
+    const viewUserDetails = (req, res) => {
+        if(!req.session.user.permissions.users) {
+            return res.status(401).render('500')
+        }
+
+        User.findOne({ _id: req.params.id }).then(getUser => {
+            res.status(200).render('./admin/index', {
+                user: req.session.user,
+                page: 'Detalhes do usuário',
+                getUser,
+                moment,
+                csrf: req.csrfToken(),
+                message: null
+            })
+        }).catch(_ => res.status(500).render('500'))
+    }
+
+    const changeUser = (req, res) => {
+        if(!req.session.user.permissions.users) {
+            return res.status(401).json(failMessage)
+        }
+
+        const changeUser = { ...req.body }
+
+        User.findOne({ _id: req.params.id }).then(async user => {
+            if(changeUser.type === 'permission') {
+                if(!req.session.user.permissions.changePermission) {
+                    return res.status(401).json(failMessage)
+                }
+    
+                if(changeUser.changePermission) user.permissions.changePermission = true
+                else user.permissions.changePermission = false
+    
+                if(changeUser.report) user.permissions.report = true
+                else user.permissions.report = false
+    
+                if(changeUser.users) user.permissions.users = true
+                else user.permissions.users = false
+    
+                if(changeUser.home) user.permissions.home = true
+                else user.permissions.home = false
+    
+                if(changeUser.origin) user.permissions.origin = true
+                else user.permissions.origin = false
+    
+                if(changeUser.orderDetail) user.permissions.orderDetail = true
+                else user.permissions.orderDetail = false
+    
+                if(changeUser.coupons) user.permissions.coupons = true
+                else user.permissions.coupons = false
+    
+                if(changeUser.product) user.permissions.product = true
+                else user.permissions.product = false
+    
+                if(changeUser.automation) user.permissions.automation = true
+                else user.permissions.automation = false
+    
+                if(changeUser.afterSales) user.permissions.afterSales = true
+                else user.permissions.afterSales = false
+            } else {
+                if(!changeUser.name && !changeUser.email && !changeUser.admin)
+                    return res.status(400).json(failMessage)
+
+                if(changeUser.name) {
+                    try {
+                        tooSmall(changeUser.name, 'Nome muito curto, digite um nome maior')
+                        tooBig(changeUser.name, 'Nome muito longo, digite um nome menor')
+                    } catch(msg) {
+                        return res.status(400).json(msg)
+                    }
+
+                    user.name = changeUser.name
+                }
+
+                if(changeUser.email) {
+                    try {
+                        tooBigEmail(changeUser.email, 'Email é muito longo')
+                        validEmailOrError(changeUser.email, 'Email inválido')
+                        const userFromDB = await User.findOne({ email: changeUser.email })
+                        .catch(err => new Error(err))
+                        if(userFromDB instanceof Error) return res.status(500).json(failMessage)
+                        notExistOrError(userFromDB, 'Esse Email já está registrado')
+                    } catch(msg) {
+                        return res.status(400).json(msg)
+                    }
+
+                    user.email = changeUser.email
+                }
+
+                if(changeUser.admin && changeUser.admin === 'Sim' && req.session.user.admin) {
+                    user.admin = true
+                }
+            }
+
+            user.save().then(res.status(200).json(successMessage))
+        }).catch(_ => res.status(500).json(failMessage))
+    }
+
+    const removeUser = (req, res) => {
+        if(!req.session.user.permissions.users) {
+            return res.status(401).json(failMessage)
+        }
+
+        User.findOne({ _id: req.params.id }).then(user => {
+            if(user.deletedAt) user.deletedAt = undefined
+            else user.deletedAt = moment().format('L - LTS')
+
+            user.save().then(res.status(200).json(successMessage))
         }).catch(_ => res.status(500).json(failMessage))
     }
 
@@ -633,6 +859,11 @@ module.exports = app => {
         viewOrigin,
         viewAutomation,
         viewReport,
-        viewAfterSales
+        viewAfterSales,
+        viewUsers,
+        addNewUser,
+        viewUserDetails,
+        changeUser,
+        removeUser
     }
 }

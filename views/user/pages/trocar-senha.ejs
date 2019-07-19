@@ -1,0 +1,63 @@
+<div role="main" class="main">
+    <% include ../../template/breadcomb.ejs %>
+
+    <section class="mb-5">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div class="featured-boxes">
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3">
+                                <div class="featured-box featured-box-primary text-left mt-5">
+                                    <div class="box-content">
+                                        <h4 class="color-primary font-weight-semibold text-4 text-uppercase mb-3">Escolha sua nova senha</h4>
+                                        <form id="form-change-password">
+                                            <div class="form-row">
+                                                <div class="form-group col-12">
+                                                    <label class="font-weight-bold text-dark text-2">Senha</label>
+                                                    <input type="password" name="password" class="form-control" required>
+                                                </div>
+                                                <div class="form-group col-12">
+                                                    <label class="font-weight-bold text-dark text-2">Confirmar senha</label>
+                                                    <input type="password" name="confirmPassword" class="form-control" required>
+                                                </div>
+                                                <div class="form-group col-12">
+                                                    <button type="submit" style="color:#fff" class="btn btn-primary btn-modern btn-block">Alterar senha</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                        <script>
+                                            $(document).ready(function() {
+                                                $('#form-change-password').on('submit', function(e) {
+                                                    e.preventDefault()
+                                                    
+                                                    $.ajax({
+                                                        type: 'POST',
+                                                        url: '/trocar-senha',
+                                                        datatype: 'html',
+                                                        contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                                                        data: $('#form-change-password').serialize(),     
+                                                        headers: {
+                                                            'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
+                                                        },
+                                                        success: function(result) {       
+                                                            window.location.href = result
+                                                        },
+                                                        error: function(xhr, status, error) {
+                                                            if(error === 'Forbidden') return window.location.href = '/'
+                                                            alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                                                        }
+                                                    })
+                                                })
+                                            })
+                                        </script>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

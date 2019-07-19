@@ -61,7 +61,6 @@
                                                             window.location.href = result
                                                         },
                                                         error: function(xhr, status, error) {
-                                                            console.log(error)
                                                             if(error === 'Forbidden') return window.location.href = '/'
                                                             alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
                                                         }

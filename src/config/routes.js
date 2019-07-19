@@ -90,7 +90,7 @@ module.exports = app => {
         app.post('/briefing', csrf(), app.src.api.user.getSegmentation)   
 
         /* ============= DOWNLOAD INVOICE  ============= */
-        app.get('/nota-fiscal', app.src.api.user.downloadInvoice)     
+        app.get('/nota-fiscal', app.src.api.user.downloadInvoice)      
         
         /* ============= VIEW SITEMAP.XML  ============= */
         app.get('/sitemap.xml', app.src.api.user.viewSiteMap)  
@@ -107,6 +107,11 @@ module.exports = app => {
             .get(csrf(), app.src.api.user.viewFirstAccess)  
             .post(csrf(), app.src.api.user.changeFirstAccess)
 
+        app.route('/trocar-senha')
+            .all(app.src.config.passport.authenticate())
+            .get(csrf(), app.src.api.user.viewChangeFirstPassword)  
+            .post(csrf(), app.src.api.user.changeFirstPassword)
+            
         app.route('/minha-conta')
             .all(app.src.config.passport.authenticate())
             .get(csrf(), app.src.api.user.viewUserProfile) 
@@ -169,7 +174,18 @@ module.exports = app => {
 
         app.route('/admin/pos-venda')
             .all(app.src.config.passport.authenticate())
-            .get(admin(app.src.api.admin.viewAfterSales))            
+            .get(admin(app.src.api.admin.viewAfterSales))   
+
+        app.route('/admin/usuarios')
+            .all(app.src.config.passport.authenticate())
+            .get(csrf(), admin(app.src.api.admin.viewUsers))  
+            .post(csrf(), admin(app.src.api.admin.addNewUser))     
+
+        app.route('/admin/usuarios/:id')
+            .all(app.src.config.passport.authenticate())
+            .get(csrf(), admin(app.src.api.admin.viewUserDetails))  
+            .put(csrf(), admin(app.src.api.admin.changeUser))  
+            .delete(csrf(), admin(app.src.api.admin.removeUser))          
     //#endregion
 
     //#region PAGARME

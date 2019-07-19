@@ -15,7 +15,7 @@ module.exports = app => {
         app.use(express_enforces_ssl())
         app.use(helmet.hsts({
             maxAge: 31536000,
-            includeSubDomains: false
+            includeSubDomains: true
         }))
         app.use(session({
             cookieName: 'session',
@@ -54,6 +54,7 @@ module.exports = app => {
     app.use([
         '/validate',
         '/primeiro-acesso',
+        '/trocar-senha',
         '/minha-conta',
         '/minha-conta/alterar-senha',
         '/minha-conta/pedidos',
@@ -66,7 +67,8 @@ module.exports = app => {
         '/admin/origem',
         '/admin/automacoes',
         '/admin/relatorios',
-        '/admin/pos-venda'
+        '/admin/pos-venda',
+        '/admin/usuarios'
     ], (req, res, next) => {
         if (!req.session.user) {
             res.status(401).render('index', {

@@ -1,0 +1,287 @@
+<div class="row">
+    <div class="col-md-4">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Informações</h3>
+            </div>
+            <div class="box-body">
+                <% if(getUser.admin) { %>
+                    <p class="text-center"><code>Administrador</code></p>
+                <% } %>
+                <ul class="list-group list-group-unbordered">
+                    <li class="list-group-item">
+                        <b>Nome</b> <a class="pull-right"><%= getUser.name %></a>
+                    </li>
+                    <li class="list-group-item">
+                        <b>Email</b> <a class="pull-right"><%= getUser.email %></a>
+                    </li>
+                    <li class="list-group-item">
+                        <b>Telefone</b> <a class="pull-right"><%= getUser.phone %></a>
+                    </li>
+                    <% if(getUser.documents) { %>
+                        <li class="list-group-item">
+                            <b><% if(getUser.documents.typeDoc === 'pf') { %>CPF<% } else { %>CNPJ<% } %></b> <a class="pull-right"><%= getUser.documents.cpfOrCnpj%></a>
+                        </li>
+                    <% } %>
+                    <% if(getUser.birthday) { %>
+                    <li class="list-group-item">
+                        <b>Data de nascimento</b> <a class="pull-right"><%= moment(getUser.birthday, 'YYYY-MM-DD').format('DD/MM/YYYY') %></a>
+                    </li>
+                    <% } %>
+                    <li class="list-group-item">
+                        <b>Registro</b> <a class="pull-right"><%= getUser.createdAt %></a>
+                    </li>
+                    <% if(getUser.deletedAt) { %>
+                        <li class="list-group-item">
+                            <b>Banido em</b> <a class="pull-right"><%= getUser.deletedAt %></a>
+                        </li>
+                    <% } %>
+                </ul>
+                <% if(getUser.address) { %>
+                    <p>Endereço</p>
+                    <ul class="list-group list-group-unbordered">
+                        <li class="list-group-item">
+                            <b>Rua</b> <a class="pull-right"><%= getUser.address.street %></a>
+                        </li>
+                        <li class="list-group-item">
+                            <b>Bairro - número</b> <a class="pull-right"><%= getUser.address.neighborhood %> - <%= getUser.address.number %></a>
+                        </li>
+                        <% if(getUser.address.complement) { %>
+                            <li class="list-group-item">
+                                <b>Complemento</b> <a class="pull-right"><%= getUser.address.complement %></a>
+                            </li>
+                        <% } %>
+                        <li class="list-group-item">
+                            <b>CEP</b> <a class="pull-right"><%= getUser.address.zipCode %></a>
+                        </li>
+                        <li class="list-group-item">
+                            <b>Cidade/estado</b> <a class="pull-right"><%= getUser.address.city %>/<%= getUser.address.state %></a>
+                        </li>
+                    </ul>
+                <% } %>
+                <div align="center">
+                    <form id="form-remove-user">
+                        <button type="submit" class="btn btn-danger">
+                            <% if(!getUser.deletedAt) { %>
+                                Banir usuário
+                            <% } else { %>
+                                Desbanir usuário
+                            <% } %>
+                        </button>
+                    </form>
+                    <script>
+                        $(document).ready(function() {
+                            $('#form-remove-user').on('submit', function(e) {                        
+                                $(document).ajaxStart(function() { Pace.restart() })
+                                e.preventDefault()
+                                
+                                $.ajax({
+                                    type: 'DELETE',
+                                    url: '/admin/usuarios/<%= getUser._id %>',  
+                                    headers: {
+                                        'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
+                                    },
+                                    success: function(result) {          
+                                        alertify.notify(result, 'success', 5)
+                                        setTimeout(function() { 
+                                            window.location.reload()
+                                        }, 500)
+                                    },
+                                    error: function(xhr, status, error) {
+                                        if(error === 'Forbidden') return window.location.href = '/'
+                                        alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                                    }
+                                })
+                            })
+                        })
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <% if(getUser.admin && user.permissions.changePermission) { %>
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Alterar permissões</h3>
+                </div>
+                <div class="box-body">
+                    <form id="change-user-permission">
+                        <input type="hidden" name="type" value="permission">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="changePermission" type="checkbox" <% if(getUser.permissions.changePermission) { %>checked<% } %>> Permissões
+                                        </label><br>
+                                        O usuário poderá alterar permissões de outros usuários
+                                    </div><br>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="report" type="checkbox" <% if(getUser.permissions.report) { %>checked<% } %>> Relatórios
+                                        </label><br>
+                                        O usuário poderá ver os relatórios
+                                    </div><br>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="users" type="checkbox" <% if(getUser.permissions.users) { %>checked<% } %>> Usuários
+                                        </label><br>
+                                        O usuário poderá ver e alterar todos os usuários
+                                    </div><br>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="home" type="checkbox" <% if(getUser.permissions.home) { %>checked<% } %>> Home
+                                        </label><br>
+                                        O usuário poderá ver as informações da aba Home
+                                    </div><br>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="origin" type="checkbox" <% if(getUser.permissions.origin) { %>checked<% } %>> Origem
+                                        </label><br>
+                                        O usuário poderá ver as origens dos pedidos
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="orderDetail" type="checkbox" <% if(getUser.permissions.orderDetail) { %>checked<% } %>> Detalhes do pedido
+                                        </label><br>
+                                        O usuário poderá ver e alterar os detalhes do pedido
+                                    </div><br>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="coupons" type="checkbox" <% if(getUser.permissions.coupons) { %>checked<% } %>> Cupons
+                                        </label><br>
+                                        O usuário poderá ver e alterar os cupons
+                                    </div><br>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="automation" type="checkbox" <% if(getUser.permissions.automation) { %>checked<% } %>> Automação
+                                        </label><br>
+                                        O usuário poderá ver as informações da aba Automação
+                                    </div><br>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="afterSales" type="checkbox" <% if(getUser.permissions.afterSales) { %>checked<% } %>> Pós venda
+                                        </label><br>
+                                        O usuário poderá ver as informações da aba Pós venda
+                                    </div><br>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="product" type="checkbox" <% if(getUser.permissions.product) { %>checked<% } %>> Planos
+                                        </label><br>
+                                        O usuário poderá ver e alterar os planos
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Alterar permissões</button>
+                    </form>
+                    <script>
+                        $(document).ready(function() {
+                            $('#change-user-permission').on('submit', function(e) {           
+                                $(document).ajaxStart(function() { Pace.restart() })
+                                e.preventDefault()
+                                
+                                $.ajax({
+                                    type: 'PUT',
+                                    url: '/admin/usuarios/<%= getUser._id %>',
+                                    datatype: 'html',
+                                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                                    data: $('#change-user-permission').serialize(),
+                                    headers: {
+                                        'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
+                                    },
+                                    success: function(result) {          
+                                        alertify.notify(result, 'success', 5)
+                                        setTimeout(function() { 
+                                            window.location.reload()
+                                        }, 500)
+                                    },
+                                    error: function(xhr, status, error) {
+                                        if(error === 'Forbidden') return window.location.href = '/'
+                                        alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                                    }
+                                })
+                            })
+                        })
+                    </script>
+                </div>
+            </div>
+        <% } %>
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Alterar informações</h3>
+            </div>
+            <div class="box-body">
+                <form id="change-user-info">
+                    <input type="hidden" name="type" value="info">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>Nome</label>
+                            <div class="input-group">
+                                <input type="text" placeholder="Digite o nome" name="name" class="form-control">
+                                <div class="input-group-addon"><i class="fa fa-user"></i></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Email</label>
+                            <div class="input-group">
+                                <input type="email" placeholder="Digite o Email" name="email" class="form-control">
+                                <div class="input-group-addon"><i class="fa fa-envelope"></i></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Administrador?</label>
+                            <div class="input-group">
+                                <select class="form-control" name="admin">
+                                    <option selected disabled>Selecione o cargo</option>
+                                    <option>Não</option>
+                                    <option>Sim</option>
+                                </select>
+                                <div class="input-group-addon"><i class="fa fa-star"></i></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" style="margin-top: 10px">
+                            <button type="submit" class="btn btn-primary">Alterar informações</button>
+                        </div>
+                    </div>
+                </form>
+                <script>
+                    $(document).ready(function() {
+                        $('#change-user-info').on('submit', function(e) {
+                            $(document).ajaxStart(function() { Pace.restart() })
+                            e.preventDefault()
+                            
+                            $.ajax({
+                                type: 'PUT',
+                                url: '/admin/usuarios/<%= getUser._id %>',
+                                datatype: 'html',
+                                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                                data: $('#change-user-info').serialize(),
+                                headers: {
+                                    'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
+                                },
+                                success: function(result) {          
+                                    alertify.notify(result, 'success', 5)
+                                    setTimeout(function() { 
+                                        window.location.reload()
+                                    }, 500)
+                                },
+                                error: function(xhr, status, error) {
+                                    if(error === 'Forbidden') return window.location.href = '/'
+                                    alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                                }
+                            })
+                        })
+                    })
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+</script>

@@ -1,144 +1,146 @@
-<link rel="stylesheet" href="/views/admin/assets/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+<% if(user.permissions.home) { %>
+    <link rel="stylesheet" href="/views/admin/assets/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="box">
-            <div class="box-header with-border">
-                <h3 class="box-title">Transações / assinaturas</h3><br/>
-            </div>
-            <div class="box-body">
-                <table id="table-info" class="table table-bordered table-hover">
-                    <style>
-                        .no-sort::after {
-                            display: none !important;
-                        }
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Transações / assinaturas</h3><br/>
+                </div>
+                <div class="box-body">
+                    <table id="table-info" class="table table-bordered table-hover">
+                        <style>
+                            .no-sort::after {
+                                display: none !important;
+                            }
 
-                        .no-sort {
-                            pointer-events: none !important;
-                            cursor: default !important;
-                        }
-                    </style>
-                    <thead>
-                        <tr>
-                            <th style="display: none;"></th>
-                            <th>#ID</th>
-                            <th>Nome</th>
-                            <th>Data</th>
-                            <th>Valor</th>
-                            <th>Status</th>
-                            <th class="no-sort">Informações</th>
-                            <th class="no-sort">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% for(let i = 0; i < orders.length; i++) { %>
-                            <tr>       
-                                <td style="display: none;"><%= i + 1 %></td>   
-                                <td><%= orders[i]._id %></td>              
-                                <td><%= orders[i].buyer.name %></td>
-                                <td><%= orders[i].createdAt %></td>
-                                <td>R$<%= (orders[i].total / 100).toFixed(2).replace('.', ',') %></td>
-                                <td>
-                                    <%
-                                        let getIcon = null
-                                        if(orders[i].origin === 'Facebook')
-                                            getIcon = 'fa fa-facebook-official'
-                                        else if(orders[i].origin === 'Google')
-                                            getIcon = 'fa fa-google'
-                                        else if(orders[i].origin === 'Email')
-                                            getIcon = 'fa fa-envelope'
-                                        else if(orders[i].origin === 'YouTube')
-                                            getIcon = 'fa fa-youtube'
-                                        else if(orders[i].origin === 'Instagram')
-                                            getIcon = 'fa fa-instagram'
-                                        else if(orders[i].origin === 'Renovação')
-                                            getIcon = 'fa fa-repeat'
-                                        else
-                                            getIcon = 'fa fa-mail-forward'
-                                    %>
-                                    <% if(orders[i].status === 'paid') { %>
-                                        <button style="letter-spacing: 2px;" class="btn btn-success btn-sm"><i class="<%= getIcon %>"></i>&nbsp;<% if(orders[i].paymentConfig.method === 'boleto') { %><i class="fa fa-barcode"></i><% } else { %><i class="fa fa-credit-card"></i><% } %>&nbsp;PAGO</button>
-                                    <% } else if(orders[i].status === 'waiting_payment') { %>
-                                        <button style="letter-spacing: 2px;" class="btn btn-default btn-sm"><i class="<%= getIcon %>"></i>&nbsp;<% if(orders[i].paymentConfig.method === 'boleto') { %><i class="fa fa-barcode"></i><% } else { %><i class="fa fa-credit-card"></i><% } %>&nbsp;AGUARDANDO</button>
-                                    <% } else { %>
-                                        <button style="letter-spacing: 2px;" class="btn btn-danger btn-sm"><i class="<%= getIcon %>"></i>&nbsp;<% if(orders[i].paymentConfig.method === 'boleto') { %><i class="fa fa-barcode"></i><% } else { %><i class="fa fa-credit-card"></i><% } %>&nbsp;CANCELADO</button>
-                                    <% } %>                                    
-                                </td>
-                                <td style="letter-spacing: 4px; font-size: 17px;">
-                                    <i <% if(orders[i].options && orders[i].options.interacion && orders[i].options.interacion.comment) { %>style="color: #4297b9"<% } %> class="fa fa-comments" data-toggle="tooltip" data-placement="top" title="Interação"></i>
-                                    <% if(orders[i].options && orders[i].options._idSegmentation) { %>
-                                        <% for(let j = 0; j < segmentations.length; j++) { %>
-                                            <% if(orders[i].options._idSegmentation == segmentations[j]._id) { %>
-                                                <% if(segmentations[j].status !== 'pendente') { %>
-                                                    <i style="color: #4297b9" class="fa fa-envelope" data-toggle="tooltip" data-placement="top" title="Segmentação"></i>
-                                                <% } else { %>
-                                                    <i class="fa fa-envelope" data-toggle="tooltip" data-placement="top" title="Segmentação"></i>
+                            .no-sort {
+                                pointer-events: none !important;
+                                cursor: default !important;
+                            }
+                        </style>
+                        <thead>
+                            <tr>
+                                <th style="display: none;"></th>
+                                <th>#ID</th>
+                                <th>Nome</th>
+                                <th>Data</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th class="no-sort">Informações</th>
+                                <th class="no-sort">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% for(let i = 0; i < orders.length; i++) { %>
+                                <tr>       
+                                    <td style="display: none;"><%= i + 1 %></td>   
+                                    <td><%= orders[i]._id %></td>              
+                                    <td><%= orders[i].buyer.name %></td>
+                                    <td><%= orders[i].createdAt %></td>
+                                    <td>R$<%= (orders[i].total / 100).toFixed(2).replace('.', ',') %></td>
+                                    <td>
+                                        <%
+                                            let getIcon = null
+                                            if(orders[i].origin === 'Facebook')
+                                                getIcon = 'fa fa-facebook-official'
+                                            else if(orders[i].origin === 'Google')
+                                                getIcon = 'fa fa-google'
+                                            else if(orders[i].origin === 'Email')
+                                                getIcon = 'fa fa-envelope'
+                                            else if(orders[i].origin === 'YouTube')
+                                                getIcon = 'fa fa-youtube'
+                                            else if(orders[i].origin === 'Instagram')
+                                                getIcon = 'fa fa-instagram'
+                                            else if(orders[i].origin === 'Renovação')
+                                                getIcon = 'fa fa-repeat'
+                                            else
+                                                getIcon = 'fa fa-mail-forward'
+                                        %>
+                                        <% if(orders[i].status === 'paid') { %>
+                                            <button style="letter-spacing: 2px;" class="btn btn-success btn-sm"><i class="<%= getIcon %>"></i>&nbsp;<% if(orders[i].paymentConfig.method === 'boleto') { %><i class="fa fa-barcode"></i><% } else { %><i class="fa fa-credit-card"></i><% } %>&nbsp;PAGO</button>
+                                        <% } else if(orders[i].status === 'waiting_payment') { %>
+                                            <button style="letter-spacing: 2px;" class="btn btn-default btn-sm"><i class="<%= getIcon %>"></i>&nbsp;<% if(orders[i].paymentConfig.method === 'boleto') { %><i class="fa fa-barcode"></i><% } else { %><i class="fa fa-credit-card"></i><% } %>&nbsp;AGUARDANDO</button>
+                                        <% } else { %>
+                                            <button style="letter-spacing: 2px;" class="btn btn-danger btn-sm"><i class="<%= getIcon %>"></i>&nbsp;<% if(orders[i].paymentConfig.method === 'boleto') { %><i class="fa fa-barcode"></i><% } else { %><i class="fa fa-credit-card"></i><% } %>&nbsp;CANCELADO</button>
+                                        <% } %>                                    
+                                    </td>
+                                    <td style="letter-spacing: 4px; font-size: 17px;">
+                                        <i <% if(orders[i].options && orders[i].options.interacion && orders[i].options.interacion.comment) { %>style="color: #4297b9"<% } %> class="fa fa-comments" data-toggle="tooltip" data-placement="top" title="Interação"></i>
+                                        <% if(orders[i].options && orders[i].options._idSegmentation) { %>
+                                            <% for(let j = 0; j < segmentations.length; j++) { %>
+                                                <% if(orders[i].options._idSegmentation == segmentations[j]._id) { %>
+                                                    <% if(segmentations[j].status !== 'pendente') { %>
+                                                        <i style="color: #4297b9" class="fa fa-envelope" data-toggle="tooltip" data-placement="top" title="Segmentação"></i>
+                                                    <% } else { %>
+                                                        <i class="fa fa-envelope" data-toggle="tooltip" data-placement="top" title="Segmentação"></i>
+                                                    <% } %>
                                                 <% } %>
                                             <% } %>
+                                        <% } else { %>
+                                            <i class="fa fa-envelope" data-toggle="tooltip" data-placement="top" title="Segmentação"></i>
                                         <% } %>
-                                    <% } else { %>
-                                        <i class="fa fa-envelope" data-toggle="tooltip" data-placement="top" title="Segmentação"></i>
-                                    <% } %>
-                                    <i <% if(orders[i].options && orders[i].options.automation && orders[i].options.automation._idResponsible) { %>style="color: #4297b9"<% } %> class="fa fa-check-circle" data-toggle="tooltip" data-placement="top" title="Automação"></i>
-                                    <i <% if(orders[i].origin === 'Renovação') { %>style="color: #4297b9"<% } %> class="fa fa-repeat" data-toggle="tooltip" data-placement="top" title="Renovação"></i>
-                                    <i <% if(orders[i].options && orders[i].options.invoice) { %>style="color: #4297b9"<% } %> class="fa fa-file" data-toggle="tooltip" data-placement="top" title="Nota fiscal"></i>
-                                </td>
-                                <td><a href="/admin/detalhes-da-compra?id=<%= orders[i]._id %>" style="color: black; font-size: 17px;"><i class="fa fa-eye" data-toggle="tooltip" data-placement="top" title="Ver mais detalhes"></i></a></td>
+                                        <i <% if(orders[i].options && orders[i].options.automation && orders[i].options.automation._idResponsible) { %>style="color: #4297b9"<% } %> class="fa fa-check-circle" data-toggle="tooltip" data-placement="top" title="Automação"></i>
+                                        <i <% if(orders[i].origin === 'Renovação') { %>style="color: #4297b9"<% } %> class="fa fa-repeat" data-toggle="tooltip" data-placement="top" title="Renovação"></i>
+                                        <i <% if(orders[i].options && orders[i].options.invoice) { %>style="color: #4297b9"<% } %> class="fa fa-file" data-toggle="tooltip" data-placement="top" title="Nota fiscal"></i>
+                                    </td>
+                                    <td><a href="/admin/detalhes-da-compra?id=<%= orders[i]._id %>" style="color: black; font-size: 17px;"><i class="fa fa-eye" data-toggle="tooltip" data-placement="top" title="Ver mais detalhes"></i></a></td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th style="display: none;"></th>
+                                <th>#ID</th>
+                                <th>Nome</th>
+                                <th>Data</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Informações</th>
+                                <th>Ações</th>
                             </tr>
-                        <% } %>
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th style="display: none;"></th>
-                            <th>#ID</th>
-                            <th>Nome</th>
-                            <th>Data</th>
-                            <th>Valor</th>
-                            <th>Status</th>
-                            <th>Informações</th>
-                            <th>Ações</th>
-                        </tr>
-                    </tfoot>
-                </table>
+                        </tfoot>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script src="/views/admin/assets/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
-<script src="/views/admin/assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('#table-info').DataTable({
-            'paging': true,
-            'lengthChange': true,
-            'searching': true,
-            'ordering': true,
-            'info': true,
-            'autoWidth': false,
-            'language': {
-                "sEmptyTable": "Nenhum registro encontrado",
-                "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
-                "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
-                "sInfoFiltered": "(Filtrados de _MAX_ registros)",
-                "sInfoPostFix": "",
-                "sInfoThousands": ".",
-                "sLengthMenu": "_MENU_ resultados por página",
-                "sLoadingRecords": "Carregando...",
-                "sProcessing": "Processando...",
-                "sZeroRecords": "Nenhum registro encontrado",
-                "sSearch": "Pesquisar",
-                "oPaginate": {
-                    "sNext": "Próximo",
-                    "sPrevious": "Anterior",
-                    "sFirst": "Primeiro",
-                    "sLast": "Último"
-                },
-                "oAria": {
-                    "sSortAscending": ": Ordenar colunas de forma ascendente",
-                    "sSortDescending": ": Ordenar colunas de forma descendente"
+    <script src="/views/admin/assets/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="/views/admin/assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#table-info').DataTable({
+                'paging': true,
+                'lengthChange': true,
+                'searching': true,
+                'ordering': true,
+                'info': true,
+                'autoWidth': false,
+                'language': {
+                    "sEmptyTable": "Nenhum registro encontrado",
+                    "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+                    "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+                    "sInfoFiltered": "(Filtrados de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sInfoThousands": ".",
+                    "sLengthMenu": "_MENU_ resultados por página",
+                    "sLoadingRecords": "Carregando...",
+                    "sProcessing": "Processando...",
+                    "sZeroRecords": "Nenhum registro encontrado",
+                    "sSearch": "Pesquisar",
+                    "oPaginate": {
+                        "sNext": "Próximo",
+                        "sPrevious": "Anterior",
+                        "sFirst": "Primeiro",
+                        "sLast": "Último"
+                    },
+                    "oAria": {
+                        "sSortAscending": ": Ordenar colunas de forma ascendente",
+                        "sSortDescending": ": Ordenar colunas de forma descendente"
+                    }
                 }
-            }
+            })
         })
-    })
-</script>
+    </script>
+<% } %>

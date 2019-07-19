@@ -117,5 +117,21 @@ module.exports = {
         }
 
         transporter.sendMail(mailOptions)
+    },
+
+    newAccountByAdmin(email, name, password) {
+        const mailOptions = {
+            from: 'TRÊS MAIS TRÊS <' + process.env.MAIL_AUTH_USER + '>',
+            to: email,
+            subject: 'Uma conta foi criada para você',
+            html: '<b>Olá, ' + name + '. Uma conta em nossa plataforma foi criada para você.</b><br/>' +
+            'Para acessar a plataforma, utilize as informações abaixo:<br/>' +
+            '<b>' + process.env.DOMAIN_NAME + '/login<br/>' +
+            'Email: ' + email + '<br/>' +
+            'Senha provisória: ' + password + '</b><br/><br/>' +
+            'Atenciosamente,<br/>Equipe TRÊS MAIS TRÊS'
+        }
+
+        transporter.sendMail(mailOptions)
     }
 }

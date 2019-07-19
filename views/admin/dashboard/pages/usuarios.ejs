@@ -1,0 +1,160 @@
+<link rel="stylesheet" href="/views/admin/assets/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-body">
+                <table id="table-info" class="table table-bordered table-hover">
+                    <style>
+                        .no-sort::after {
+                            display: none !important;
+                        }
+
+                        .no-sort {
+                            pointer-events: none !important;
+                            cursor: default !important;
+                        }
+                    </style>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Registro</th>
+                            <th class="no-sort">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(let i = 0; i < users.length; i++) { %>
+                            <tr>
+                                <td><% if(users[i].admin) { %><i class="fa fa-star" style="color: #f39c12;" data-toggle="tooltip" data-placement="top" title="Administrador"></i> <% } %><%= users[i].name %></td>
+                                <td><%= users[i].email %></td>                                
+                                <td><%= users[i].createdAt %></td>                           
+                                <td><a href="/admin/usuarios/<%= users[i]._id %>"><span class="btn badge bg-light-blue">Ver detalhes</span></a></td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Registro</th>
+                            <th>Ações</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">Adicionar novo usuário</h3>
+                <p>O usuário receberá uma senha provisória por Email</p>
+            </div>
+            <div class="box-body">
+                <form id="add-new-user">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>Nome</label>
+                            <div class="input-group">
+                                <input type="text" placeholder="Digite o nome" name="name" class="form-control">
+                                <div class="input-group-addon"><i class="fa fa-user"></i></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Email</label>
+                            <div class="input-group">
+                                <input type="email" placeholder="Digite o Email" name="email" class="form-control">
+                                <div class="input-group-addon"><i class="fa fa-envelope"></i></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Administrador?</label>
+                            <div class="input-group">
+                                <select class="form-control" name="admin">
+                                    <option selected disabled>Selecione o cargo</option>
+                                    <option>Não</option>
+                                    <option>Sim</option>
+                                </select>
+                                <div class="input-group-addon"><i class="fa fa-star"></i></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" style="margin-top: 10px">
+                            <button type="submit" class="btn btn-primary">Adicionar usuário</button>
+                        </div>
+                    </div>
+                </form>
+                <script>
+                    $(document).ready(function() {
+                        $('#add-new-user').on('submit', function(e) {
+                            $(document).ajaxStart(function() { Pace.restart() })
+                            e.preventDefault()
+                            
+                            $.ajax({
+                                type: 'POST',
+                                url: '/admin/usuarios',
+                                datatype: 'html',
+                                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                                data: $('#add-new-user').serialize(), 
+                                headers: {
+                                    'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
+                                },
+                                success: function(result) {          
+                                    alertify.notify(result, 'success', 5)
+                                    setTimeout(function() { 
+                                        window.location.reload()
+                                    }, 500)
+                                },
+                                error: function(xhr, status, error) {
+                                    if(error === 'Forbidden') return window.location.href = '/'
+                                    alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                                }
+                            })
+                        })
+                    })
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/views/admin/assets/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="/views/admin/assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#table-info').DataTable({
+            'paging': true,
+            'lengthChange': true,
+            'searching': true,
+            'ordering': true,
+            'info': true,
+            'autoWidth': false,
+            'language': {
+                "sEmptyTable": "Nenhum registro encontrado",
+                "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+                "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+                "sInfoFiltered": "(Filtrados de _MAX_ registros)",
+                "sInfoPostFix": "",
+                "sInfoThousands": ".",
+                "sLengthMenu": "_MENU_ resultados por página",
+                "sLoadingRecords": "Carregando...",
+                "sProcessing": "Processando...",
+                "sZeroRecords": "Nenhum registro encontrado",
+                "sSearch": "Pesquisar",
+                "oPaginate": {
+                    "sNext": "Próximo",
+                    "sPrevious": "Anterior",
+                    "sFirst": "Primeiro",
+                    "sLast": "Último"
+                },
+                "oAria": {
+                    "sSortAscending": ": Ordenar colunas de forma ascendente",
+                    "sSortDescending": ": Ordenar colunas de forma descendente"
+                }
+            }
+        })
+    })
+</script>

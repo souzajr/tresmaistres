@@ -463,14 +463,13 @@ module.exports = app => {
     const editPassword = (req, res) => {
         const changePassword = { ...req.body }
 
-        User.findOne({ _id: req.session.user._id }).then(async user => {
+        User.findOne({ _id: req.session.user._id }).then(user => {
             if (changePassword.currentPassword || changePassword.newPassword || changePassword.confirmNewPassword) {
                 try {
                     existOrError(changePassword.currentPassword, 'Digite sua senha atual')
                     existOrError(changePassword.newPassword, 'Digite sua nova senha')
                     existOrError(changePassword.confirmNewPassword, 'Digite a confirmação da sua nova senha')
-                    const checkUser = await User.findOne({ _id: req.session.user._id })
-                    const isMatch = bcrypt.compareSync(changePassword.currentPassword, checkUser.password)
+                    const isMatch = bcrypt.compareSync(changePassword.currentPassword, user.password)
                     if (!isMatch) return res.status(401).json('Senha atual incorreta')
                     hasDigitOrError(changePassword.newPassword, 'A senha deve ter pelo menos um número')
                     //hasLowerOrError(changePassword.newPassword, 'A senha deve ter pelo menos uma letra minúscula')
@@ -633,6 +632,52 @@ module.exports = app => {
         res.status(200).download('./public/' + req.query.invoice)
     }
 
+    const viewChangeFirstPassword = (req, res) => {
+        if(!req.session.user.newUserByAdmin)
+            return res.status(404).render('404')
+
+        res.status(200).render('index', {
+            user: req.session.user,
+            page: 'Trocar senha',
+            csrf: req.csrfToken(),
+            message: null
+        })
+    }
+
+    const changeFirstPassword = (req, res) => {
+        if(!req.session.user.newUserByAdmin)
+            return res.status(200).json(failMessage)
+
+        const changePassword = { ...req.body }
+
+        User.findOne({ _id: req.session.user._id }).then(user => {
+            if(changePassword.password || changePassword.confirmPassword) {
+                try {
+                    existOrError(changePassword.password, 'Digite sua nova senha')
+                    existOrError(changePassword.confirmPassword, 'Digite a confirmação da sua nova senha')
+                    const isMatch = bcrypt.compareSync(changePassword.password, user.password)
+                    if (isMatch) return res.status(401).json('Sua nova senha não pode ser igual a senha provisória')
+                    hasDigitOrError(changePassword.password, 'A senha deve ter pelo menos um número')
+                    //hasLowerOrError(changePassword.password, 'A senha deve ter pelo menos uma letra minúscula')
+                    //hasUpperOrError(changePassword.password, 'A senha deve ter pelo menos uma letra maiúscula')
+                    notSpaceOrError(changePassword.password, 'A senha não deve ter espaços em branco')
+                    //hasSpecialOrError(changePassword.password, 'A senha deve ter pelo menos um caractere especial')
+                    strongOrError(changePassword.password, 'A senha deve conter pelo menos 8 caracteres')
+                    equalsOrError(changePassword.password, changePassword.confirmPassword, 'A senha e confirmação da senha não são iguais')
+                } catch (msg) {
+                    return res.status(400).json(msg)
+                }
+
+                user.newUserByAdmin = false
+                user.password = encryptPassword(changePassword.password)
+                user.save().then(_ => {
+                    if(user.admin) return res.status(200).json('/admin')
+                    res.status(200).json('/minha-conta')
+                })
+            } else return res.status(400).json(failMessage)
+        }).catch(_ => res.status(500).json(failMessage))
+    }
+
     const viewSiteMap = (req, res) => {
         const sitemap = sm.createSitemap({
             hostname: process.env.DOMAIN_NAME,
@@ -682,6 +727,8 @@ module.exports = app => {
         viewSegmentation,
         getSegmentation,
         downloadInvoice,
+        viewChangeFirstPassword,
+        changeFirstPassword,
         viewSiteMap
     }
 }
