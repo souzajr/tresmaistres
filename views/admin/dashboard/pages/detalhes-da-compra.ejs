@@ -12,8 +12,8 @@
         <%= order.buyer.name %><br>
         Data de nascimento: <%= moment(order.buyer.birthday, 'YYYY-MM-DD').format('DD/MM/YYYY') %><br>
         <% if(order.buyer.documents.typeDoc === 'pf') { %>CPF:<% } else { %>CNPJ:<% } %> <span id="cpfOrCnpj"></span><br>
-        Telefone: <span id="phone"></span><br>
-        Email: <%= order.buyer.email %><br>
+        Telefone: <a target="_blank" href="https://wa.me/55<%= order.buyer.phone %>"><span id="phone"></span></a><br>
+        Email: <a href="mailto:<%= order.buyer.email %>"><%= order.buyer.email %></a><br>
     </div>
     <div class="col-sm-4 invoice-col">
         <strong>Endereço de cobrança</strong><br>
@@ -42,7 +42,7 @@
                 <span class="label label-danger">NÃO INICIADA</span>
             <% } %>
         <% if(order.options && order.options._idSegmentation) { %>
-            <% if(segmentation && segmentation.status !== 'pendente') { %>
+            <% if(segmentation) { %>
                 <br>Briefing: <a href="#" data-toggle="modal" data-target="#modal-briefing">Ver mais</a>
             <% } else { %>
                 <br>Briefing: <a target="_blank" href="/briefing?id=<%= order.options._idSegmentation %>">URL do cliente</a>
@@ -51,8 +51,22 @@
             
     </div>
 </div>
+     
+<% if(segmentation) { %>
+    <strong>Segmentação</strong>
+    <div class="row invoice-info">
+        <div class="col-sm-6 invoice-col">
+            Login Instagram: <a target="_blank" href="https://www.instagram.com/<%= segmentation.instagramProfile.replace('@', '') %>"><%= segmentation.instagramProfile %></a><br>
+            Senha Instagram: <%= segmentation.instagramPassword %><br>
+            Perfis de interesse: <%= segmentation.interest.profiles %><br>
+            Assuntos de interesse: <%= segmentation.interest.subjects %><br>
+            Locais de interesse: <%= segmentation.interest.locations %><br>
+            Gênero de interesse: <%= segmentation.interest.genre %>
+        </div>
+    </div>
+<% } %>
 
-<div class="row">
+<div class="row" style="margin-top: 15px;">
     <div class="col-xs-12 table-responsive">
         <table class="table table-striped">
             <thead>
@@ -163,29 +177,45 @@
                     <input type="hidden" name="segmentationId" value="<%= segmentation._id %>">
                     <div class="modal-body">          
                         <div class="row">
-                            <div class="col-md-6">              
-                                <strong>Login Instagram</strong><br/>
-                                <%= segmentation.instagramProfile %>
+                            <div class="col-md-6"> 
+                                <div class="form-group">
+                                    <label>Login Instagram</label>
+                                    <input type="text" name="instagramProfile" value="<%= segmentation.instagramProfile %>" class="form-control">
+                                </div>        
                             </div>
-                            <div class="col-md-6">              
-                                <strong>Senha Instagram</strong><br/>
-                                <%= segmentation.instagramPassword %>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Senha Instagram</label>
+                                    <input type="text" name="instagramPassword" value="<%= segmentation.instagramPassword %>" class="form-control">
+                                </div>               
                             </div>
-                            <div class="col-md-12">              
-                                <strong>Perfis de interesse</strong><br/>
-                                <%= segmentation.interest.profiles %>
+                            <div class="col-md-12">     
+                                <div class="form-group">
+                                    <label>Perfis de interesse</label>   
+                                    <textarea name="profiles" class="form-control"><%= segmentation.interest.profiles %></textarea>   
+                                </div>
                             </div>
-                            <div class="col-md-12">              
-                                <strong>Assuntos de interesse</strong><br/>
-                                <%= segmentation.interest.subjects %>
+                            <div class="col-md-12">   
+                                <div class="form-group">
+                                    <label>Assuntos de interesse</label>   
+                                    <textarea name="subjects" class="form-control"><%= segmentation.interest.subjects %></textarea>   
+                                </div>     
                             </div>
-                            <div class="col-md-12">              
-                                <strong>Locais de interesse</strong><br/>
-                                <%= segmentation.interest.locations %>
+                            <div class="col-md-12">  
+                                <div class="form-group">
+                                    <label>Locais de interesse</label>   
+                                    <textarea name="locations" class="form-control"><%= segmentation.interest.locations %></textarea>   
+                                </div>         
                             </div>
-                            <div class="col-md-12">              
-                                <strong>Gênero de interesse</strong><br/>
-                                <%= segmentation.interest.genre %>
+                            <div class="col-md-12">  
+                                <div class="form-group">
+                                    <label>Gênero de interesse</label> 
+                                    <select name="genre" class="form-control">
+                                        <option <% if(segmentation.interest.genre === 'Ambos') { %>selected<% } %>>Ambos</option>
+                                        <option <% if(segmentation.interest.genre === 'Masculino') { %>selected<% } %>>Masculino</option>
+                                        <option <% if(segmentation.interest.genre === 'Feminino') { %>selected<% } %>>Feminino</option>
+                                    </select>
+                                </div>           
                             </div>
                             <div class="col-md-12">
                                 <div class="form-group">

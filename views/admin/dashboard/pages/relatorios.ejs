@@ -133,94 +133,10 @@
     <div class="col-md-12">
         <div class="box">
             <div class="box-header with-border">
-                <h3 class="box-title">Transações / assinaturas</h3><br/>
-            </div>
-            <div class="box-body">
-                <table id="table-info" class="table table-bordered table-hover">
-                    <style>
-                        .no-sort::after {
-                            display: none !important;
-                        }
-
-                        .no-sort {
-                            pointer-events: none !important;
-                            cursor: default !important;
-                        }
-                    </style>
-                    <thead>
-                        <tr>
-                            <th style="display: none;"></th>
-                            <th>#ID</th>
-                            <th>Nome</th>
-                            <th>Data</th>
-                            <th>Valor</th>
-                            <th>Status</th>
-                            <th class="no-sort">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% for(let i = 0; i < orders.length; i++) { %>
-                            <tr>       
-                                <td style="display: none;"><%= i + 1 %></td>   
-                                <td><%= orders[i]._id %></td>              
-                                <td><%= orders[i].buyer.name %></td>
-                                <td><%= orders[i].createdAt %></td>
-                                <td>R$<%= (orders[i].total / 100).toFixed(2).replace('.', ',') %></td>
-                                <td>
-                                    <%
-                                        let getIcon = null
-                                        if(orders[i].origin === 'Facebook')
-                                            getIcon = 'fa fa-facebook-official'
-                                        else if(orders[i].origin === 'Google')
-                                            getIcon = 'fa fa-google'
-                                        else if(orders[i].origin === 'Email')
-                                            getIcon = 'fa fa-envelope'
-                                        else if(orders[i].origin === 'YouTube')
-                                            getIcon = 'fa fa-youtube'
-                                        else if(orders[i].origin === 'Instagram')
-                                            getIcon = 'fa fa-instagram'
-                                        else if(orders[i].origin === 'Renovação')
-                                            getIcon = 'fa fa-repeat'
-                                        else
-                                            getIcon = 'fa fa-mail-forward'
-                                    %>
-                                    <% if(orders[i].status === 'paid') { %>
-                                        <button style="letter-spacing: 2px;" class="btn btn-success btn-sm"><i class="<%= getIcon %>"></i>&nbsp;<% if(orders[i].paymentConfig.method === 'boleto') { %><i class="fa fa-barcode"></i><% } else { %><i class="fa fa-credit-card"></i><% } %>&nbsp;PAGO</button>
-                                    <% } else if(orders[i].status === 'waiting_payment') { %>
-                                        <button style="letter-spacing: 2px;" class="btn btn-default btn-sm"><i class="<%= getIcon %>"></i>&nbsp;<% if(orders[i].paymentConfig.method === 'boleto') { %><i class="fa fa-barcode"></i><% } else { %><i class="fa fa-credit-card"></i><% } %>&nbsp;AGUARDANDO</button>
-                                    <% } else { %>
-                                        <button style="letter-spacing: 2px;" class="btn btn-danger btn-sm"><i class="<%= getIcon %>"></i>&nbsp;<% if(orders[i].paymentConfig.method === 'boleto') { %><i class="fa fa-barcode"></i><% } else { %><i class="fa fa-credit-card"></i><% } %>&nbsp;CANCELADO</button>
-                                    <% } %>                                    
-                                </td>
-                                <td><a href="/admin/detalhes-da-compra?id=<%= orders[i]._id %>" style="color: black; font-size: 17px;"><i class="fa fa-eye" data-toggle="tooltip" data-placement="top" title="Ver mais detalhes"></i></a></td>
-                            </tr>
-                        <% } %>
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th style="display: none;"></th>
-                            <th>#ID</th>
-                            <th>Nome</th>
-                            <th>Data</th>
-                            <th>Valor</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-12">
-        <div class="box">
-            <div class="box-header with-border">
                 <h3 class="box-title">Transações não finalizadas</h3><br/>
             </div>
             <div class="box-body">
-                <table id="table-info-2" class="table table-bordered table-hover">
+                <table id="table-info" class="table table-bordered table-hover">
                     <thead>
                         <tr>
                             <th style="display: none;"></th>
@@ -371,38 +287,6 @@
 
     $(document).ready(function() {
         $('#table-info').DataTable({
-            'paging': true,
-            'lengthChange': true,
-            'searching': true,
-            'ordering': true,
-            'info': true,
-            'autoWidth': false,
-            'language': {
-                "sEmptyTable": "Nenhum registro encontrado",
-                "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
-                "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
-                "sInfoFiltered": "(Filtrados de _MAX_ registros)",
-                "sInfoPostFix": "",
-                "sInfoThousands": ".",
-                "sLengthMenu": "_MENU_ resultados por página",
-                "sLoadingRecords": "Carregando...",
-                "sProcessing": "Processando...",
-                "sZeroRecords": "Nenhum registro encontrado",
-                "sSearch": "Pesquisar",
-                "oPaginate": {
-                    "sNext": "Próximo",
-                    "sPrevious": "Anterior",
-                    "sFirst": "Primeiro",
-                    "sLast": "Último"
-                },
-                "oAria": {
-                    "sSortAscending": ": Ordenar colunas de forma ascendente",
-                    "sSortDescending": ": Ordenar colunas de forma descendente"
-                }
-            }
-        })
-
-        $('#table-info-2').DataTable({
             'paging': true,
             'lengthChange': true,
             'searching': true,

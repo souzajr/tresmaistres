@@ -209,10 +209,8 @@ module.exports = app => {
             req.session.user = user
             req.session.token = jwt.encode(payload, process.env.AUTH_SECRET)
 
-            if(user.firstAccess) return res.redirect('/primeiro-acesso')
-            if(user.admin) return res.redirect('/admin')
-            res.redirect('/minha-conta')    
-        }).catch(err => console.log(err))
+            res.status(200).json('/minha-conta')    
+        }).catch(_ => res.status(500).json(failMessage))
     }
 
     const viewRecoverPassword = (req, res) => {

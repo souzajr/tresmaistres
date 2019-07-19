@@ -318,6 +318,12 @@ module.exports = app => {
 
         try {
             existOrError(segmentation.segmentationId, failMessage)
+            existOrError(segmentation.instagramProfile, 'Digite o login do perfil no Instagram')
+            existOrError(segmentation.instagramPassword, 'Digite a senha do perfil no Instagram')
+            existOrError(segmentation.profiles, 'Digite os perfis de interesse')
+            existOrError(segmentation.subjects, 'Digite os assuntos de interesse')
+            existOrError(segmentation.locations, 'Digite as cidades de interesse')
+            existOrError(segmentation.genre, 'Escolha o gênero do público')
             existOrError(segmentation.status, 'Escolha o status da segmentação')
         } catch(msg) {
             return res.status(400).json(msg)
@@ -325,8 +331,16 @@ module.exports = app => {
 
         Segmentation.findOne({ _id: segmentation.segmentationId }).then(getSegmentation => {
             if(segmentation.status === 'pendente') getSegmentation.status = segmentation.status
-            else return res.status(400).json('Esse já é o status atual da segmentação')
 
+            getSegmentation.instagramProfile = segmentation.instagramProfile
+            getSegmentation.instagramPassword = segmentation.instagramPassword
+            getSegmentation.interest = {
+                profiles: segmentation.profiles,
+                subjects: segmentation.subjects,
+                locations: segmentation.locations,
+                genre: segmentation.genre
+            }
+            
             getSegmentation.save().then(res.status(200).json(successMessage))
         }).catch(_ => res.status(500).json(failMessage))
     }

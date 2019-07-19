@@ -22,6 +22,10 @@
                         <thead>
                             <tr>
                                 <th style="display: none;"></th>
+                                <th style="display: none;"></th>
+                                <th style="display: none;"></th>
+                                <th style="display: none;"></th>
+                                <th style="display: none;"></th>
                                 <th>#ID</th>
                                 <th>Nome</th>
                                 <th>Data</th>
@@ -34,7 +38,21 @@
                         <tbody>
                             <% for(let i = 0; i < orders.length; i++) { %>
                                 <tr>       
-                                    <td style="display: none;"><%= i + 1 %></td>   
+                                    <td style="display: none;"><%= i + 1 %></td>  
+                                    <td style="display: none;"><%= orders[i].buyer.documents.cpfOrCnpj %></td>
+                                    <td style="display: none;"><%= orders[i].buyer.phone %></td>    
+                                    <td style="display: none;"><%= orders[i].buyer.email %></td>    
+                                    <td style="display: none;">
+                                        <% if(orders[i].options && orders[i].options._idSegmentation) { %>
+                                            <% for(let j = 0; j < segmentations.length; j++) { %>
+                                                <% if(orders[i].options._idSegmentation == segmentations[j]._id) { %>
+                                                    <% if(segmentations[j].status !== 'pendente') { %>
+                                                        <%= segmentations[j].instagramProfile %>
+                                                    <% } %>
+                                                <% } %>
+                                            <% } %>
+                                        <% } %>
+                                    </td>   
                                     <td><%= orders[i]._id %></td>              
                                     <td><%= orders[i].buyer.name %></td>
                                     <td><%= orders[i].createdAt %></td>
@@ -90,6 +108,10 @@
                         </tbody>
                         <tfoot>
                             <tr>
+                                <th style="display: none;"></th>
+                                <th style="display: none;"></th>
+                                <th style="display: none;"></th>
+                                <th style="display: none;"></th>
                                 <th style="display: none;"></th>
                                 <th>#ID</th>
                                 <th>Nome</th>
