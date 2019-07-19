@@ -330,10 +330,9 @@ module.exports = app => {
         }
 
         Segmentation.findOne({ _id: segmentation.segmentationId }).then(getSegmentation => {
-            if(segmentation.status === 'pendente') getSegmentation.status = segmentation.status
-
             getSegmentation.instagramProfile = segmentation.instagramProfile
             getSegmentation.instagramPassword = segmentation.instagramPassword
+            getSegmentation.status = segmentation.status
             getSegmentation.interest = {
                 profiles: segmentation.profiles,
                 subjects: segmentation.subjects,
