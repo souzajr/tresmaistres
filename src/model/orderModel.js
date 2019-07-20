@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 
 const OrderSchema = new mongoose.Schema({
-    _pagarmeReport: { type: String, required: true },
-    _idTransactionPagarme: { type: Number, required: true },
+    _pagarmeReport: String,
+    _idTransactionPagarme: Number,
     _idUser: String,
     status: { type: String, required: true },
     total: { type: Number, required: true }, 
@@ -45,6 +45,7 @@ const OrderSchema = new mongoose.Schema({
         _idSeller: String,
         _idSegmentation: String,
         invoice: String,
+        receipt: String,
         interacion: {
             comment: String,
             createdAt: String

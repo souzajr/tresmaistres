@@ -130,7 +130,12 @@ module.exports = app => {
     //#region ADMIN 
         app.route('/admin')
             .all(app.src.config.passport.authenticate())
-            .get(admin(app.src.api.admin.viewHome)) 
+            .get(csrf(), admin(app.src.api.admin.viewHome)) 
+            .post(csrf(), admin(app.src.api.admin.addNewOrder))
+
+        app.route('/admin/comprovante')
+            .all(app.src.config.passport.authenticate())
+            .get(admin(app.src.api.admin.viewReceipt))            
 
         app.route('/admin/perfil')
             .all(app.src.config.passport.authenticate())

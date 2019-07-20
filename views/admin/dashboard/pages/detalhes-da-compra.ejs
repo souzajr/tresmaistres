@@ -14,18 +14,19 @@
         <% if(order.buyer.documents.typeDoc === 'pf') { %>CPF:<% } else { %>CNPJ:<% } %> <span id="cpfOrCnpj"></span><br>
         Telefone: <a target="_blank" href="https://wa.me/55<%= order.buyer.phone %>"><span id="phone"></span></a><br>
         Email: <a href="mailto:<%= order.buyer.email %>"><%= order.buyer.email %></a><br>
+        Origem: <%= order.origin %>
     </div>
     <div class="col-sm-4 invoice-col">
         <strong>Endereço de cobrança</strong><br>
         <%= order.buyer.address.street %>, <%= order.buyer.address.number %><br>
         <% if(order.buyer.address.complement) { %><%= order.buyer.address.complement %><br><% } %>
         <%= order.buyer.address.neighborhood %>. CEP: <span id="zipCode"></span><br>
-        <%= order.buyer.address.city %>/<%= order.buyer.address.state %><br>
+        <%= order.buyer.address.city %>/<%= order.buyer.address.state %>
     </div>
     <div class="col-sm-4 invoice-col">
         <strong>Informações</strong><br>
         ID do pedido: #<%= order._id %><br>
-        Forma de pagamento: <% if(order.paymentConfig.method === 'credit_card') { %>Cartão de crédito<% } else { %>Boleto<% } %><br>
+        Forma de pagamento: <% if(order.paymentConfig.method === 'credit_card') { %>Cartão de crédito<% } else if(order.paymentConfig.method === 'boleto') { %>Boleto<% } else { %>Outro<% } %><br>
         Renovação: <% if(order.origin === 'Renovação') { %>Sim<% } else { %>Não<% } %><br>
         Status: 
             <% if(order.status === 'paid') { %>
@@ -34,21 +35,19 @@
                 <span class="label label-warning">AGUARDANDO</span>
             <% } else { %>
                 <span class="label label-danger">CANCELADO</span>
-            <% } %><br>
-        Automação:   
+            <% } %>
+        <br>Automação:   
             <% if(order.options && order.options.automation && order.options.automation._idResponsible) { %>
                 <span class="label label-success">INICIADA</span>
             <% } else { %>
                 <span class="label label-danger">NÃO INICIADA</span>
             <% } %>
         <% if(order.options && order.options._idSegmentation) { %>
-            <% if(segmentation) { %>
-                <br>Briefing: <a href="#" data-toggle="modal" data-target="#modal-briefing">Ver mais</a>
-            <% } else { %>
-                <br>Briefing: <a target="_blank" href="/briefing?id=<%= order.options._idSegmentation %>">URL do cliente</a>
-            <% } %>
+            <br>Briefing: <a href="#" data-toggle="modal" data-target="#modal-briefing">Editar</a> / <a target="_blank" href="/briefing?id=<%= order.options._idSegmentation %>">URL do cliente</a>
         <% } %>
-            
+        <% if(order.options && order.options.receipt) { %>
+            <br>Comprovante: <a target="_blank" href="/admin/comprovante?id=<%= order.options.receipt %>">Ver mais</a>
+        <% } %>            
     </div>
 </div>
      
@@ -56,12 +55,12 @@
     <strong>Segmentação</strong>
     <div class="row invoice-info">
         <div class="col-sm-6 invoice-col">
-            <b>Login Instagram:</b> <a target="_blank" href="https://www.instagram.com/<%= segmentation.instagramProfile.replace('@', '') %>"><%= segmentation.instagramProfile %></a><br>
-            <b>Senha Instagram:</b> <%= segmentation.instagramPassword %><br>
-            <b>Perfis de interesse:</b> <%= segmentation.interest.profiles %><br>
-            <b>Assuntos de interesse:</b> <%= segmentation.interest.subjects %><br>
-            <b>Locais de interesse:</b> <%= segmentation.interest.locations %><br>
-            <b>Gênero de interesse:</b> <%= segmentation.interest.genre %>
+            <% if(segmentation.instagramProfile) { %><b>Login Instagram:</b> <a target="_blank" href="https://www.instagram.com/<%= segmentation.instagramProfile.replace('@', '') %>"><%= segmentation.instagramProfile %></a><br><% } %>
+            <% if(segmentation.instagramPassword) { %><b>Senha Instagram:</b> <%= segmentation.instagramPassword %><br><% } %>
+            <% if(segmentation.interest && segmentation.interest.profiles) { %><b>Perfis de interesse:</b> <%= segmentation.interest.profiles %><br><% } %>
+            <% if(segmentation.interest && segmentation.interest.subjects) { %><b>Assuntos de interesse:</b> <%= segmentation.interest.subjects %><br><% } %>
+            <% if(segmentation.interest && segmentation.interest.locations) { %><b>Locais de interesse:</b> <%= segmentation.interest.locations %><br><% } %>
+            <% if(segmentation.interest && segmentation.interest.genre) { %><b>Gênero de interesse:</b> <%= segmentation.interest.genre %><% } %>
         </div>
     </div>
 <% } %>

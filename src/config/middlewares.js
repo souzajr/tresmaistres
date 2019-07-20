@@ -68,7 +68,8 @@ module.exports = app => {
         '/admin/automacoes',
         '/admin/relatorios',
         '/admin/pos-venda',
-        '/admin/usuarios'
+        '/admin/usuarios',
+        '/admin/comprovante'
     ], (req, res, next) => {
         if (!req.session.user) {
             res.status(401).render('index', {

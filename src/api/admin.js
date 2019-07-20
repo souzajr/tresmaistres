@@ -13,6 +13,9 @@ const multer = require('multer')
 const crypto = require('crypto')
 const path = require('path')
 const fs = require('fs')
+const cepValidator = require('cep-promise')
+const cpf = require('@fnando/cpf/dist/node')
+const cnpj = require('@fnando/cnpj/dist/node')
 const moment = require('moment')
 moment.locale('pt-br')
 const failMessage = 'Algo deu errado'
@@ -43,15 +46,174 @@ module.exports = app => {
     const viewHome = (req, res) => {
         Order.find().sort({ 'createdAt' : -1 }).then(orders => {
             Segmentation.find().then(segmentations => {
-                res.status(200).render('./admin/index', {
-                    user: req.session.user,
-                    page: 'Home',
-                    orders,
-                    segmentations,
-                    message: null
+                Product.find().then(product => {
+                    res.status(200).render('./admin/index', {
+                        user: req.session.user,
+                        page: 'Home',
+                        orders,
+                        segmentations,
+                        product,
+                        csrf: req.csrfToken(),
+                        message: null
+                    })
                 })
             })
         }).catch(_ => res.status(500).render('500'))
+    }    
+
+    const addNewOrder = (req, res) => {
+        if(!req.session.user.permissions.home) {
+            return res.status(401).json(failMessage)
+        }
+
+        const storage = multer.diskStorage({
+            destination: (req, file, cb) => {
+                cb(null, './public')
+            },
+            filename: (req, file, cb) => {
+                cb(null, crypto.randomBytes(10).toString('hex') + Date.now() + path.extname(file.originalname).toLowerCase())
+            }
+        })
+        
+        const upload = multer({ storage, fileFilter: function (req, file, callback) {
+            var ext = path.extname(file.originalname).toLowerCase()
+            if(ext !== '.pdf' && ext !== '.jpg' && ext !== '.jpeg' && ext !== '.png') {
+                return callback(new Error())
+            }
+    
+            callback(null, true)
+        },
+        limits: {
+            limits: 1,
+            fileSize: 15 * 1024 * 1024 // 15MB
+        }}).single('file')
+
+        upload(req, res, async function(err) {
+            const newOrder = { ...req.body }
+
+            if (err instanceof multer.MulterError) {
+                return res.status(400).json(failMessage)
+            } else if (err) {
+                return res.status(400).json(failMessage)
+            } else if (!req.file) {
+                return res.status(400).json('Você deve anexar um comprovante')
+            }
+
+            try {
+                existOrError(newOrder.name, 'Digite o nome')
+                tooSmall(newOrder.name, 'Nome muito curto, digite um nome maior')
+                tooBig(newOrder.name, 'Nome muito longo, digite um nome menor')
+                existOrError(newOrder.phone, 'Digite o telefone')
+                newOrder.phone = newOrder.phone.split('(').join('').split(')').join('').split('-').join('').split(' ').join('')
+                existOrError(newOrder.email, 'Digite o Email')
+                tooBigEmail(newOrder.email, 'Email muito longo, digite um Email menor')
+                validEmailOrError(newOrder.email, 'Email inválido')
+                existOrError(newOrder.typeDoc, 'Escolha entre pessoa física ou pessoa jurídica')
+                existOrError(newOrder.cpfOrCnpj, 'Digite o CPF ou CNPJ')
+                if(newOrder.typeDoc === 'pf') {
+                    if(!cpf.isValid(newOrder.cpfOrCnpj)) {
+                        fs.unlinkSync('./public/' + req.file.filename)
+                        return res.status(400).json('CPF inválido')
+                    }
+                    newOrder.cpfOrCnpj = cpf.strip(newOrder.cpfOrCnpj)
+                } else {
+                    if(!cnpj.isValid(newOrder.cpfOrCnpj)) {
+                        fs.unlinkSync('./public/' + req.file.filename)
+                        return res.status(400).json('CNPJ inválido')
+                    }
+                    newOrder.cpfOrCnpj = cnpj.strip(newOrder.cpfOrCnpj)
+                }
+                existOrError(newOrder.birthday, 'Digite a data de nascimento do titular da cobrança')  
+                if(moment().diff(moment(newOrder.birthday, 'YYYY-MM-DD'), 'years') < 18) {
+                    fs.unlinkSync('./public/' + req.file.filename)
+                    return res.status(400).json('O titular da cobrança deve ter mais de 18 anos de idade')
+                }
+                existOrError(newOrder.street, 'Digite a rua ou avenida do endereço de cobrança')
+                existOrError(newOrder.number, 'Digite a número do endereço de cobrança')
+                existOrError(newOrder.city, 'Digite a cidade do endereço de cobrança')
+                existOrError(newOrder.state, 'Escolha o estado do endereço de cobrança')
+                existOrError(newOrder.zipCode, 'Digite o CEP do endereço de cobrança')
+                newOrder.zipCode = newOrder.zipCode.split('.').join('').split('-').join('')
+                const validateZipCode = await cepValidator(newOrder.zipCode).catch(err => err)
+                notExistOrError(validateZipCode.errors, 'CEP inválido') 
+                existOrError(newOrder.neighborhood, 'Digite o bairro do endereço de cobrança')   
+                if(!newOrder.origin) newOrder.origin = 'Outro'
+                existOrError(newOrder.product, 'Escolha o produto')
+                newOrder.product = await Product.findOne({ _id: newOrder.product })
+                .catch(err => new Error(err))
+                if(!newOrder.product || newOrder.product instanceof Error) {
+                    fs.unlinkSync('./public/' + req.file.filename)
+                    return res.status(500).json(failMessage)
+                }
+                existOrError(newOrder.method, 'Escolha a forma de pagamento')
+            } catch(msg) {                
+                fs.unlinkSync('./public/' + req.file.filename)
+                return res.status(400).json(msg)
+            }
+
+            const order = {
+                status: 'paid',
+                total: newOrder.product.value, 
+                origin: newOrder.origin,
+                product: {
+                    _id: newOrder.product._id,
+                    name: newOrder.product.name,
+                    value: newOrder.product.value,
+                    validity: newOrder.product.validity
+                },
+                paymentConfig: {
+                    method: newOrder.method,
+                },
+                buyer: {
+                    name: newOrder.name,
+                    phone: newOrder.phone,
+                    email: newOrder.email,
+                    birthday: newOrder.birthday,
+                    address: {
+                        street: newOrder.street,
+                        neighborhood: newOrder.neighborhood,
+                        number: newOrder.number,
+                        complement: newOrder.complement,
+                        zipCode: newOrder.zipCode,
+                        city: newOrder.city,
+                        state: newOrder.state
+                    },
+                    documents: {
+                        typeDoc: newOrder.typeDoc,
+                        cpfOrCnpj: newOrder.cpfOrCnpj
+                    }
+                },
+                options: {
+                    receipt: req.file.filename,
+                },
+                createdAt: moment().format('L - LTS')
+            }
+
+            if(order.product.validity) {
+                order.product.dateValidity = moment(moment().format('L'), 'DD/MM/YYYY').add(order.product.validity, 'days').format('L')
+                if(order.product.dateValidity === 'Invalid date') {
+                    fs.unlinkSync('./public/' + req.file.filename)
+                    return res.status(400).json(failMessage)
+                }
+            }
+
+            Order.create(order).then(order => {
+                new Segmentation({
+                    _idUser: order._idUser ? order._idUser : null,
+                    _idOrder: order._id,
+                    status: 'pendente',
+                    createdAt: moment().format('L - LTS')
+                }).save().then(segmentation => {
+                    order.options._idSegmentation = segmentation._id
+                    order.save().then(res.status(200).json(successMessage))
+                })
+            }).catch(_ => res.status(500).json(failMessage))
+        })
+    }
+
+    const viewReceipt = (req, res) => {
+        if(!req.query.id) return res.status(404).render('404')
+        res.status(200).sendFile(req.query.id, { root: './public/' })
     }
     
     const viewProfile = (req, res) => {
@@ -856,6 +1018,8 @@ module.exports = app => {
 
     return {
         viewHome,
+        addNewOrder,
+        viewReceipt,
         viewProfile,
         changeProfile,
         viewOrderDetails,
