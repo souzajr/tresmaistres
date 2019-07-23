@@ -570,7 +570,8 @@ module.exports = app => {
         if(!req.query.id) return res.status(404).render('404')
 
         Segmentation.findOne({ _id: req.query.id }).then(async segmentation => {
-            if(segmentation.status !== 'pendente') return res.status(404).render('404')
+            if(segmentation.status !== 'pendente' && (!req.session.user || !req.session.user.admin))
+                return res.status(404).render('404')
 
             let getUser = null
             if(segmentation._idUser) {
