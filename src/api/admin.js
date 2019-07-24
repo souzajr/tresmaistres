@@ -99,15 +99,14 @@ module.exports = app => {
                 return res.status(400).json('Você deve anexar um comprovante')
             }
 
+            // nome, telefone, cpf, produto (com valor aberto), origem, comprovante e forma de pgt.
+
             try {
                 existOrError(newOrder.name, 'Digite o nome')
                 tooSmall(newOrder.name, 'Nome muito curto, digite um nome maior')
                 tooBig(newOrder.name, 'Nome muito longo, digite um nome menor')
                 existOrError(newOrder.phone, 'Digite o telefone')
                 newOrder.phone = newOrder.phone.split('(').join('').split(')').join('').split('-').join('').split(' ').join('')
-                existOrError(newOrder.email, 'Digite o Email')
-                tooBigEmail(newOrder.email, 'Email muito longo, digite um Email menor')
-                validEmailOrError(newOrder.email, 'Email inválido')
                 existOrError(newOrder.typeDoc, 'Escolha entre pessoa física ou pessoa jurídica')
                 existOrError(newOrder.cpfOrCnpj, 'Digite o CPF ou CNPJ')
                 if(newOrder.typeDoc === 'pf') {
@@ -122,21 +121,7 @@ module.exports = app => {
                         return res.status(400).json('CNPJ inválido')
                     }
                     newOrder.cpfOrCnpj = cnpj.strip(newOrder.cpfOrCnpj)
-                }
-                existOrError(newOrder.birthday, 'Digite a data de nascimento do titular da cobrança')  
-                if(moment().diff(moment(newOrder.birthday, 'YYYY-MM-DD'), 'years') < 18) {
-                    fs.unlinkSync('./public/' + req.file.filename)
-                    return res.status(400).json('O titular da cobrança deve ter mais de 18 anos de idade')
-                }
-                existOrError(newOrder.street, 'Digite a rua ou avenida do endereço de cobrança')
-                existOrError(newOrder.number, 'Digite a número do endereço de cobrança')
-                existOrError(newOrder.city, 'Digite a cidade do endereço de cobrança')
-                existOrError(newOrder.state, 'Escolha o estado do endereço de cobrança')
-                existOrError(newOrder.zipCode, 'Digite o CEP do endereço de cobrança')
-                newOrder.zipCode = newOrder.zipCode.split('.').join('').split('-').join('')
-                const validateZipCode = await cepValidator(newOrder.zipCode).catch(err => err)
-                notExistOrError(validateZipCode.errors, 'CEP inválido') 
-                existOrError(newOrder.neighborhood, 'Digite o bairro do endereço de cobrança')   
+                }  
                 if(!newOrder.origin) newOrder.origin = 'Outro'
                 existOrError(newOrder.product, 'Escolha o produto')
                 newOrder.product = await Product.findOne({ _id: newOrder.product })
@@ -146,6 +131,12 @@ module.exports = app => {
                     return res.status(500).json(failMessage)
                 }
                 existOrError(newOrder.method, 'Escolha a forma de pagamento')
+                existOrError(newOrder.total, 'Digite o total do pedido')
+                newOrder.total = Number((Number(Number(newOrder.total).toFixed(2)) * 100).toFixed(0))
+                if(newOrder.total.toString() === 'NaN' || newOrder.total < 0) {
+                    fs.unlinkSync('./public/' + req.file.filename)
+                    return res.status(400).json(failMessage)
+                }
             } catch(msg) {                
                 fs.unlinkSync('./public/' + req.file.filename)
                 return res.status(400).json(msg)
@@ -153,12 +144,12 @@ module.exports = app => {
 
             const order = {
                 status: 'paid',
-                total: newOrder.product.value, 
+                total: newOrder.total, 
                 origin: newOrder.origin,
                 product: {
                     _id: newOrder.product._id,
                     name: newOrder.product.name,
-                    value: newOrder.product.value,
+                    value: newOrder.total,
                     validity: newOrder.product.validity
                 },
                 paymentConfig: {
@@ -167,16 +158,16 @@ module.exports = app => {
                 buyer: {
                     name: newOrder.name,
                     phone: newOrder.phone,
-                    email: newOrder.email,
-                    birthday: newOrder.birthday,
+                    email: 'NaN',
+                    birthday: 'NaN',
                     address: {
-                        street: newOrder.street,
-                        neighborhood: newOrder.neighborhood,
-                        number: newOrder.number,
-                        complement: newOrder.complement,
-                        zipCode: newOrder.zipCode,
-                        city: newOrder.city,
-                        state: newOrder.state
+                        street: 'NaN',
+                        neighborhood: 'NaN',
+                        number: 'NaN',
+                        complement: 'NaN',
+                        zipCode: 'NaN',
+                        city: 'NaN',
+                        state: 'NaN'
                     },
                     documents: {
                         typeDoc: newOrder.typeDoc,
@@ -207,7 +198,10 @@ module.exports = app => {
                     order.options._idSegmentation = segmentation._id
                     order.save().then(res.status(200).json(successMessage))
                 })
-            }).catch(_ => res.status(500).json(failMessage))
+            }).catch(_ => {
+                fs.unlinkSync('./public/' + req.file.filename)
+                res.status(500).json(failMessage)
+            })
         })
     }
 
