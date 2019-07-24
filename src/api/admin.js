@@ -99,8 +99,6 @@ module.exports = app => {
                 return res.status(400).json('Você deve anexar um comprovante')
             }
 
-            // nome, telefone, cpf, produto (com valor aberto), origem, comprovante e forma de pgt.
-
             try {
                 existOrError(newOrder.name, 'Digite o nome')
                 tooSmall(newOrder.name, 'Nome muito curto, digite um nome maior')
