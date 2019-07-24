@@ -12,7 +12,8 @@ const SegmentationSchema = new mongoose.Schema({
         locations: String,
         genre: String
     },
-    createdAt: { type: String, required: true }
+    createdAt: { type: String, required: true },
+    sendByUserAt: String 
 })
 
 mongoose.model('Segmentation', SegmentationSchema)

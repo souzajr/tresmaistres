@@ -52,6 +52,7 @@
 </div>
      
 <% if(segmentation) { %>
+    <br>
     <strong>Segmentação</strong>
     <div class="row invoice-info">
         <div class="col-sm-6 invoice-col">
@@ -61,6 +62,7 @@
             <% if(segmentation.interest && segmentation.interest.subjects) { %><b>Assuntos de interesse:</b> <%= segmentation.interest.subjects %><br><% } %>
             <% if(segmentation.interest && segmentation.interest.locations) { %><b>Locais de interesse:</b> <%= segmentation.interest.locations %><br><% } %>
             <% if(segmentation.interest && segmentation.interest.genre) { %><b>Gênero de interesse:</b> <%= segmentation.interest.genre %><% } %>
+            <% if(segmentation.sendByUserAt) { %><b>Enviado pelo usuário em:</b> <%= segmentation.sendByUserAt %><% } %>
         </div>
     </div>
 <% } %>

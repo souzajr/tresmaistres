@@ -615,6 +615,7 @@ module.exports = app => {
             getSegmentation.status = 'enviado'
             getSegmentation.instagramProfile = segmentation.instagramProfile
             getSegmentation.instagramPassword = segmentation.instagramPassword
+            getSegmentation.sendByUserAt = moment().format('L - LTS')
             getSegmentation.interest = {
                 profiles: segmentation.profiles,
                 subjects: segmentation.subjects,
