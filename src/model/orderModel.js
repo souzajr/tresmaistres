@@ -20,6 +20,8 @@ const OrderSchema = new mongoose.Schema({
     },
     paymentConfig: {
         method: { type: String, require: true },
+        installments: Number,
+        installmentValue: Number,
         boleto_url: String
     },
     buyer: {

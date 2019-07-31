@@ -67,7 +67,11 @@
                             <% } %>
                             <tr>
                                 <td><b>Total do pedido</b></td>
-                                <td><b>R$<%= (order.total / 100).toFixed(2).replace('.', ',') %></b></td>
+                                <% if(order.paymentConfig.installmentValue) { %>
+                                    <td><b><%= order.paymentConfig.installments %>x de R$<%= (order.paymentConfig.installmentValue / order.paymentConfig.installments / 100).toFixed(2).replace('.', ',') %> (Total: R$<%= (order.paymentConfig.installmentValue / 100).toFixed(2).replace('.', ',') %>)</b></td>
+                                <% } else { %>
+                                    <td><b>R$<%= (order.total / 100).toFixed(2).replace('.', ',') %></b></td>
+                                <% } %>
                             </tr>
                         </tbody>
                     </table>

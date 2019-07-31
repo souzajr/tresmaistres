@@ -200,16 +200,27 @@ module.exports = app => {
         }
 
         if(order.paymentConfig.method === 'credit_card') {
-            if(!order.paymentConfig.card_hash)
+            if(!order.paymentConfig.card_hash || !order.paymentConfig.installments)
                 return res.status(400).json(failMessage)
+
+            order.paymentConfig.installments = parseInt(order.paymentConfig.installments)
+            if(order.paymentConfig.installments.toString() === 'NaN' || order.paymentConfig.installments < 1 || order.paymentConfig.installments > process.env.PAGARME_MAX_INSTALLMENTS)
+                return res.status(400).json(failMessage)
+
+            order.paymentConfig.installmentValue = 0
+            if(order.paymentConfig.installments > process.env.PAGARME_FREE_INSTALLMENTS) {
+                order.paymentConfig.installmentValue = Number((order.total * (1 + process.env.PAGARME_INEREST_RATE * order.paymentConfig.installments / 100)).toFixed(0))
+                if(order.paymentConfig.installmentValue.toString() === 'NaN')
+                    return res.status(400).json(failMessage)
+            }  
 
             pagarme.client.connect({ api_key: process.env.PAGARME_API_KEY })
             .then(client => client.transactions.create({
-                'amount': order.total,
+                'amount': order.paymentConfig.installmentValue ? order.paymentConfig.installmentValue : order.total,
                 'card_hash': order.paymentConfig.card_hash,
                 'postback_url': process.env.DOMAIN_NAME + process.env.PAGARME_POSTBACK,
                 'async': false,
-                'installments': 1,
+                'installments': order.paymentConfig.installments,
                 'capture': true,
                 'payment_method': order.paymentConfig.method,
                 'customer': {
@@ -241,7 +252,7 @@ module.exports = app => {
                 'items': [{
                     'id': order.product._id,
                     'title': order.product.name,
-                    'unit_price': order.total,
+                    'unit_price': order.paymentConfig.installmentValue ? order.paymentConfig.installmentValue : order.total,
                     'quantity': 1,
                     'tangible': false
                 }]

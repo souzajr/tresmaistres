@@ -14,6 +14,7 @@ const cpf = require('@fnando/cpf/dist/node')
 const cnpj = require('@fnando/cnpj/dist/node')
 const sm = require('sitemap')
 const jwt = require('jwt-simple')
+const pagarme = require('pagarme')
 const moment = require('moment')
 moment.locale('pt-br')
 const failMessage = 'Algo deu errado'
@@ -487,7 +488,7 @@ module.exports = app => {
     }
 
     const viewCheckout = async (req, res) => {
-        let getUser = null, getProduct = null, discountCoupon = null
+        let getUser = null, getProduct = null, discountCoupon = null, installments = null
 
         if(req.session.user) {
             getUser = await User.findOne({ _id: req.session.user._id })
@@ -502,7 +503,6 @@ module.exports = app => {
             .catch(err => new Error(err))
             if(getProduct instanceof Error) return res.status(500).render('500')
         }
-
         if(req.query.cupom) {
             if(typeof(req.query.cupom) === 'string') {
                 discountCoupon = await Coupon.findOne({ name: req.query.cupom.toLowerCase() }).then(coupon => {
@@ -519,11 +519,32 @@ module.exports = app => {
             }            
         }
 
+        let calcInstallments = 0
+        if(getProduct) {
+            calcInstallments = getProduct.value
+            if(discountCoupon && discountCoupon !== 'Invalid') {
+                calcInstallments = calcInstallments - (discountCoupon.percentage * calcInstallments / 100)
+            }
+        }
+
+        if(calcInstallments > 0) {
+            installments = await pagarme.client.connect({ api_key: process.env.PAGARME_API_KEY })
+            .then(client => client.transactions.calculateInstallmentsAmount({
+                max_installments: process.env.PAGARME_MAX_INSTALLMENTS,
+                free_installments: process.env.PAGARME_FREE_INSTALLMENTS,
+                interest_rate: process.env.PAGARME_INEREST_RATE,
+                amount: calcInstallments
+            })).then(installments => installments.installments)
+            .catch(err => new Error(err))
+            if(installments instanceof Error) return res.status(500).render('500')
+        }
+            
         res.status(200).render('index', {
             product: getProduct,
             page: 'Finalizar compra',
             user: getUser,
             coupon: discountCoupon,
+            installments,
             encryptionKey: process.env.PAGARME_ENCRYPTION_KEY,
             csrf: req.csrfToken(),
             message: null

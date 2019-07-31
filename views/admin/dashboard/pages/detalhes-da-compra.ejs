@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-xs-12">
         <h2 class="page-header">
-            <i class="fa fa-globe"></i> TRÊS MAIS TRÊS
+            <i class="fa fa-globe"></i> TRÊS MAIS TRÊSx
             <small class="pull-right">Data da compra: <%= order.createdAt %></small>
         </h2>
     </div>
@@ -27,6 +27,9 @@
         <strong>Informações</strong><br>
         ID do pedido: #<%= order._id %><br>
         Forma de pagamento: <% if(order.paymentConfig.method === 'credit_card') { %>Cartão de crédito<% } else if(order.paymentConfig.method === 'boleto') { %>Boleto<% } else { %>Outro<% } %><br>
+        <% if(order.paymentConfig.installmentValue) { %>
+            <%= order.paymentConfig.installments %>x de R$<%= (order.paymentConfig.installmentValue / order.paymentConfig.installments / 100).toFixed(2).replace('.', ',') %> (Total: R$<%= (order.paymentConfig.installmentValue / 100).toFixed(2).replace('.', ',') %>)<br>
+        <% } %>
         Renovação: <% if(order.origin === 'Renovação') { %>Sim<% } else { %>Não<% } %><br>
         Status: 
             <% if(order.status === 'paid') { %>
@@ -50,12 +53,11 @@
         <% } %>            
     </div>
 </div>
-     
+ 
 <% if(segmentation) { %>
-    <br>
-    <strong>Segmentação</strong>
-    <div class="row invoice-info">
+    <div class="row invoice-info" style="margin-top: 5px;">
         <div class="col-sm-6 invoice-col">
+            <strong>Segmentação</strong><br>
             <% if(segmentation.instagramProfile) { %><b>Login Instagram:</b> <a target="_blank" href="https://www.instagram.com/<%= segmentation.instagramProfile.replace('@', '') %>"><%= segmentation.instagramProfile %></a><br><% } %>
             <% if(segmentation.instagramPassword) { %><b>Senha Instagram:</b> <%= segmentation.instagramPassword %><br><% } %>
             <% if(segmentation.interest && segmentation.interest.profiles) { %><b>Perfis de interesse:</b> <%= segmentation.interest.profiles %><br><% } %>
