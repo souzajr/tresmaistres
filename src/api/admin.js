@@ -43,7 +43,7 @@ module.exports = app => {
     }
 
     const viewHome = (req, res) => {
-        Order.find().sort({ 'createdAt' : -1 }).then(orders => {
+        Order.find().sort({ '_id' : -1 }).then(orders => {
             Segmentation.find().then(segmentations => {
                 Product.find().then(product => {
                     res.status(200).render('./admin/index', {
@@ -788,7 +788,7 @@ module.exports = app => {
             return res.status(401).render('500')
         }
 
-        Order.find().sort({ 'createdAt' : -1 }).then(getOrders => {
+        Order.find().sort({ '_id' : -1 }).then(getOrders => {
             Segmentation.find({ status: 'enviado' }).then(segmentations => {
                 const orders = []
                 for(let i = 0; i < getOrders.length; i++) {
@@ -815,7 +815,7 @@ module.exports = app => {
             return res.status(401).render('500')
         }
 
-        Order.find().sort({ 'createdAt' : -1 }).then(orders => {
+        Order.find().sort({ '_id' : -1 }).then(orders => {
             res.status(200).render('./admin/index', {
                 user: req.session.user,
                 page: 'Relatórios',
@@ -831,7 +831,7 @@ module.exports = app => {
             return res.status(401).render('500')
         }
 
-        Order.find({ status: 'paid' }).sort({ 'createdAt' : -1 }).then(orders => {
+        Order.find({ status: 'paid' }).sort({ '_id' : -1 }).then(orders => {
             res.status(200).render('./admin/index', {
                 user: req.session.user,
                 page: 'Pós venda',
