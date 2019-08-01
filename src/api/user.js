@@ -525,6 +525,8 @@ module.exports = app => {
             calcInstallments = getProduct.value
             if(discountCoupon && discountCoupon !== 'Invalid') {
                 calcInstallments = Number((calcInstallments - (discountCoupon.percentage * calcInstallments / 100)).toFixed(0))
+                if(calcInstallments.toString() === 'NaN')
+                    return res.status(500).render('500')
             }
         }
 
