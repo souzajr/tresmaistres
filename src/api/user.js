@@ -503,6 +503,7 @@ module.exports = app => {
             .catch(err => new Error(err))
             if(getProduct instanceof Error) return res.status(500).render('500')
         }
+
         if(req.query.cupom) {
             if(typeof(req.query.cupom) === 'string') {
                 discountCoupon = await Coupon.findOne({ name: req.query.cupom.toLowerCase() }).then(coupon => {
@@ -523,7 +524,7 @@ module.exports = app => {
         if(getProduct) {
             calcInstallments = getProduct.value
             if(discountCoupon && discountCoupon !== 'Invalid') {
-                calcInstallments = calcInstallments - (discountCoupon.percentage * calcInstallments / 100)
+                calcInstallments = Number((calcInstallments - (discountCoupon.percentage * calcInstallments / 100)).toFixed(0))
             }
         }
 
