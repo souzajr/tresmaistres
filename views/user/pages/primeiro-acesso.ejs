@@ -70,14 +70,15 @@
                                                             url: '/primeiro-acesso',
                                                             datatype: 'html',
                                                             contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-                                                            data: $('#form-cadastro').serialize(),         
+                                                            data: $('#form-cadastro').serialize(),     
                                                             headers: {
-                                                                'X-CSRF-TOKEN': $('meta[name="token"]').attr('content')
+                                                                'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
                                                             },
                                                             success: function(result) {       
-                                                                window.location.href = '/validate'
+                                                                window.location.href = result
                                                             },
                                                             error: function(xhr, status, error) {
+                                                                if(error === 'Forbidden') return window.location.href = '/'
                                                                 alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
                                                             }
                                                         })

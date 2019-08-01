@@ -138,7 +138,7 @@ module.exports = app => {
                 req.session.user = getUser
                 req.session.token = jwt.encode(payload, process.env.AUTH_SECRET)
 
-                res.status(200).end()
+                res.status(200).json('/minha-conta')
             })
         }).catch(_ => res.status(500).json(failMessage))
     }
