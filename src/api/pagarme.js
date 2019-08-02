@@ -421,8 +421,8 @@ module.exports = app => {
                             order._pagarmeReport = report._id
                             order.status = transaction.status
 
-                            if(transaction.status === 'paid' && transaction.amount === transaction.paid_amount) {                                
-                                if(!order.options || !order.options._idSegmentation) { 
+                            if(transaction.status === 'paid' && transaction.amount === transaction.paid_amount) {
+                                if(order.paymentConfig.method === 'boleto' && (!order.options || !order.options._idSegmentation)) {      
                                     await new Segmentation({
                                         _idUser: order._idUser ? order._idUser : null,
                                         _idOrder: order._id,
@@ -434,8 +434,8 @@ module.exports = app => {
                                         } else {
                                             order.options._idSegmentation = segmentation._id
                                         }
-                                    }).catch(_ => res.status(500).end())
-                                }
+                                    })
+                                }                         
                                                                 
                                 mail.paymentReceived(order.buyer.email, order.buyer.name, order._id, order.options._idSegmentation)
                             }
