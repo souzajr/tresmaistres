@@ -321,7 +321,7 @@ module.exports = app => {
                         })
                     })
                 }
-            }).catch(_ => res.status(500).json(failMessage))
+            }).catch(() => res.status(500).json(failMessage))
         } else if(order.paymentConfig.method === 'boleto') {
             
             if(order.paymentConfig.card_hash || order.product.value >= 200000) return res.status(400).json(failMessage)
@@ -404,7 +404,7 @@ module.exports = app => {
                         })
                     }
                 })
-            }).catch(_ => res.status(500).json(failMessage))
+            }).catch(() => res.status(500).json(failMessage))
         } else return res.status(400).json(failMessage)
     }
 
@@ -444,7 +444,7 @@ module.exports = app => {
                         })
                     })
                 })    
-            }).catch(_ => res.status(500).end())
+            }).catch(() => res.status(500).end())
         } else res.status(401).end()
     }
 

@@ -48,7 +48,7 @@ module.exports = app => {
                 csrf: req.csrfToken(),
                 message: null
             })
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
 
     const sendMessage = (req, res) => {
@@ -140,7 +140,7 @@ module.exports = app => {
 
                 res.status(200).json('/minha-conta')
             })
-        }).catch(_ => res.status(500).json(failMessage))
+        }).catch(() => res.status(500).json(failMessage))
     }
 
     const viewTerms = (req, res) => {
@@ -211,7 +211,7 @@ module.exports = app => {
             req.session.token = jwt.encode(payload, process.env.AUTH_SECRET)
 
             res.status(200).json('/minha-conta')    
-        }).catch(_ => res.status(500).json(failMessage))
+        }).catch(() => res.status(500).json(failMessage))
     }
 
     const viewRecoverPassword = (req, res) => {
@@ -246,7 +246,7 @@ module.exports = app => {
         await user.save().then(_ => {
             mail.recoveryMail(user.email, token)
             res.status(200).json(successMessage)
-        }).catch(_ => res.status(500).json(failMessage))
+        }).catch(() => res.status(500).json(failMessage))
     }
 
     const checkToken = async (req, res) => {
@@ -269,7 +269,7 @@ module.exports = app => {
                     message: null
                 })
             }
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
 
     const resetPassword = async (req, res) => {
@@ -316,7 +316,7 @@ module.exports = app => {
         await user.save().then(_ => {
             mail.alertOfChange(user.email)
             res.redirect('/login')
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
 
     const viewUserProfile = async (req, res) => {
@@ -447,7 +447,7 @@ module.exports = app => {
                 req.session.user = user
                 res.status(200).json(successMessage)
             })
-        }).catch(_ => res.status(400).json(failMessage))
+        }).catch(() => res.status(400).json(failMessage))
     }
 
     const viewEditPassword = async (req, res) => {
@@ -562,7 +562,7 @@ module.exports = app => {
                 user: req.session.user,
                 message: null
             })
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
 
     const orderDetails = (req, res) => {
@@ -587,7 +587,7 @@ module.exports = app => {
                     message: null
                 })
             })
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
 
     const viewSegmentation = (req, res) => {
@@ -615,7 +615,7 @@ module.exports = app => {
                 csrf: req.csrfToken(),
                 message: null
             })
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
 
     const getSegmentation = (req, res) => {
@@ -648,7 +648,7 @@ module.exports = app => {
             }
 
             getSegmentation.save().then(res.status(200).end())
-        }).catch(_ => res.status(500).json(failMessage))
+        }).catch(() => res.status(500).json(failMessage))
     }
 
     const downloadInvoice = (req, res) => {
@@ -699,7 +699,7 @@ module.exports = app => {
                     res.status(200).json('/minha-conta')
                 })
             } else return res.status(400).json(failMessage)
-        }).catch(_ => res.status(500).json(failMessage))
+        }).catch(() => res.status(500).json(failMessage))
     }
 
     const viewSiteMap = (req, res) => {

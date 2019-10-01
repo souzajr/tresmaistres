@@ -57,7 +57,7 @@ module.exports = app => {
                     })
                 })
             })
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }    
 
     const addNewOrder = (req, res) => {
@@ -75,7 +75,7 @@ module.exports = app => {
         })
         
         const upload = multer({ storage, fileFilter: function (req, file, callback) {
-            var ext = path.extname(file.originalname).toLowerCase()
+            const ext = path.extname(file.originalname).toLowerCase()
             if(ext !== '.pdf' && ext !== '.jpg' && ext !== '.jpeg' && ext !== '.png') {
                 return callback(new Error())
             }
@@ -193,9 +193,9 @@ module.exports = app => {
                     createdAt: moment().format('L - LTS')
                 }).save().then(segmentation => {
                     order.options._idSegmentation = segmentation._id
-                    order.save().then(res.status(200).json(successMessage))
+                    order.save().then(() => res.status(200).json(successMessage))
                 })
-            }).catch(_ => {
+            }).catch(() => {
                 fs.unlinkSync('./public/' + req.file.filename)
                 res.status(500).json(failMessage)
             })
@@ -280,7 +280,7 @@ module.exports = app => {
                 req.session.user = user
                 res.status(200).json(successMessage)
             })
-        }).catch(_ => res.status(500).json(failMessage))
+        }).catch(() => res.status(500).json(failMessage))
     }
 
     const viewOrderDetails = (req, res) => {
@@ -295,8 +295,6 @@ module.exports = app => {
 
             if(order.options && order.options._idSegmentation) {
                 segmentation = await Segmentation.findOne({ _id: order.options._idSegmentation })
-                .catch(err => new Error(err))
-                if(segmentation instanceof Error) return res.status(500).render('500')
             }
 
             User.find({ admin: true }).then(users => {
@@ -311,7 +309,7 @@ module.exports = app => {
                     message: null
                 })
             })
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
 
     const changeOrderDetails = (req, res) => {
@@ -329,7 +327,7 @@ module.exports = app => {
         })
         
         const upload = multer({ storage, fileFilter: function (req, file, callback) {
-            var ext = path.extname(file.originalname).toLowerCase()
+            const ext = path.extname(file.originalname).toLowerCase()
             if(ext !== '.pdf' && ext !== '.csv' && ext !== '.doc' && ext !== '.docx') {
                 return callback(new Error())
             }
@@ -393,8 +391,8 @@ module.exports = app => {
                         if(order.options && order.options.interacion) order.options.interacion = {}
                     }
 
-                    order.save().then(res.status(200).json(successMessage))
-                }).catch(_ => res.status(500).json(failMessage))
+                    order.save().then(() => res.status(200).json(successMessage))
+                }).catch(() => res.status(500).json(failMessage))
             }
 
             Order.findOne({ _id: orderUpdate.orderId }).then(order => {
@@ -458,7 +456,7 @@ module.exports = app => {
                     mail.sendInvoice(order.buyer.email, order.buyer.name, order._id)
                     res.status(200).json(successMessage)
                 })
-            }).catch(_ => res.status(500).json(failMessage))
+            }).catch(() => res.status(500).json(failMessage))
         })
     }
 
@@ -493,8 +491,8 @@ module.exports = app => {
                 genre: segmentation.genre
             }
             
-            getSegmentation.save().then(res.status(200).json(successMessage))
-        }).catch(_ => res.status(500).json(failMessage))
+            getSegmentation.save().then(() => res.status(200).json(successMessage))
+        }).catch(() => res.status(500).json(failMessage))
     }
 
     const viewCoupons = (req, res) => { 
@@ -511,7 +509,7 @@ module.exports = app => {
                 csrf: req.csrfToken(),
                 message: null
             })
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
 
     const addCoupon = async (req, res) => {        
@@ -546,8 +544,8 @@ module.exports = app => {
         }
 
         coupon.createdAt = moment().format('L - LTS')
-        Coupon.create(coupon).then(res.status(200).json(successMessage))
-        .catch(_ => res.status(500).json(failMessage))
+        Coupon.create(coupon).then(() => res.status(200).json(successMessage))
+        .catch(() => res.status(500).json(failMessage))
     }
 
     const editCoupon = async (req, res) => {
@@ -593,8 +591,8 @@ module.exports = app => {
             if(coupon.validity !== getCoupon.validity)
                 getCoupon.validity = coupon.validity
 
-            getCoupon.save().then(res.status(200).json(successMessage))
-        }).catch(_ => res.status(500).json(failMessage))
+            getCoupon.save().then(() => res.status(200).json(successMessage))
+        }).catch(() => res.status(500).json(failMessage))
     }
 
     const removeCoupon = (req, res) => {
@@ -605,8 +603,8 @@ module.exports = app => {
         if(!req.body.couponId) return res.status(400).json(failMessage)
 
         Coupon.deleteOne({ _id: req.body.couponId })
-        .then(res.status(200).json(successMessage))
-        .catch(_ => res.status(500).json(failMessage))
+        .then(() => res.status(200).json(successMessage))
+        .catch(() => res.status(500).json(failMessage))
     }
 
     const viewPlans = (req, res) => {
@@ -622,7 +620,7 @@ module.exports = app => {
                 csrf: req.csrfToken(),
                 message: null
             })
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
 
     const addPlan = async (req, res) => {
@@ -686,8 +684,8 @@ module.exports = app => {
             options,
             createdAt: moment().format('L - LTS')
         }).save()
-        .then(res.status(200).json(successMessage))
-        .catch(_ => res.status(500).json(failMessage))
+        .then(() => res.status(200).json(successMessage))
+        .catch(() => res.status(500).json(failMessage))
     }
 
     const editPlan = async (req, res) => {
@@ -752,8 +750,8 @@ module.exports = app => {
             getProduct.validity = product.validity,
             getProduct.options = options
 
-            getProduct.save().then(res.status(200).json(successMessage))
-        }).catch(_ => res.status(500).json(failMessage))
+            getProduct.save().then(() => res.status(200).json(successMessage))
+        }).catch(() => res.status(500).json(failMessage))
     }
 
     const removePlan = (req, res) => {
@@ -764,8 +762,8 @@ module.exports = app => {
         if(!req.body.productId) return res.status(400).json(failMessage)
 
         Product.deleteOne({ _id: req.body.productId })
-        .then(res.status(200).json(successMessage))
-        .catch(_ => res.status(500).json(failMessage))
+        .then(() => res.status(200).json(successMessage))
+        .catch(() => res.status(500).json(failMessage))
     }
 
     const viewOrigin = (req, res) => {
@@ -780,7 +778,7 @@ module.exports = app => {
                 orders,
                 message: null
             })
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
 
     const viewAutomation = (req, res) => {
@@ -807,7 +805,7 @@ module.exports = app => {
                     message: null
                 })
             })
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
 
     const viewReport = (req, res) => {
@@ -823,7 +821,7 @@ module.exports = app => {
                 moment,
                 message: null
             })
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
     
     const viewAfterSales = (req, res) => {
@@ -839,7 +837,7 @@ module.exports = app => {
                 moment,
                 message: null
             })
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
 
     const viewUsers = (req, res) => {
@@ -855,7 +853,7 @@ module.exports = app => {
                 csrf: req.csrfToken(),
                 message: null
             })
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
 
     const addNewUser = async (req, res) => {
@@ -893,7 +891,7 @@ module.exports = app => {
         User.create(user).then(_ => {
             mail.newAccountByAdmin(user.email, user.name, password)
             res.status(200).json(successMessage)
-        }).catch(_ => res.status(500).json(failMessage))
+        }).catch(() => res.status(500).json(failMessage))
     }
 
     const viewUserDetails = (req, res) => {
@@ -910,7 +908,7 @@ module.exports = app => {
                 csrf: req.csrfToken(),
                 message: null
             })
-        }).catch(_ => res.status(500).render('500'))
+        }).catch(() => res.status(500).render('500'))
     }
 
     const changeUser = (req, res) => {
@@ -990,8 +988,8 @@ module.exports = app => {
                 }
             }
 
-            user.save().then(res.status(200).json(successMessage))
-        }).catch(_ => res.status(500).json(failMessage))
+            user.save().then(() => res.status(200).json(successMessage))
+        }).catch(() => res.status(500).json(failMessage))
     }
 
     const removeUser = (req, res) => {
@@ -1000,13 +998,106 @@ module.exports = app => {
         }
 
         User.findOne({ _id: req.params.id }).then(user => {
-            if(user.deletedAt) user.deletedAt = undefined
-            else user.deletedAt = moment().format('L - LTS')
+            user.deletedAt ?
+                user.deletedAt = undefined :
+                user.deletedAt = moment().format('L - LTS')
 
-            user.save().then(res.status(200).json(successMessage))
-        }).catch(_ => res.status(500).json(failMessage))
+            user.save().then(() => res.status(200).json(successMessage))
+        }).catch(() => res.status(500).json(failMessage))
     }
 
+    const addObservation = (req, res) => {
+        if(!req.session.user.permissions.orderDetail) {
+            return res.status(401).json(failMessage)
+        }
+
+        const storage = multer.diskStorage({
+            destination: (req, file, cb) => {
+                cb(null, './public')
+            },
+            filename: (req, file, cb) => {
+                cb(null, crypto.randomBytes(10).toString('hex') + Date.now() + path.extname(file.originalname).toLowerCase())
+            }
+        })
+        
+        const upload = multer({ storage, fileFilter: function (req, file, callback) {
+            const ext = path.extname(file.originalname).toLowerCase()
+            if(ext !== '.pdf' && ext !== '.jpg' && ext !== '.jpeg' && ext !== '.png') {
+                return callback(new Error())
+            }
+    
+            callback(null, true)
+        },
+        limits: {
+            limits: 1,
+            fileSize: 15 * 1024 * 1024 // 15MB
+        }}).single('file')
+
+        upload(req, res, function(err) {
+            const observation = { ...req.body }
+
+            if (err instanceof multer.MulterError) {
+                return res.status(400).json(failMessage)
+            } else if (err) {
+                return res.status(400).json(failMessage)
+            } else if (!req.file) {
+                return Order.findOne({ _id: observation.orderId }).then(order => {
+                    if(order.options) {
+                        order.options.observations.push({
+                            _idUser: observation.userId,
+                            comment: observation.comment,
+                            createdAt: moment().format('L - LTS')
+                        })
+                    } else {
+                        order.options = {
+                            observations: [{
+                                _idUser: observation.userId,
+                                comment: observation.comment,
+                                createdAt: moment().format('L - LTS')
+                            }]
+                        }
+                    }
+
+                    order.save().then(() => res.status(200).json(successMessage))
+                }).catch(() => res.status(500).json(failMessage))
+            }
+
+            Order.findOne({ _id: observation.orderId }).then(order => {
+                if(order.options) {
+                    order.options.observations.push({
+                        _idUser: observation.userId,
+                        comment: observation.comment,
+                        attachment: req.file.filename,
+                        createdAt: moment().format('L - LTS')
+                    })
+                } else {
+                    order.options = {
+                        observations: [{
+                            _idUser: observation.userId,
+                            comment: observation.comment,
+                            attachment: req.file.filename,
+                            createdAt: moment().format('L - LTS')
+                        }]
+                    }
+                }
+
+                order.save().then(() => res.status(200).json(successMessage))
+            }).catch(() => res.status(500).json(failMessage))
+        })
+    }
+
+    const viewObservationFile = (req, res) => {        
+        if(!req.session.user.permissions.orderDetail) {
+            return res.status(401).render('500')
+        }
+
+        if(!req.query.id) {
+            return res.status(404).render('404')
+        }
+        
+        res.status(200).sendFile(req.query.id, { root: './public/' })
+    }
+ 
     return {
         viewHome,
         addNewOrder,
@@ -1032,6 +1123,8 @@ module.exports = app => {
         addNewUser,
         viewUserDetails,
         changeUser,
-        removeUser
+        removeUser,
+        addObservation,
+        viewObservationFile
     }
 }

@@ -145,7 +145,12 @@ module.exports = app => {
         app.route('/admin/detalhes-da-compra')
             .all(app.src.config.passport.authenticate())
             .get(csrf(), admin(app.src.api.admin.viewOrderDetails))
-            .post(csrf(), admin(app.src.api.admin.changeOrderDetails))         
+            .post(csrf(), admin(app.src.api.admin.changeOrderDetails))  
+
+        app.route('/admin/detalhes-da-compra/observacao')
+            .all(app.src.config.passport.authenticate())
+            .get(admin(app.src.api.admin.viewObservationFile))
+            .post(csrf(), admin(app.src.api.admin.addObservation))        
 
         app.route('/admin/briefing')
             .all(app.src.config.passport.authenticate())
@@ -204,6 +209,9 @@ module.exports = app => {
     //#region HANDLE ERROR
         if(process.env.AMBIENT_MODE === 'PROD') {
             app.use(function (err, req, res, next) { 
+                if(err.code === 'EBADCSRFTOKEN')
+                    return res.status(403).json('Forbidden')
+                    
                 res.status(500).render('500')
             })
 

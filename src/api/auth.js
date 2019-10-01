@@ -78,7 +78,7 @@ module.exports = app => {
                 if(user.firstAccess) return res.redirect('/primeiro-acesso')
                 if(user.admin) return res.redirect('/admin')
                 res.redirect('/minha-conta')    
-            }).catch(_ => res.status(500).render('500'))
+            }).catch(() => res.status(500).render('500'))
         } else {
             return res.status(401).render('index', {
                 user: req.session.user,

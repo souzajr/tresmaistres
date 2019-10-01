@@ -13,10 +13,6 @@ module.exports = app => {
         const express_enforces_ssl = require('express-enforces-ssl')
         app.enable('trust proxy')
         app.use(express_enforces_ssl())
-        app.use(helmet.hsts({
-            maxAge: 31536000,
-            includeSubDomains: true
-        }))
         app.use(session({
             cookieName: 'session',
             encryptionAlgorithm: 'aes256',

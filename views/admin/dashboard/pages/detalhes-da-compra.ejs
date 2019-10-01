@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="/views/admin/assets/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+
 <div class="row">
     <div class="col-xs-12">
         <h2 class="page-header">
@@ -146,12 +148,6 @@
                 </select>
             </div>
         </div>
-        <div class="col-md-12">
-            Observações<% if(order.options && order.options.interacion && order.options.interacion.createdAt) { %> (<%= order.options.interacion.createdAt %>)<% } %>:
-            <div class="form-group">
-                <textarea name="comment" class="form-control" rows="3"><% if(order.options && order.options.interacion && order.options.interacion.comment) { %><%= order.options.interacion.comment %><% } %></textarea>
-            </div>        
-        </div>
         <div class="col-md-6">
             Anexar nota fiscal <% if(order.options && order.options.invoice) { %><a href="/nota-fiscal?invoice=<%= order.options.invoice %>">(ver nota fiscal atual)</a><% } %>
             <div class="form-group">
@@ -163,6 +159,9 @@
     <div class="row">
         <div class="col-md-6">
             <button type="submit" class="btn btn-primary">Salvar informações</button>
+        </div>
+        <div class="col-md-6">
+            <button type="button" data-toggle="modal" data-target="#modal-add-observation" class="pull-right btn btn-primary">Adicionar observação</button>
         </div>
     </div>
 </form>
@@ -270,6 +269,168 @@
     </div>
 <% } %>
 
+<div class="row"style="margin-top: 15px;">
+    <div class="col-md-12">
+        <table id="table-info" class="table table-bordered table-hover">
+            <style>
+                .no-sort::after {
+                    display: none !important;
+                }
+
+                .no-sort {
+                    pointer-events: none !important;
+                    cursor: default !important;
+                }
+            </style>
+            <thead>
+                <tr>
+                    <th>Responsável</th>
+                    <th>Data</th>
+                    <th class="no-sort">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(let i = 0; i < order.options.observations.length; i++) { %>
+                    <tr>
+                        <td>
+                            <% for(let j = 0; j < users.length; j++) { %>
+                                <% if(users[j]._id == order.options.observations[i]._idUser) { %>
+                                    <%= users[j].name %>
+                                <% } %>
+                            <% } %>
+                        </td>
+                        <td>
+                            <%= order.options.observations[i].createdAt %>
+                        </td>
+                        <td>
+                            <a href="#" data-toggle="modal" data-target="#modal-observation-<%= i %>" style="color: black; font-size: 17px;">
+                                <i class="fa fa-eye" data-toggle="tooltip" data-placement="top" title="Ver mais detalhes"></i>
+                            </a>
+                            <div class="modal fade" id="modal-observation-<%= i %>">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span></button>
+                                            <h4 class="modal-title">Observação</h4>
+                                        </div>
+                                        <div class="modal-body">       
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <b>Adicionado por</b><br/>
+                                                    <% for(let j = 0; j < users.length; j++) { %>
+                                                        <% if(users[j]._id == order.options.observations[i]._idUser) { %>
+                                                            <%= users[j].name %>
+                                                        <% } %>
+                                                    <% } %>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <b>Adicionado em</b><br/>
+                                                    <%= order.options.observations[i].createdAt %>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <b>Observação</b><br/>
+                                                    <%= order.options.observations[i].comment %>
+                                                </div>
+                                                <% if(order.options.observations[i].attachment) { %>
+                                                    <div class="col-md-12">
+                                                        <b><a target="_blank" href="/admin/detalhes-da-compra/observacao?id=<%= order.options.observations[i].attachment %>">Ver anexo</a></b>
+                                                    </div>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Fechar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Responsável</th>
+                    <th>Data</th>
+                    <th>Ações</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-add-observation">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Adicionar observação</h4>
+            </div>
+            <form id="form-add-observation">
+                <input type="hidden" name="userId" value="<%= user._id %>" >
+                <input type="hidden" name="orderId" value="<%= order._id %>"> 
+                <div class="modal-body">
+                    <b style="color: red">Atenção: digite a observação com cuidado, ela não poderá ser apagada.</b>         
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Observação</label>
+                                <textarea name="comment" class="form-control" required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Anexo</label>
+                                <input name="file" type="file" class="form-control" accept=".pdf, .jpg, .png, .jpeg" required>
+                                <small>Tamanho máximo: 15MB. Tipos aceitos: PDF, JPG, JPEG e PNG.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </div>
+            </form>
+            <script>
+                $(document).ready(function() {
+                    $('#form-add-observation').on('submit', function(e) {                        
+                        $(document).ajaxStart(function() { Pace.restart() })
+                        e.preventDefault()
+                        
+                        $.ajax({
+                            type: 'POST',
+                            url: '/admin/detalhes-da-compra/observacao',
+                            enctype: 'multipart/form-data',
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                            data: new FormData($('#form-add-observation')[0]),  
+                            headers: {
+                                'X-CSRF-TOKEN': '<% if(locals.csrf) { %><%= locals.csrf %><% } %>'
+                            },
+                            success: function(result) {          
+                                alertify.notify(result, 'success', 5)
+                                setTimeout(function() { 
+                                    window.location.reload()
+                                }, 500)
+                            },
+                            error: function(xhr, status, error) {
+                                if(error === 'Forbidden') return window.location.href = '/'
+                                alertify.notify(JSON.parse(xhr.responseText), 'error', 5)
+                            }
+                        })
+                    })
+                })
+            </script>
+        </div>
+    </div>
+</div>
+
+<script src="/views/admin/assets/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="/views/admin/assets/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 <script type="text/javascript" src="/views/assets/js/string-mask.js"></script>
 <script>
     $(document).ready(function() { 
@@ -295,6 +456,38 @@
             const formatterPhone = new StringMask('(00) 0 0000-0000')
             $('#phone').html(formatterPhone.apply(phone))
         } 
+
+        $('#table-info').DataTable({
+            'paging': true,
+            'lengthChange': true,
+            'searching': true,
+            'ordering': true,
+            'info': true,
+            'autoWidth': false,
+            'language': {
+                "sEmptyTable": "Nenhum registro encontrado",
+                "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+                "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+                "sInfoFiltered": "(Filtrados de _MAX_ registros)",
+                "sInfoPostFix": "",
+                "sInfoThousands": ".",
+                "sLengthMenu": "_MENU_ resultados por página",
+                "sLoadingRecords": "Carregando...",
+                "sProcessing": "Processando...",
+                "sZeroRecords": "Nenhum registro encontrado",
+                "sSearch": "Pesquisar",
+                "oPaginate": {
+                    "sNext": "Próximo",
+                    "sPrevious": "Anterior",
+                    "sFirst": "Primeiro",
+                    "sLast": "Último"
+                },
+                "oAria": {
+                    "sSortAscending": ": Ordenar colunas de forma ascendente",
+                    "sSortDescending": ": Ordenar colunas de forma descendente"
+                }
+            }
+        })
 
         $('#form-action').on('submit', function(e) {                        
             $(document).ajaxStart(function() { Pace.restart() })

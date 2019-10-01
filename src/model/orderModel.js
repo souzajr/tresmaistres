@@ -48,10 +48,12 @@ const OrderSchema = new mongoose.Schema({
         _idSegmentation: String,
         invoice: String,
         receipt: String,
-        interacion: {
+        observations: [{
+            _idUser: String,
             comment: String,
+            attachment: String,
             createdAt: String
-        },
+        }],
         automation: {
             _idResponsible: String,
             createdAt: String
