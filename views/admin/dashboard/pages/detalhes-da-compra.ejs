@@ -383,7 +383,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label>Anexo</label>
-                                <input name="file" type="file" class="form-control" accept=".pdf, .jpg, .png, .jpeg" required>
+                                <input id="file-input" name="file" type="file" class="form-control" accept=".pdf, .jpg, .png, .jpeg" required>
                                 <small>Tamanho máximo: 15MB. Tipos aceitos: PDF, JPG, JPEG e PNG.</small>
                             </div>
                         </div>
@@ -395,6 +395,8 @@
                 </div>
             </form>
             <script>
+                document.getElementById("file-input").required = false
+
                 $(document).ready(function() {
                     $('#form-add-observation').on('submit', function(e) {                        
                         $(document).ajaxStart(function() { Pace.restart() })
